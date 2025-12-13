@@ -20,7 +20,7 @@ where the parameter inside the brackets declare which beam energy to run the ana
 
 
 
-~The analysis script runs a light version of the full DVCS analysis over the provided files, and creates three plots as output (which are stored in the `figs` directory). These plots are:
-- the track psuedorapidity distributions for all expected final state particles (scattered electron, proton and photon), for both generated and reconstructed particles,
-- the distribution of the Mandelstam t variable for both generated and reconstructed DVCS events, on the condition that the full final state is reconstructed, and~
-- the difference between the predicted and measured track theta for the detected DVCS photon, for all reconstructed photons (as long as only one photon is identified).
+~~The analysis script runs a light version of the full DVCS analysis over the provided files, and creates three plots as output (which are stored in the `figs` directory). These plots are:~~
+- ~~the track psuedorapidity distributions for all expected final state particles (scattered electron, proton and photon), for both generated and reconstructed particles,~~
+- ~~the distribution of the Mandelstam t variable for both generated and reconstructed DVCS events, on the condition that the full final state is reconstructed, and~~
+- ~~the difference between the predicted and measured track theta for the detected DVCS photon, for all reconstructed photons (as long as only one photon is identified).~~
