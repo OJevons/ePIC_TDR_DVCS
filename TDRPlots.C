@@ -625,13 +625,13 @@ void TDRPlots(TString energy = "10x100"){
   TCanvas* ctRes = new TCanvas("ctRes","",1500,500);
   ctRes->Divide(3,1,-1);
   Float_t tRes_common_ystart{1e-3}; 
-  Float_t tRes_common_yend{1.5e0};
+  Float_t tRes_common_yend{3.5e-1};
   Float_t tRes_common_xstart{-0.01}; 
   Float_t tRes_common_xend{1.9};
 
   // Pad 1 - 5x41
   ctRes->cd(1);
-  gPad->SetLogy();
+  //gPad->SetLogy();
   // Markers and lines
   h_tresB0_5x41->SetMarkerStyle(20);
   h_tresB0_5x41->SetMarkerSize(1.5);
@@ -643,7 +643,7 @@ void TDRPlots(TString energy = "10x100"){
   h_tresRP_5x41->SetLineColor(kP6Red);
   // Axes
   h_tresB0_5x41->SetTitle("");
-  h_tresB0_5x41->GetYaxis()->SetTitle("RMS(#Deltat) [GeV^{2}]");
+  h_tresB0_5x41->GetYaxis()->SetTitle("RMS(#Deltat/|t|_{MC})");
   h_tresB0_5x41->GetYaxis()->SetRangeUser(tRes_common_ystart,tRes_common_yend);
   h_tresB0_5x41->GetXaxis()->SetRangeUser(tRes_common_xstart,tRes_common_xend);
   h_tresB0_5x41->GetYaxis()->SetNdivisions(505);
@@ -666,7 +666,7 @@ void TDRPlots(TString energy = "10x100"){
 
   // Pad 2 - 10x100
   ctRes->cd(2);
-  gPad->SetLogy();
+  //gPad->SetLogy();
   // Markers and lines
   h_tresB0_10x100->SetMarkerStyle(21);
   h_tresB0_10x100->SetMarkerSize(1.3);
@@ -679,6 +679,7 @@ void TDRPlots(TString energy = "10x100"){
   // Axes
   h_tresB0_10x100->SetTitle("");
   h_tresB0_10x100->GetYaxis()->SetRangeUser(tRes_common_ystart,tRes_common_yend);
+  h_tresB0_10x100->GetYaxis()->SetNdivisions(505);
   h_tresB0_10x100->GetXaxis()->SetRangeUser(tRes_common_xstart,tRes_common_xend);
   h_tresB0_10x100->GetXaxis()->SetTitle("|t|_{MC} [GeV^{2}]");
   // Draw
@@ -695,7 +696,7 @@ void TDRPlots(TString energy = "10x100"){
 
   // Pad 3 - 18x275
   ctRes->cd(3);
-  gPad->SetLogy();
+  //gPad->SetLogy();
   // Markers and lines
   h_tresB0_18x275->SetMarkerStyle(22);
   h_tresB0_18x275->SetMarkerSize(1.4);
@@ -708,6 +709,7 @@ void TDRPlots(TString energy = "10x100"){
   // Axes
   h_tresB0_18x275->SetTitle("");
   h_tresB0_18x275->GetYaxis()->SetRangeUser(tRes_common_ystart,tRes_common_yend);
+  h_tresB0_18x275->GetYaxis()->SetNdivisions(505);
   h_tresB0_18x275->GetXaxis()->SetRangeUser(tRes_common_xstart,tRes_common_xend);
   h_tresB0_18x275->GetXaxis()->SetTitle("|t|_{MC} [GeV^{2}]");
   // Draw
