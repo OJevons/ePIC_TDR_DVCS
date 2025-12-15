@@ -7,7 +7,7 @@ The creation of plots for the ePIC TDR will require two steps:
 
 The main analysis takes the form of an `ePIC_DVCS_TASK` object, user-defined in `ePIC_DVCS_TASK.h`. THsi specific form which this analysis object will take is defined in `ePIC_DVCS_TDR.cxx`. The file `run_ePIC_DVCS.C` is provided as a wrapper macro to run these analysis objects. This script does the following:
 - Initialises a DVCS analysis object.
-- Gives, as input to the object, a list of files which the analysis is to run over (standard filelists for the `25.10.2` campaign files for all three 'default' EIC energy settings are provided in this repo).
+- Gives, as input to the object, a list of files which the analysis is to run over (standard filelists for the `25.10.2` campaign files for all three 'default' EIC ep energy settings are provided in this repo).
 - Defines the output file nam, which will store the created histograms.
 - Sets the behaviour with which to analyse the provided events.
 - Tells the object to run its analysis.
@@ -18,9 +18,10 @@ root 'run_ePIC_DVCSC("5x41/10x100/18x275")'
 ```
 where the parameter inside the brackets declare which beam energy to run the analysis on. By default (if the brackets are left empty when executing the run macro) the analysis is set to run using the 10x100 GeV beam energy setting.
 
+Once the analysis has been run over all three 'standard' EIC energy settings, the plotting macro `TDRPlots.C` can be used. This script makes the following plots:
+- the track psuedorapidity distributions for all expected final state particles (scattered electron, proton and photon), for both generated and reconstructed particles,
+- the difference between the predicted and measured track theta for the detected DVCS photon, for all reconstructed single-photon events (both as a 1D histogram, and as a 2D histogram as a function of generated photon theta),
+- the Mandelstam t distribution for generated and reconstructed fully-exclusive DVCS events, along with an exponential fit to fill any points that are missed due to gaps in the coverage at the far forward region, and
+- the resolution of the Mandelstam t variable for fully-exclusive DVCS events, calculated separately for events with B0 tracks and Roman Pot tracks.
 
-
-~~The analysis script runs a light version of the full DVCS analysis over the provided files, and creates three plots as output (which are stored in the `figs` directory). These plots are:~~
-- ~~the track psuedorapidity distributions for all expected final state particles (scattered electron, proton and photon), for both generated and reconstructed particles,~~
-- ~~the distribution of the Mandelstam t variable for both generated and reconstructed DVCS events, on the condition that the full final state is reconstructed, and~~
-- ~~the difference between the predicted and measured track theta for the detected DVCS photon, for all reconstructed photons (as long as only one photon is identified).~~
+This final plot displays the resolution for all three standard EIC energy settings, which is why all three analysis files are required before any plotting.
