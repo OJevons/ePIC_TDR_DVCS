@@ -1,0 +1,517 @@
+using namespace std;
+
+#include <TSystem.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+
+#include "./ePIC_style.C"
+
+// INITIAL SETTINGS
+// Choose to print plots
+bool kSAVE = true;
+// PATH TO MAIN REPO DIRECTORY
+TString sFigsPath = "/home/oliver/eic/Analysis/ePIC_TDR_DVCS/figs/";
+
+//---------------------------------------------------------------------
+// Helper functions for printing strings
+//---------------------------------------------------------------------
+// 1. Decompose a double into scientific notation (mantissa, exponent)
+void frexp10(double x, double &mantissa, int &exp10){
+  if(x == 0.){
+    mantissa = 0.;
+    exp10 = 0;
+    return;
+  }
+  
+  exp10 = static_cast<int>(std::floor(std::log10(std::fabs(x))));
+  mantissa = x / std::pow(10., exp10);
+}
+
+// 2. Print (a +/- b) such that both terms have the same exponent
+TString combineScientific(double val, double err){
+  double val_m, err_m;
+  int val_e, err_e;
+  
+  // Decompose value and error
+  frexp10(val, val_m, val_e);
+  frexp10(err, err_m, err_e);
+  
+  // Use exponent of value as the common exponent
+  int exp_common = val_e;
+  
+  // Rescale error to common exponent
+  double scaled_val = val_m;
+  double scaled_err = err_m * std::pow(10., err_e-exp_common);
+  
+  double rounded_val = std::round(scaled_val * 100.)/100.;
+  double rounded_err = std::round(scaled_err * 100.)/100.;
+
+  TString outstring = Form("(%.2f #pm %.2f)x10^{%i}",scaled_val,scaled_err,exp_common);
+  
+  return outstring;
+}
+
+//---------------------------------------------------------------------
+// Extract sliced RMS of 2D histo
+//---------------------------------------------------------------------
+TH1D* extractRMSSlice(TString outputHistoName, TH2D* twoDHisto){
+
+	int num_bins  = twoDHisto->GetNbinsX();
+	double xBinWidth = twoDHisto->GetXaxis()->GetBinWidth(1); 
+	double xMin = twoDHisto->GetXaxis()->GetBinCenter(1) - xBinWidth*0.5;
+	double xMax = twoDHisto->GetXaxis()->GetBinCenter(num_bins) + xBinWidth*0.5;
+
+	TH1D * finalResoHisto = new TH1D(outputHistoName, outputHistoName, num_bins, xMin, xMax);
+
+	TH1D* tmp;
+	double rmsReso = 0.0;
+	double rmsErr = 0.0;
+	for(int bin = 1; bin < num_bins+1; bin++){
+	  rmsReso = 0.0;
+	  tmp = (TH1D*)twoDHisto->ProjectionY("NEIN", bin, bin);
+	  
+	  rmsReso = tmp->GetRMS();
+	  rmsErr  = tmp->GetRMSError();
+	  finalResoHisto->SetBinContent(bin, rmsReso);
+	  finalResoHisto->SetBinError(bin, rmsErr);
+	} 
+
+	return finalResoHisto;
+}
+
+//---------------------------------------------------------------------
+// Calculate histogram scaling factors to get to desired luminosity
+// Give luminosity in full scientific (expect 1e15 for 1fb-1)
+//---------------------------------------------------------------------
+double calcScaling(TString energy, TString hel, float lumi){
+  // Holding variables - No. of events generated, integrated cross-section
+  // These vary by beam settings
+  Double_t fXSint{0}, NEv{0};
+
+  if(energy == "9x130"){
+    NEv = 1e6;
+    if(hel.Contains("T")){
+      if(hel == "emhTm") fXSint = 6.91502943051105e-9;
+      else if(hel == "emhTp") fXSint = 7.00501745732437e-9;
+      else if(hel == "ephTm") fXSint = 6.92070657974331e-9;
+      else if(hel == "ephTp") fXSint = 7.00302210771398e-9;
+    }
+    else if(hel.Contains("L")){
+      if(hel == "emhTm") fXSint = 6.94645727655662e-9;
+      else if(hel == "emhTp") fXSint = 6.97831632951577e-9;
+      else if(hel == "ephTm") fXSint = 6.97649277129601e-9;
+      else if(hel == "ephTp") fXSint = 6.95324310420876e-9;
+    }
+    else fXSint = 1;
+  }
+  else if(energy == "9x275"){
+    NEv = 2.5e6;
+    if(hel.Contains("T")){
+      if(hel == "emhTm") fXSint = 7.65782690151261e-9;
+      else if(hel == "emhTp") fXSint = 7.73125664480267e-9;
+      else if(hel == "ephTm") fXSint = 7.65495841373398e-9;
+      else if(hel == "ephTp") fXSint = 7.73434664504977e-9;
+    }
+    else if(hel.Contains("L")){
+      if(hel == "emhTm") fXSint = 7.6845279388898e-9;
+      else if(hel == "emhTp") fXSint = 7.70176410396224e-9;
+      else if(hel == "ephTm") fXSint = 7.70861721413337e-9;
+      else if(hel == "ephTp") fXSint = 7.68892983520446e-9;
+    }
+    else fXSint = 1;
+  }
+
+  Double_t genlumi = NEv/fXSint;
+  Double_t scale = lumi/genlumi;
+
+  return scale;
+}
+
+//---------------------------------------------------------------------
+// MAIN
+// 
+// ePIC TDR plots - single particle
+//---------------------------------------------------------------------
+void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TString hel = "emhTm"){
+  // Print plot settings
+  cout<<"---------------------------------"<<endl;
+  cout<<"Processing plots - single energy"<<endl;
+  cout<<"\tCampaign: "<<campaign<<endl;
+  cout<<"\tEnergy: "<<energy<<endl;
+  cout<<"\tBeam helicity: "<<hel<<endl;
+  cout<<"---------------------------------"<<endl;
+
+  // Set beam energies
+  Float_t fEBeam{0}, fPBeam{0};
+  if(energy == "9x130" || energy == "9x275"){
+    fEBeam = 9.;
+    if(energy == "9x130") fPBeam = 130.;
+    else if(energy == "9x275") fPBeam = 275.;
+  }
+  else{
+    cout<<"Invalid beam energy."<<endl;
+    return;
+  }
+
+  // Load chosen input file
+  TString sIn = "../rootfiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TFile* fIn = TFile::Open(sIn);
+
+  //--------------------------------------------------------------------
+  // Load histograms from file
+  //--------------------------------------------------------------------
+  
+  // SINGLE PARTICLE KINEMATICS
+  // 1) Scattered electron - eta, E/p, 2D E/eta
+  TH1D* h_eta_MCe  = (TH1D*)fIn->Get("eta_MCe");
+  TH1D* h_eta_RPe  = (TH1D*)fIn->Get("eta_RPe");
+  TH2D* h_EvEta_e = (TH2D*)fIn->Get("2d_eveta_e");
+  TH1D* h_EOverP_e  = (TH1D*)fIn->Get("eoverp_elec");
+
+  // 2) Real photon - eta, 2D E/eta, theta resolution
+  TH1D* h_eta_MCg  = (TH1D*)fIn->Get("eta_MCg");
+  TH1D* h_eta_RPg  = (TH1D*)fIn->Get("eta_RPg");
+  TH2D* h_EvEta_g = (TH2D*)fIn->Get("2d_eveta_g");
+  TH1D* h_PhotRes_theta = (TH1D*)fIn->Get("photres_theta")->Clone("thetares_phot");
+  TH2D* h_PhotRes2D_theta = (TH2D*)fIn->Get("photres2d_theta")->Clone("thetares_phot_2d");
+
+  // 3) Scattered proton - eta, theta
+  TH1D* h_eta_MCp  = (TH1D*)fIn->Get("eta_MCp");
+  TH1D* h_eta_RPp  = (TH1D*)fIn->Get("eta_RPp");
+  TH1D* h_eta_RPPp = (TH1D*)fIn->Get("eta_RPPp");
+  TH2D* h_EvEta_p  = (TH2D*)fIn->Get("2d_eveta_p");
+  TH1D* h_theta_MCp = (TH1D*)fIn->Get("theta_mcp");
+  TH1D* h_theta_B0p = (TH1D*)fIn->Get("theta_b0p");
+  TH1D* h_theta_RPp = (TH1D*)fIn->Get("theta_RPp");
+  
+  // CALCULATIONS
+  // 1. Scaling factor to EIC lumi
+  double EIClumi{1.};
+  if(energy == "9x130") EIClumi = 1e15;
+  else if(energy == "9x275") EIClumi = 2.5e15;
+  else EIClumi = 2.5e15;
+  Double_t scaleToEIC = calcScaling(energy, hel, EIClumi);
+
+
+  //--------------------------------------------------------------------------------------
+  // Draw histograms
+  //--------------------------------------------------------------------------------------
+  // Global style
+  gROOT->ProcessLine("set_ePIC_style()");
+  gStyle->SetCanvasPreferGL(kTRUE);
+
+  // CANVAS: FULL EVENT ETA
+  TCanvas* cEta = new TCanvas("cEta","",1500,500);
+  cEta->Divide(3,1,-1);
+  // Scale distributions to EIC lumi
+  h_eta_MCe->Scale(scaleToEIC);
+  h_eta_RPe->Scale(scaleToEIC);
+  h_eta_MCg->Scale(scaleToEIC);
+  h_eta_RPg->Scale(scaleToEIC);
+  h_eta_MCp->Scale(scaleToEIC);
+  h_eta_RPp->Scale(scaleToEIC);
+  h_eta_RPPp->Scale(scaleToEIC);
+
+  // Find maximum of distributions
+  Float_t maxEta{0};
+  for(TH1D* h : {h_eta_MCe,h_eta_MCg,h_eta_MCp,h_eta_RPg,h_eta_RPe,h_eta_RPp,h_eta_RPPp}){
+    if(h->GetMaximum() > maxEta) maxEta = h->GetMaximum();
+  }
+  maxEta *= 15; // Increase maximum for drawing purposes
+
+  // Pad 1 - electrons
+  cEta->cd(1);
+  gPad->SetLogy();
+  // Set Drawing options
+  // Markers and Lines
+  h_eta_MCe->SetLineColor(kBlack);
+  h_eta_MCe->SetLineWidth(2);
+  h_eta_RPe->SetLineColor(kBlack);
+  h_eta_RPe->SetMarkerColor(kBlack);
+  h_eta_RPe->SetMarkerStyle(20);
+  h_eta_RPe->SetFillColorAlpha(kP6Gray,0.5);
+  // Axes
+  h_eta_MCe->GetYaxis()->SetRangeUser(0.9, maxEta);
+  h_eta_MCe->GetXaxis()->SetTitle("#eta");
+  h_eta_MCe->GetYaxis()->SetTitleOffset(1.25);
+  h_eta_MCe->GetYaxis()->SetTitle("Counts");
+  // Draw
+  h_eta_MCe->Draw("HIST");
+  h_eta_RPe->Draw("ep same");
+  // Add legend
+  TLegend* lcEta_p1 = new TLegend(0.67,0.60,1.,0.73);
+  lcEta_p1->AddEntry(h_eta_MCe, "#bf{EpIC} MC", "l");
+  lcEta_p1->AddEntry(h_eta_RPe, "Raw reco.", "pl");
+  lcEta_p1->Draw();
+  // Add text
+  TLatex* tePICLabel_eta = new TLatex(0.17, 0.92, 
+				      Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  tePICLabel_eta->SetNDC();
+  tePICLabel_eta->Draw("same");
+  TLatex* tLabel1_eta = new TLatex(0.68, 0.79, "#splitline{Single e^{-}}{Q^{2} #geq 1 GeV^{2}}");
+  tLabel1_eta->SetNDC();
+  tLabel1_eta->Draw("same");
+
+  // Pad 2 - photons
+  cEta->cd(2);
+  gPad->SetLogy();
+  // Markers and Lines
+  h_eta_MCg->SetLineColor(kP6Red);
+  h_eta_MCg->SetLineWidth(2);
+  h_eta_RPg->SetLineColor(kP6Red);
+  h_eta_RPg->SetMarkerColor(kP6Red);
+  h_eta_RPg->SetMarkerStyle(20);
+  // Axes
+  h_eta_MCg->GetYaxis()->SetRangeUser(0.9, maxEta);
+  h_eta_MCg->GetXaxis()->SetTitle("#eta");
+  // Draw
+  h_eta_MCg->Draw("HIST");
+  h_eta_RPg->Draw("ep same");
+  // Add text
+  TLatex* tLabel2_eta = new TLatex(0.60, 0.92, "Single #gamma");
+  tLabel2_eta->SetNDC();
+  tLabel2_eta->Draw("same");
+  // Add legend
+  TLegend* lcEta_p2 = new TLegend(0.60,0.77,0.99,0.90);
+  lcEta_p2->AddEntry(h_eta_MCg, "#bf{EpIC} MC", "l");
+  lcEta_p2->AddEntry(h_eta_RPg, "Raw reco.", "pl");
+  lcEta_p2->Draw();
+
+  // Pad 3 - protons
+  cEta->cd(3);
+  gPad->SetLogy();
+  // Markers and Lines
+  h_eta_MCp->SetLineColor(kP6Blue);
+  h_eta_MCp->SetLineWidth(2);
+  h_eta_RPp->SetLineColor(kP6Violet);
+  h_eta_RPp->SetMarkerColor(kP6Violet);
+  h_eta_RPp->SetMarkerStyle(20);
+  h_eta_RPPp->SetLineColor(kP6Blue);
+  h_eta_RPPp->SetMarkerColor(kP6Blue);
+  h_eta_RPPp->SetMarkerStyle(20);
+  // Axes
+  h_eta_MCp->GetYaxis()->SetRangeUser(0.9, maxEta);
+  h_eta_MCp->GetXaxis()->SetTitle("#eta");
+  h_eta_MCp->GetYaxis()->SetTitle("Counts");
+  // Draw
+  h_eta_MCp->Draw("HIST");
+  h_eta_RPp->Draw("ep same");
+  h_eta_RPPp->Draw("ep same");
+  // Add legend
+  TLegend* lcEta_p3 = new TLegend(0.05,0.74,0.72,0.9);
+  lcEta_p3->AddEntry(h_eta_MCp, "#bf{EpIC} MC", "l");
+  lcEta_p3->AddEntry(h_eta_RPp, "Reco. B0", "pl");
+  lcEta_p3->AddEntry(h_eta_RPPp, "Reco. RP", "pl");
+  lcEta_p3->Draw();
+  // Add text
+  TLatex* tLabel3_eta = new TLatex(0.07, 0.92, "Single p");
+  tLabel3_eta->SetNDC();
+  tLabel3_eta->Draw("same");
+  // Save figure
+  if(kSAVE) cEta->SaveAs(sFigsPath + "TDR_" + energy + "_Eta.png");
+  cEta->Close();
+
+
+  // CANVASES A., B., C.) 2D ENERGY/ETA (Single species)
+  // Extra canvases - energy/eta
+  TCanvas* cEvEta_e = new TCanvas("cEvEta_e","",1000,1000);
+  h_EvEta_e->GetYaxis()->SetRangeUser(0, 1.3*fEBeam);
+  h_EvEta_e->Draw();
+  // Add text
+  TLatex* tePICLabel_EvEtaelec = new TLatex(0.16, 0.88,
+					    Form("#splitline{#bf{ePIC} Simulation %s, %s GeV}{ep #rightarrow e'p'#gamma, all MC e^{-}}", campaign.Data(), energy.Data()));
+  tePICLabel_EvEtaelec->SetNDC();
+  tePICLabel_EvEtaelec->SetTextSize(0.04);
+  tePICLabel_EvEtaelec->Draw("same");
+  // Save figure
+  if(kSAVE) cEvEta_e->SaveAs(sFigsPath + "TDR_" + energy + "_EvEta_e.png");
+  cEvEta_e->Close();
+
+  TCanvas* cEvEta_g = new TCanvas("cEvEta_g","",1000,1000);
+  h_EvEta_g->Draw();
+  // Add text
+  TLatex* tePICLabel_EvEtaphot = new TLatex(0.16, 0.88,
+					    Form("#splitline{#bf{ePIC} Simulation %s, %s GeV}{ep #rightarrow e'p'#gamma, all MC #gamma}", campaign.Data(), energy.Data()));
+  tePICLabel_EvEtaphot->SetNDC();
+  tePICLabel_EvEtaphot->SetTextSize(0.04);
+  tePICLabel_EvEtaphot->Draw("same");
+  // Save figure
+  if(kSAVE) cEvEta_g->SaveAs(sFigsPath + "TDR_" + energy + "_EvEta_g.png");
+  cEvEta_g->Close();
+
+  TCanvas* cEvEta_p = new TCanvas("cEvEta_p","",1000,1000);
+  h_EvEta_p->GetYaxis()->SetRangeUser(0.5*fPBeam, 1.1*fPBeam);
+  h_EvEta_p->Draw();
+  // Add text
+  TLatex* tePICLabel_EvEtaprot = new TLatex(0.16, 0.88, 
+					    Form("#splitline{#bf{ePIC} Simulation %s, %s GeV}{ep #rightarrow e'p'#gamma, all MC p'}", campaign.Data(), energy.Data()));
+  tePICLabel_EvEtaprot->SetNDC();
+  tePICLabel_EvEtaprot->SetTextSize(0.04);
+  tePICLabel_EvEtaprot->Draw("same");
+  // Save figure
+  if(kSAVE) cEvEta_p->SaveAs(sFigsPath + "TDR_" + energy + "_EvEta_p.png");
+  cEvEta_p->Close();
+
+
+  // CANVAS: ELECTRON E/P
+  TCanvas* cEOverP = new TCanvas("cEOverP","",1000,1000);
+  // Scale to 5fb-1
+  h_EOverP_e->Scale(scaleToEIC);
+  // Set draw options - markers and lines
+  h_EOverP_e->SetLineColor(kBlack);
+  // Set draw options - axes
+  float origmax = h_EOverP_e->GetMaximum();
+  h_EOverP_e->SetLineWidth(2);
+  h_EOverP_e->SetMaximum(origmax*1.2);
+  h_EOverP_e->GetXaxis()->SetRangeUser(0.5,1.6);
+  // Draw
+  h_EOverP_e->SetBinContent(h_EOverP_e->GetNbinsX()+1,0); // If X range > 1.5, will plot overflow - force this to be empty
+  h_EOverP_e->Draw("hist");
+  // Add lines to show applied cuts
+  TLine* lEpMin = new TLine(0.8,0.,0.8,origmax);
+  lEpMin->SetLineColor(kP6Red);
+  lEpMin->SetLineWidth(2);
+  lEpMin->Draw();
+  TLine* lEpMax = new TLine(1.2,0.,1.2,origmax);
+  lEpMax->SetLineColor(kP6Red);
+  lEpMax->SetLineWidth(2);
+  lEpMax->Draw();
+  // Add text
+  TLatex* tePICLabel_eoverp = new TLatex(0.55, 0.91*h_EOverP_e->GetMaximum(), 
+					 Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  tePICLabel_eoverp->SetTextSize(0.037);
+  tePICLabel_eoverp->Draw("same");
+  // Add legend
+  TLegend* lEOverP = new TLegend(0.70,0.66,0.97,0.79);
+  lEOverP->SetLineWidth(0);
+  lEOverP->SetFillStyle(0);
+  lEOverP->SetTextSize(0.032);
+  lEOverP->SetHeader("All reco. -ve tracks");
+  lEOverP->AddEntry(h_EOverP_e,"Raw reco.","l");
+  lEOverP->AddEntry(lEpMin,"Applied cuts","l");
+  lEOverP->Draw();
+  // Save figure
+  if(kSAVE) cEOverP->SaveAs(sFigsPath + "TDR_" + energy +"_EoverP.png");
+  cEOverP->Close();
+
+  
+  // CANVAS: PHOTON ANGULAR RESOLUTION
+  TCanvas* cPhotRes = new TCanvas("cPhotRes","",1500,750);
+  cPhotRes->Divide(2,1);
+  
+  // Pad 1 - 1D resolution
+  cPhotRes->cd(1);
+  // Markers and Lines
+  h_PhotRes_theta->SetLineColor(kBlack);
+  h_PhotRes_theta->SetMarkerColor(kBlack);
+  h_PhotRes_theta->SetMarkerStyle(20);
+  // Axes
+  h_PhotRes_theta->GetXaxis()->SetTitle("#Delta#theta_{#gamma} [deg]");
+  h_PhotRes_theta->GetXaxis()->SetRangeUser(-10,10);
+  h_PhotRes_theta->GetYaxis()->SetTitle("Counts / 0.5 deg");
+  h_PhotRes_theta->GetYaxis()->SetTitleOffset(1.45);
+  h_PhotRes_theta->GetYaxis()->SetRangeUser(0.1,1.5*h_PhotRes_theta->GetMaximum());
+  // Draw
+  h_PhotRes_theta->Draw("ep");
+  // Add text
+  TLatex* tePICLabel_photres = new TLatex(-8.8, 0.9*h_PhotRes_theta->GetMaximum(), 
+					  Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, all reco. #gamma}", campaign.Data(), energy.Data()));
+  tePICLabel_photres->SetTextSize(0.04);
+  tePICLabel_photres->Draw("same");
+  // Fit plot and extract fitted function
+  TFitResultPtr fitres = h_PhotRes_theta->Fit("gaus","S","",-10,10);
+  // Add text: fitted parameters
+  TString sFitRes = "#sigma = " + combineScientific(fitres->Parameter(2),fitres->ParError(2)) + " deg";
+  TLatex* tFitRes = new TLatex(-8.8, 0.77*h_PhotRes_theta->GetMaximum(), sFitRes);
+  tFitRes->Draw("same");
+  
+  // Pad 2 - 2D resolution against MC theta
+  cPhotRes->cd(2);
+  gPad->SetLogz();
+  gPad->SetRightMargin(0.125);
+  h_PhotRes2D_theta->GetYaxis()->SetTitle("#Delta#theta_{#gamma} [deg]");
+  h_PhotRes2D_theta->GetYaxis()->SetRangeUser(-60,60);
+  h_PhotRes2D_theta->GetZaxis()->SetMaxDigits(2);
+  h_PhotRes2D_theta->Draw("colz");
+  gPad->Update();
+  auto palette = (TPaletteAxis*)h_PhotRes2D_theta->GetListOfFunctions()->FindObject("palette");
+  palette->SetX1NDC(0.88);
+  palette->SetY1NDC(0.12);
+  palette->SetX2NDC(0.92);
+  palette->SetY2NDC(0.95);
+  // Save figure
+  if(kSAVE) cPhotRes->SaveAs(sFigsPath + "TDR_" + energy +"_PhotRes.png");
+  cPhotRes->Close();
+
+  // CANVAS: Applied cuts - proton track theta
+  TCanvas* cProtTheta = new TCanvas("cProtTheta","",1000,1000);
+  // Scale to 5fb-1
+  h_theta_MCp->Scale(scaleToEIC);
+  h_theta_B0p->Scale(scaleToEIC);
+  h_theta_RPp->Scale(scaleToEIC);
+  // Set draw options - markers and lines
+  h_theta_MCp->SetLineColor(kBlack);
+  h_theta_MCp->SetLineWidth(2);
+  h_theta_B0p->SetLineColor(kP6Blue);
+  h_theta_B0p->SetLineWidth(2);
+  h_theta_RPp->SetLineColor(kP6Violet);
+  h_theta_RPp->SetLineWidth(2);
+  // Set draw options - axes
+  gPad->SetLogy();
+  h_theta_MCp->GetXaxis()->SetTitle("#theta_{p'} [mrad]");
+  h_theta_MCp->GetYaxis()->SetTitle("Counts/0.25 mrad");
+  h_theta_MCp->GetYaxis()->SetRangeUser(0.1,100*h_theta_MCp->GetMaximum());
+  // Duplicate for drawing acceptance
+  TH1D* h_theta_B0p_copy = (TH1D*)h_theta_B0p->Clone("theta_b0p_copy");
+  h_theta_B0p_copy->SetFillColor(kP6Blue);
+  h_theta_B0p_copy->SetFillStyle(3001);
+  h_theta_B0p_copy->GetXaxis()->SetRangeUser(5.5,20);
+  TH1D* h_theta_RPp_copy = (TH1D*)h_theta_RPp->Clone("theta_rpp_copy");
+  h_theta_RPp_copy->SetFillColor(kP6Violet);
+  h_theta_RPp_copy->SetFillStyle(3001);
+  h_theta_RPp_copy->GetXaxis()->SetRangeUser(0,5);
+  // Draw
+  h_theta_MCp->Draw("hist");
+  h_theta_B0p->Draw("hist same");
+  h_theta_RPp->Draw("hist same");
+  h_theta_B0p_copy->Draw("hist same");
+  h_theta_RPp_copy->Draw("hist same");
+  // Add lines to show applied cuts
+  float thetamax = h_theta_RPp->GetMaximum();
+  if(h_theta_B0p->GetMaximum() > thetamax) thetamax = h_theta_B0p->GetMaximum();
+  TLine* lThCut1 = new TLine(5.,0.,5.,2*thetamax);
+  lThCut1->SetLineColor(kP6Grape);
+  lThCut1->SetLineWidth(2);
+  lThCut1->Draw();
+  TLine* lThCut2 = new TLine(5.5,0.,5.5,2*thetamax);
+  lThCut2->SetLineColor(kP8Blue);
+  lThCut2->SetLineWidth(2);
+  lThCut2->Draw();
+  TLine* lThCut3 = new TLine(20.,0.,20.,2*thetamax);
+  lThCut3->SetLineColor(kP8Blue);
+  lThCut3->SetLineWidth(2);
+  lThCut3->Draw();
+  // Add text
+  TLatex* tePICLabel_thetap = new TLatex(2., 0.2*h_theta_MCp->GetMaximum(), 
+					 Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  tePICLabel_thetap->SetTextSize(0.037);
+  tePICLabel_thetap->Draw("same");
+  TLatex* t_ptheta_extra = new TLatex(0.6*h_theta_MCp->GetBinLowEdge(h_theta_MCp->GetNbinsX()), 50*thetamax,"#splitline{Lines - all reco. tracks}{Filled - accepted p'}");
+  t_ptheta_extra->SetTextSize(0.037);
+  t_ptheta_extra->Draw("same");
+  // Add legend
+  TLegend* lProtTheta = new TLegend(0.15,0.68,0.41,0.82);
+  lProtTheta->SetLineWidth(0);
+  lProtTheta->SetFillStyle(0);
+  lProtTheta->SetTextSize(0.037);
+  lProtTheta->AddEntry(h_theta_MCp,"MC truth","l");
+  lProtTheta->AddEntry(h_theta_B0p_copy,"Raw reco., B0 +ve tracks","lf");
+  lProtTheta->AddEntry(h_theta_RPp_copy,"Raw reco., RP tracks","lf");
+  lProtTheta->Draw();
+  // Save figure
+  if(kSAVE) cProtTheta->SaveAs(sFigsPath + "TDR_" + energy +"_ProtTheta.png");
+  cProtTheta->Close();
+
+  return;
+}
