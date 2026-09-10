@@ -4,7 +4,13 @@ using namespace std;
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
-#include "./ePIC_ExcKinUtils.h"
+#include "/home/ojj2x/eic/ePIC_TDR_DVCS/include/ePIC_ExcKinUtils.h"
+
+// PATH TO MAIN REPO DIRECTORY
+TString sMainDir = "/home/ojj2x/eic/ePIC_TDR_DVCS/";
+TString sFilePath = sMainDir + "rootfiles/";
+TString sFigsPath = sMainDir + "figs/";
+
 
 // Calculate histogram scaling factors to get to desired luminosity
 // Give luminosity in full scientific (expect 1e15 for 1fb-1)
@@ -66,7 +72,7 @@ void DVCS_Binning(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   cout<<"\tBeam polarisation state: "<<sPolState<<endl;
   cout<<"---------------------------------"<<endl;
   
-  TString sIn = "$EIC_WORK_DIR/DVCS_Analysis/RootFiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+sPolState+".root";
+  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+sPolState+".root";
   TFile* fIn = TFile::Open(sIn);
 
   // Load histograms - expecting 3 Q2 bins
@@ -217,6 +223,9 @@ void DVCS_Binning(TString campaign = "26.07.1", TString energy = "9x130", TStrin
 
       } // rof (No. of t edges)
     } //rof (No. of xB edges)
+
+    c->SaveAs(Form(sFigsPath + "3Dbinning_%s_%i",energy.Data(),q));
+    c->Close();
     
   } //rof (loop over Q2 bins)
 
