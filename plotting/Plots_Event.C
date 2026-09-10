@@ -9,9 +9,11 @@ using namespace std;
 
 // INITIAL SETTINGS
 // Choose to print plots
-bool kSAVE = false;
+bool kSAVE = true;
 // PATH TO MAIN REPO DIRECTORY
-TString sFigsPath = "/home/oliver/eic/Analysis/ePIC_TDR_DVCS/figs/";
+TString sMainDir = "/home/ojj2x/eic/ePIC_TDR_DVCS/";
+TString sFilePath = sMainDir + "rootfiles/";
+TString sFigsPath = sMainDir + "figs/";
 
 //---------------------------------------------------------------------
 // Helper functions for printing strings
@@ -206,7 +208,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   }
 
   // Load chosen input file
-  TString sIn = "../rootfiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
   TFile* fIn = TFile::Open(sIn);
 
   //--------------------------------------------------------------------
@@ -291,7 +293,12 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_t_B0Rec->Scale(scaleToEIC);
   h_t_RPRec->Scale(scaleToEIC);
   h_t_LCRec->Scale(scaleToEIC);
-  
+  //
+  h_EmPz_MC->Scale(scaleToEIC);
+  h_EmPz_RP->Scale(scaleToEIC);
+  //
+  h_pTmiss_RP->Scale(scaleToEIC);
+    
   // 2. Efficiency and corrected reco
   TH1D* h_Q2_Eff = (TH1D*)h_Q2_Acc->Clone("q2_eff");
   h_Q2_Eff->Divide(h_Q2_MC);
@@ -348,10 +355,10 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_Q2_Rec->SetMarkerSize(1.5);
   h_Q2_Rec->SetLineColor(kP6Blue);
   h_Q2_Rec->SetLineWidth(2);
-  h_Q2_Corr->SetMarkerColor(kP6Yellow);
+  h_Q2_Corr->SetMarkerColor(kP6Blue);
   h_Q2_Corr->SetMarkerStyle(kFullCircle);
   h_Q2_Corr->SetMarkerSize(1.5);
-  h_Q2_Corr->SetLineColor(kP6Yellow);
+  h_Q2_Corr->SetLineColor(kP6Blue);
   h_Q2_Corr->SetLineWidth(2);
   // Axes
   h_Q2_MC->GetYaxis()->SetTitle("Counts / 0.02 GeV^{2}");
@@ -439,10 +446,10 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_xB_Rec->SetMarkerSize(1.5);
   h_xB_Rec->SetLineColor(kP6Blue);
   h_xB_Rec->SetLineWidth(2);
-  h_xB_Corr->SetMarkerColor(kP6Yellow);
+  h_xB_Corr->SetMarkerColor(kP6Blue);
   h_xB_Corr->SetMarkerStyle(kFullCircle);
   h_xB_Corr->SetMarkerSize(1.5);
-  h_xB_Corr->SetLineColor(kP6Yellow);
+  h_xB_Corr->SetLineColor(kP6Blue);
   h_xB_Corr->SetLineWidth(2);
   // Axes
   h_xB_MC->GetYaxis()->SetTitle("Counts");
@@ -453,8 +460,8 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_xB_Rec->Draw("pe same");
   h_xB_Corr->Draw("pe same");
   // Labels
-  TLatex* tePICLabel_R = new TLatex(0.35, 0.86, 
-  				  Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  TLatex* tePICLabel_R = new TLatex(0.39, 0.87, 
+				    Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
   tePICLabel_R->SetNDC();
   tePICLabel_R->SetTextSize(0.05);
   tePICLabel_R->Draw("same");
@@ -513,7 +520,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cxB_Res->SaveAs(sFigsPath + "TDR_" + energy +"_xB_Res.png");
   cxB_Res->Close();
 
-  // CANVAS: Y distribution
+  // CANVAS: y distribution
   TCanvas* cy = new TCanvas("cy","",1000,1000);
   TPad* uppery = new TPad("uppery","",0.05,0.3,0.95,0.95);
   uppery->SetBottomMargin(0);
@@ -533,10 +540,10 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_y_Rec->SetMarkerSize(1.5);
   h_y_Rec->SetLineColor(kP6Blue);
   h_y_Rec->SetLineWidth(2);
-  h_y_Corr->SetMarkerColor(kP6Yellow);
+  h_y_Corr->SetMarkerColor(kP6Blue);
   h_y_Corr->SetMarkerStyle(kFullCircle);
   h_y_Corr->SetMarkerSize(1.5);
-  h_y_Corr->SetLineColor(kP6Yellow);
+  h_y_Corr->SetLineColor(kP6Blue);
   h_y_Corr->SetLineWidth(2);
   // Axes
   h_y_MC->GetYaxis()->SetTitle("Counts");
@@ -577,7 +584,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cy->SaveAs(sFigsPath + "TDR_" + energy +"_y.png");
   cy->Close();
 
-  // CANVAS: Y 2D
+  // CANVAS: y 2D
   TCanvas* cy_2D = new TCanvas("cy_2d","",1000,1000);
   gPad->SetLogz();
   gPad->SetRightMargin(0.12);
@@ -588,7 +595,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cy_2D->SaveAs(sFigsPath + "TDR_" + energy +"_y_2D.png");
   cy_2D->Close();
 
-  // CANVAS: Y resolution
+  // CANVAS: y resolution
   TCanvas* cy_Res = new TCanvas("cy_res","",1000,1000);
   gPad->SetLogz();
   gPad->SetRightMargin(0.12);
@@ -599,5 +606,320 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cy_Res->SaveAs(sFigsPath + "TDR_" + energy +"_y_Res.png");
   cy_Res->Close();
 
+  
+  // CANVAS: t distribution
+  TCanvas* ct = new TCanvas("ct","",1000,1000);
+  TPad* uppert = new TPad("uppery","",0.05,0.3,0.95,0.95);
+  uppert->SetBottomMargin(0);
+  uppert->Draw();
+  TPad* lowert = new TPad("lowery","",0.05,0.05,0.95,0.3);
+  lowert->SetBottomMargin(0.22);
+  lowert->SetTopMargin(0);
+  lowert->Draw();
+  // UPPER - Distribution
+  uppert->cd();
+  gPad->SetLogy();
+  // Markers and lines
+  h_t_MC->SetLineColor(kBlack);
+  h_t_MC->SetLineWidth(2);
+  h_t_B0Rec->SetMarkerColor(kP6Blue);
+  h_t_B0Rec->SetMarkerStyle(kOpenCircle);
+  h_t_B0Rec->SetMarkerSize(1.5);
+  h_t_B0Rec->SetLineColor(kP6Blue);
+  h_t_B0Rec->SetLineWidth(2);
+  h_t_B0Corr->SetMarkerColor(kP6Blue);
+  h_t_B0Corr->SetMarkerStyle(kFullCircle);
+  h_t_B0Corr->SetMarkerSize(1.5);
+  h_t_B0Corr->SetLineColor(kP6Blue);
+  h_t_B0Corr->SetLineWidth(2);
+  h_t_RPRec->SetMarkerColor(kP6Grape);
+  h_t_RPRec->SetMarkerStyle(kOpenCircle);
+  h_t_RPRec->SetMarkerSize(1.5);
+  h_t_RPRec->SetLineColor(kP6Grape);
+  h_t_RPRec->SetLineWidth(2);
+  h_t_RPCorr->SetMarkerColor(kP6Grape);
+  h_t_RPCorr->SetMarkerStyle(kFullCircle);
+  h_t_RPCorr->SetMarkerSize(1.5);
+  h_t_RPCorr->SetLineColor(kP6Grape);
+  h_t_RPCorr->SetLineWidth(2);
+  h_t_LCRec->SetMarkerColor(kP6Yellow);
+  h_t_LCRec->SetMarkerStyle(kOpenCircle);
+  h_t_LCRec->SetMarkerSize(1.5);
+  h_t_LCRec->SetLineColor(kP6Yellow);
+  h_t_LCRec->SetLineWidth(2);
+  h_t_LCCorr->SetMarkerColor(kP6Yellow);
+  h_t_LCCorr->SetMarkerStyle(kFullCircle);
+  h_t_LCCorr->SetMarkerSize(1.5);
+  h_t_LCCorr->SetLineColor(kP6Yellow);
+  h_t_LCCorr->SetLineWidth(2);
+  // Axes
+  h_t_MC->GetYaxis()->SetTitle("Counts / 0.1 GeV^{2}");
+  h_t_MC->GetYaxis()->SetTitleSize(0.05);
+  h_t_MC->GetYaxis()->SetLabelSize(0.05);
+  h_t_MC->GetYaxis()->SetRangeUser(1,10*h_t_MC->GetMaximum());
+  // Drawing
+  h_t_MC->Draw("hist");
+  h_t_B0Rec->Draw("pe same");
+  h_t_RPRec->Draw("pe same");
+  h_t_LCRec->Draw("pe same");
+  h_t_B0Corr->Draw("pe same");
+  h_t_RPCorr->Draw("pe same");
+  h_t_LCCorr->Draw("pe same");
+  // Labels
+  tePICLabel_R->Draw("same");
+  // Legend
+  TLegend* lt = new TLegend(0.17, 0.05, 0.71, 0.25);
+  lt->SetLineWidth(0);
+  lt->SetFillStyle(0);
+  lt->SetNColumns(2);
+  lt->AddEntry(h_t_MC, "MC gen.", "l");
+  lt->AddEntry((TObject*)0, "", "");
+  lt->AddEntry(h_t_B0Rec, "Raw reco. (B0)", "lp");
+  lt->AddEntry(h_t_B0Corr, "Corr. reco. (B0)", "lp");
+  lt->AddEntry(h_t_RPRec, "Raw reco. (RP)", "lp");
+  lt->AddEntry(h_t_RPCorr, "Corr. reco. (RP)", "lp");
+  lt->AddEntry(h_t_LCRec, "Raw reco. (e'#gamma)", "lp");
+  lt->AddEntry(h_t_LCCorr, "Corr. reco. (e'#gamma)", "lp");
+  lt->Draw();
+  
+  // LOWER - Ratio/efficiency
+  lowert->cd();
+  // Markers and lines
+  h_t_B0Eff->SetLineColor(kP6Blue);
+  h_t_B0Eff->SetLineWidth(2);
+  h_t_RPEff->SetLineColor(kP6Grape);
+  h_t_RPEff->SetLineWidth(2);
+  h_t_LCEff->SetLineColor(kP6Yellow);
+  h_t_LCEff->SetLineWidth(2);
+  // Axes
+  h_t_LCEff->GetXaxis()->SetTitle("|t| [GeV^{2}]");
+  h_t_LCEff->GetXaxis()->SetTitleSize(0.11);
+  h_t_LCEff->GetXaxis()->SetTitleOffset(0.93);
+  h_t_LCEff->GetXaxis()->SetLabelSize(0.11);
+  h_t_LCEff->GetYaxis()->SetTitle("Acc/MC");
+  h_t_LCEff->GetYaxis()->SetTitleSize(0.13);
+  h_t_LCEff->GetYaxis()->SetTitleOffset(0.4);
+  h_t_LCEff->GetYaxis()->SetLabelSize(0.13);
+  h_t_LCEff->GetYaxis()->SetNdivisions(505);
+  h_t_LCEff->GetYaxis()->SetRangeUser(0.,1.05);
+  // Draw
+  h_t_LCEff->Draw();
+  h_t_B0Eff->Draw("same");
+  h_t_RPEff->Draw("same");
+  // Save figure
+  if(kSAVE) ct->SaveAs(sFigsPath + "TDR_" + energy +"_t.png");
+  ct->Close();
+
+
+  // CANVAS: Overlaid t-resolutions (absolute)
+  TH1D* h_tResB0_Proj = (TH1D*)h_t_B0Res->ProjectionY("tresb0_py");
+  TH1D* h_tResRP_Proj = (TH1D*)h_t_RPRes->ProjectionY("tresrp_py");
+  TH1D* h_tResLC_Proj = (TH1D*)h_t_LCRes->ProjectionY("treslc_py");
+
+  TCanvas* ctRes_All = new TCanvas("ctres_all","",1000,1000);
+  // Set draw options - markers and lines
+  h_tResB0_Proj->SetLineColor(kP6Blue);
+  h_tResB0_Proj->SetFillColor(kP6Blue);
+  h_tResB0_Proj->SetFillStyle(3001);
+  h_tResRP_Proj->SetLineColor(kP6Grape);
+  h_tResRP_Proj->SetFillColor(kP6Grape);
+  h_tResRP_Proj->SetFillStyle(3001);
+  h_tResLC_Proj->SetLineColor(kP6Yellow);
+  h_tResLC_Proj->SetFillColor(kP6Yellow);
+  h_tResLC_Proj->SetFillStyle(3001);
+  // Set draw options - axes
+  // Using Method L plot for baseline
+  gPad->SetLogy();
+  h_tResLC_Proj->GetXaxis()->SetTitle("#Deltat [GeV^{2}]");
+  h_tResLC_Proj->GetXaxis()->SetRangeUser(-2.,2.);
+  h_tResLC_Proj->GetYaxis()->SetTitle("Counts/0.02 GeV^{ 2}");
+  h_tResLC_Proj->GetYaxis()->SetRangeUser(1,1000*h_tResLC_Proj->GetMaximum());
+  // Draw
+  // Method L first, others depending on which has more entries
+  h_tResLC_Proj->Draw("hist");
+  if(h_tResB0_Proj->GetEntries() > h_tResRP_Proj->GetEntries()){
+    h_tResB0_Proj->Draw("hist same");
+    h_tResRP_Proj->Draw("hist same");
+  }
+  else{
+    h_tResRP_Proj->Draw("hist same");
+    h_tResB0_Proj->Draw("hist same");
+  }
+  // Add text
+  TLatex* tePICLabel_tres = new TLatex(-1.9, 0.25*h_tResLC_Proj->GetMaximum(),
+				       Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma}", campaign.Data(), energy.Data()));
+  tePICLabel_tres->SetTextSize(0.037);
+  tePICLabel_tres->Draw("same");
+  // Add legend
+  TLegend* ltRes = new TLegend(0.16,0.70,0.45,0.84);
+  ltRes->SetLineWidth(0);
+  ltRes->SetFillStyle(0);
+  ltRes->SetTextSize(0.037);
+  TString sB0Res_leg = "BABE (B0), RMS = " + combineScientific(h_tResB0_Proj->GetRMS(),h_tResB0_Proj->GetRMSError()) + " GeV^{2}";
+  TString sRPRes_leg = "BABE (RP), RMS = " + combineScientific(h_tResRP_Proj->GetRMS(),h_tResRP_Proj->GetRMSError()) + " GeV^{2}";
+  TString sLCRes_leg = "eXBE, RMS = " + combineScientific(h_tResLC_Proj->GetRMS(),h_tResLC_Proj->GetRMSError()) + " GeV^{2}";
+  ltRes->AddEntry(h_tResB0_Proj,sB0Res_leg,"lp");
+  ltRes->AddEntry(h_tResRP_Proj,sRPRes_leg,"lp");
+  ltRes->AddEntry(h_tResLC_Proj,sLCRes_leg,"lp");
+  ltRes->Draw();
+  // Save figure
+  if(kSAVE) ctRes_All->SaveAs(sFigsPath + "TDR_" + energy +"_tRes_All.png");
+  ctRes_All->Close();
+
+  // CANVAS - Overlaid t-resolutions (relative)
+  TH1D* h_tResB0Pct_Proj = (TH1D*)h_t_B0ResPct->ProjectionY("tresb0pct_py");
+  TH1D* h_tResRPPct_Proj = (TH1D*)h_t_RPResPct->ProjectionY("tresrppct_py");
+  TH1D* h_tResLCPct_Proj = (TH1D*)h_t_LCResPct->ProjectionY("treslcpct_py");
+
+  TCanvas* ctResPct_All = new TCanvas("ctrespct_all","",1000,1000);
+  // Set draw options - markers and lines
+  h_tResB0Pct_Proj->SetLineColor(kP6Blue);
+  h_tResB0Pct_Proj->SetFillColor(kP6Blue);
+  h_tResB0Pct_Proj->SetFillStyle(3001);
+  h_tResRPPct_Proj->SetLineColor(kP6Grape);
+  h_tResRPPct_Proj->SetFillColor(kP6Grape);
+  h_tResRPPct_Proj->SetFillStyle(3001);
+  h_tResLCPct_Proj->SetLineColor(kP6Yellow);
+  h_tResLCPct_Proj->SetFillColor(kP6Yellow);
+  h_tResLCPct_Proj->SetFillStyle(3001);
+  // Set draw options - axes
+  // Using Method L plot for baseline
+  h_tResLCPct_Proj->GetXaxis()->SetTitle("#Deltat/|t_{MC}|");
+  h_tResLCPct_Proj->GetXaxis()->SetRangeUser(-0.05,1.);
+  h_tResLCPct_Proj->GetYaxis()->SetRangeUser(1,1.25*h_tResLCPct_Proj->GetMaximum());
+  // Draw
+  // Method L first, others depending on which has more entries
+  h_tResLCPct_Proj->Draw("hist");
+  if(h_tResB0Pct_Proj->GetEntries() > h_tResRPPct_Proj->GetEntries()){
+    h_tResB0Pct_Proj->Draw("hist same");
+    h_tResRPPct_Proj->Draw("hist same");
+  }
+  else{
+    h_tResRPPct_Proj->Draw("hist same");
+    h_tResB0Pct_Proj->Draw("hist same");
+  }
+  // Add text
+  TLatex* tePICLabel_trespct = new TLatex(-0.01, 0.91*h_tResLCPct_Proj->GetMaximum(),
+					  Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma}", campaign.Data(), energy.Data()));
+  tePICLabel_trespct->SetTextSize(0.037);
+  tePICLabel_trespct->Draw("same");
+  // Add legend
+  TLegend* ltResPct = new TLegend(0.30,0.64,0.64,0.78);
+  ltResPct->SetLineWidth(0);
+  ltResPct->SetFillStyle(0);
+  ltResPct->SetTextSize(0.032);
+  TString sB0ResPct_leg = "BABE (B0), RMS = " + combineScientific(h_tResB0Pct_Proj->GetRMS(),h_tResB0Pct_Proj->GetRMSError());
+  TString sRPResPct_leg = "BABE (RP), RMS = " + combineScientific(h_tResRPPct_Proj->GetRMS(),h_tResRPPct_Proj->GetRMSError());
+  TString sLCResPct_leg = "eXBE, RMS = " + combineScientific(h_tResLCPct_Proj->GetRMS(),h_tResLCPct_Proj->GetRMSError());
+  ltResPct->AddEntry(h_tResB0Pct_Proj,sB0ResPct_leg,"lf");
+  ltResPct->AddEntry(h_tResRPPct_Proj,sRPResPct_leg,"lf");
+  ltResPct->AddEntry(h_tResLCPct_Proj,sLCResPct_leg,"lf");
+  ltResPct->Draw();
+  // Save figure
+  if(kSAVE) ctResPct_All->SaveAs(sFigsPath + "TDR_" + energy +"_tResPct_All.png");
+  ctResPct_All->Close();
+
+
+  // CANVAS: Event (E-pz)
+  TCanvas* cEmPz = new TCanvas("cempz","",1000,1000);
+  gPad->SetLogy();
+  // Markers and lines
+  h_EmPz_MC->SetLineColor(kBlack);
+  h_EmPz_MC->SetLineWidth(2);
+  h_EmPz_RP->SetLineColor(kP6Blue);
+  h_EmPz_RP->SetLineWidth(2);
+  // Axes
+  h_EmPz_MC->GetXaxis()->SetTitle("(E-p_{z})_{e'p'#gamma} [GeV]");
+  h_EmPz_MC->GetXaxis()->SetRangeUser(0.,30.);
+  h_EmPz_MC->GetYaxis()->SetTitle("Counts / 0.25 GeV");
+  float empz_high = 0.8*h_EmPz_MC->GetMaximum();
+  h_EmPz_MC->GetYaxis()->SetRangeUser(0.5,50*empz_high);
+  // Draw
+  h_EmPz_MC->Draw("hist");
+  h_EmPz_RP->Draw("hist same");
+  // Text
+  TLatex* tePICLabel_empz = new TLatex(0.17, 0.86, 
+				  Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  tePICLabel_empz->SetNDC();
+  tePICLabel_empz->SetTextSize(0.04);
+  tePICLabel_empz->Draw("same");
+  // Lines
+  TLine* lLower = new TLine(15.,0.,15.,empz_high);
+  lLower->SetLineColor(kP6Red);
+  lLower->SetLineWidth(2);
+  lLower->Draw();
+  TLine* lUpper = new TLine(25.,0.,25.,empz_high);
+  lUpper->SetLineColor(kP6Red);
+  lUpper->SetLineWidth(2);
+  lUpper->Draw();
+  // Legend
+  TLegend* lEmPz = new TLegend(0.18,0.58,0.53,0.72);
+  lEmPz->SetLineWidth(0);
+  lEmPz->SetFillStyle(0);
+  lEmPz->SetTextSize(0.032);
+  lEmPz->AddEntry(h_EmPz_MC,"MC gen.","l");
+  lEmPz->AddEntry(h_EmPz_RP,"Raw reco.","l");
+  lEmPz->Draw();
+  // Save figure
+  if(kSAVE) cEmPz->SaveAs(sFigsPath + "TDR_" + energy +"_ct_All.png");
+  cEmPz->Close();
+  
+
+  // CANVAS: Missing pT
+  TCanvas* cpTmiss3 = new TCanvas("cempz","",1000,1000);
+  gPad->SetLogy();
+  // Markers and lines
+  h_pTmiss_RP->SetLineColor(kBlack);
+  h_pTmiss_RP->SetLineWidth(2);
+  // Axes
+  h_pTmiss_RP->GetXaxis()->SetTitle("p_{T,miss} [GeV]");
+  h_pTmiss_RP->GetXaxis()->SetTitleOffset(1.10);
+  h_pTmiss_RP->GetYaxis()->SetTitle("Counts / 0.01 GeV");
+  h_pTmiss_RP->GetYaxis()->SetRangeUser(0.5,5*h_pTmiss_RP->GetMaximum());
+  // Draw
+  h_pTmiss_RP->Draw("hist");
+  // Text
+  TLatex* tePICLabel_ptm3 = new TLatex(0.3, 0.87, 
+				       Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  tePICLabel_ptm3->SetNDC();
+  tePICLabel_ptm3->SetTextSize(0.04);
+  tePICLabel_ptm3->Draw("same");
+  // Lines
+  TLine* lptm3 = new TLine(0.5,0.,0.5,0.75*h_pTmiss_RP->GetMaximum());
+  lptm3->SetLineColor(kP6Red);
+  lptm3->SetLineWidth(2);
+  lptm3->Draw();
+  // Save figure
+  if(kSAVE) cpTmiss3->SaveAs(sFigsPath + "TDR_" + energy +"_pTmiss3.png");
+  cpTmiss3->Close();
+
+
+  // CANVAS: 2d event x/Q2
+  TCanvas* cxBvQ2 = new TCanvas("cxbvq2","",1000,1000);
+  gPad->SetLogx();
+  gPad->SetLogy();
+  gPad->SetLogz();
+  gPad->SetRightMargin(0.12);
+  h_xBvQ2_Rec->GetXaxis()->SetTitle("x_{B}");
+  h_xBvQ2_Rec->GetYaxis()->SetTitle("Q^{2} [GeV^{2}]");
+  h_xBvQ2_Rec->Draw("colz");
+  // Save figure
+  if(kSAVE) cxBvQ2->SaveAs(sFigsPath + "TDR_" + energy +"_xBvQ2_Rec.png");
+  cxBvQ2->Close();
+
+
+  // CANVAS: 2d event x/Q2
+  TCanvas* cxBvt = new TCanvas("cxbvt","",1000,1000);
+  gPad->SetLogx();
+  gPad->SetLogz();
+  gPad->SetRightMargin(0.12);
+  h_xBvt_Rec->GetXaxis()->SetTitle("x_{B}");
+  h_xBvt_Rec->GetYaxis()->SetTitle("|t| [GeV^{2}]");
+  h_xBvt_Rec->Draw("colz");
+  // Save figure
+  if(kSAVE) cxBvt->SaveAs(sFigsPath + "TDR_" + energy +"_xBvt_Rec.png");
+  cxBvQ2->Close();
+
+  
   return;
 }
