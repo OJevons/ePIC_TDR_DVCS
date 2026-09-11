@@ -115,6 +115,9 @@ void DVCS_Binning(TString campaign = "26.07.1", TString energy = "9x130", TStrin
     h_xvt_q2diff[q]->SetTitle(Form("x_{B}:|t|, %.2f<Q^{2}<%.2f GeV^{2}",q2edges[q],q2edges[q+1]));
     gPad->SetLogx();
     gPad->SetLogz();
+    h_xvt_q2diff[q]->GetYaxis()->SetTitle("|t| [GeV^{2}]");
+    h_xvt_q2diff[q]->GetYaxis()->SetTitleOffset(1.3);
+    h_xvt_q2diff[q]->GetXaxis()->SetTitle("x_{B}");
     h_xvt_q2diff[q]->Draw("col");
     //---------------------------------------------------------------------------------------------------
     
@@ -144,7 +147,7 @@ void DVCS_Binning(TString campaign = "26.07.1", TString energy = "9x130", TStrin
       
       //---------------------------------------------------------------------------------------------------
       // Add boxes to plots
-      TBox* boxB0 = new TBox(0,t_gap,1,2.);
+      TBox* boxB0 = new TBox(0.,t_gap,1.,2.);
       boxB0->SetFillStyle(0);
       boxB0->SetLineColor(kRed);
       boxB0->SetLineWidth(2);
@@ -218,13 +221,20 @@ void DVCS_Binning(TString campaign = "26.07.1", TString energy = "9x130", TStrin
 	boxRP->SetFillStyle(0);
 	boxRP->SetLineColor(kRed);
 	boxRP->SetLineWidth(2);
-	boxRP->Draw();
+	if(k<t_edges.size()-1) boxRP->Draw(); // Don't try to draw last box (fails outside of t edges array)
 	//---------------------------------------------------------------------------------------------------
 
       } // rof (No. of t edges)
     } //rof (No. of xB edges)
 
-    c->SaveAs(Form(sFigsPath + "3Dbinning_%s_%i",energy.Data(),q));
+    // Add text to binning plot
+    TLatex* tePICLabel = new TLatex(0.15, 0.85,
+				    Form("#bf{ePIC} Simulation %s, %s GeV", campaign.Data(), energy.Data()));
+    tePICLabel->SetNDC();
+    tePICLabel->SetTextSize(0.04);
+    tePICLabel->Draw("same");
+    // Save plot
+    c->SaveAs(Form(sFigsPath + "3Dbinning_%s_%i.png",energy.Data(),q));
     c->Close();
     
   } //rof (loop over Q2 bins)
