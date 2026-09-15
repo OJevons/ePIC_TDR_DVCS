@@ -11,7 +11,9 @@ using namespace std;
 // Choose to print plots
 bool kSAVE = true;
 // PATH TO MAIN REPO DIRECTORY
-TString sFigsPath = "/home/oliver/eic/Analysis/ePIC_TDR_DVCS/figs/";
+TString sMainDir = "/home/ojj2x/eic/ePIC_TDR_DVCS/";
+TString sFilePath = sMainDir + "rootfiles/";
+TString sFigsPath = sMainDir + "figs/";
 
 //---------------------------------------------------------------------
 // Helper functions for printing strings
@@ -155,7 +157,7 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   }
 
   // Load chosen input file
-  TString sIn = "../rootfiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
   TFile* fIn = TFile::Open(sIn);
 
   //--------------------------------------------------------------------
@@ -316,8 +318,10 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // CANVASES A., B., C.) 2D ENERGY/ETA (Single species)
   // Extra canvases - energy/eta
   TCanvas* cEvEta_e = new TCanvas("cEvEta_e","",1000,1000);
+  gPad->SetLogz();
+  gPad->SetRightMargin(0.12);
   h_EvEta_e->GetYaxis()->SetRangeUser(0, 1.3*fEBeam);
-  h_EvEta_e->Draw();
+  h_EvEta_e->Draw("colz");
   // Add text
   TLatex* tePICLabel_EvEtaelec = new TLatex(0.16, 0.88,
 					    Form("#splitline{#bf{ePIC} Simulation %s, %s GeV}{ep #rightarrow e'p'#gamma, all MC e^{-}}", campaign.Data(), energy.Data()));
@@ -329,7 +333,9 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   cEvEta_e->Close();
 
   TCanvas* cEvEta_g = new TCanvas("cEvEta_g","",1000,1000);
-  h_EvEta_g->Draw();
+  gPad->SetLogz();
+  gPad->SetRightMargin(0.12);
+  h_EvEta_g->Draw("colz");
   // Add text
   TLatex* tePICLabel_EvEtaphot = new TLatex(0.16, 0.88,
 					    Form("#splitline{#bf{ePIC} Simulation %s, %s GeV}{ep #rightarrow e'p'#gamma, all MC #gamma}", campaign.Data(), energy.Data()));
@@ -341,8 +347,10 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   cEvEta_g->Close();
 
   TCanvas* cEvEta_p = new TCanvas("cEvEta_p","",1000,1000);
+  gPad->SetLogz();
+  gPad->SetRightMargin(0.12);
   h_EvEta_p->GetYaxis()->SetRangeUser(0.5*fPBeam, 1.1*fPBeam);
-  h_EvEta_p->Draw();
+  h_EvEta_p->Draw("colz");
   // Add text
   TLatex* tePICLabel_EvEtaprot = new TLatex(0.16, 0.88, 
 					    Form("#splitline{#bf{ePIC} Simulation %s, %s GeV}{ep #rightarrow e'p'#gamma, all MC p'}", campaign.Data(), energy.Data()));
