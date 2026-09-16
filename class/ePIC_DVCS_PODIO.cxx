@@ -1,5 +1,5 @@
 // ePIC DVCS analysis class definition
-#include "preLoadLib.hh"
+#include "../include/preLoadLib.hh"
 
 // Data model headers
 #include "edm4eic/ReconstructedParticleCollection.h"
@@ -531,7 +531,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TString cutname[17] = {"inc-sing_ele","e'-Q^{2}",
                          "inc-sing_pho","#gamma-E_{#gamma}",
                          "inc-sing_pro","p'-#theta_{p}",
-                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}"
+                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}",
                          "e'#gamma-mult","e'#gamma-NegTrackVeto","e'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'#gamma-(E-pz)","e'#gamma-p_{T,miss}"};
   TH1D* hPassCuts_MC = new TH1D("passcuts_mc",";;",nCuts,0,nCuts);
   TH1D* hPassCuts_Rec = new TH1D("passcuts_rec",";;",nCuts,0,nCuts);
@@ -561,7 +561,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   DVCSBinning binning;
   // NOTE: change this if your binning file lives elsewhere or is named per
   //       configuration, e.g. "bins_"+camp+"_"+energy+".txt".
-  TString sBinFile = "bins_"+sEnergy+".txt";
+  TString sBinFile = "./binning/bins_"+sEnergy+".txt";
   if(!binning.load(sBinFile.Data())){
     std::cerr << "[ePIC_DVCS] FATAL: could not load binning from " << sBinFile << std::endl;
     return;
@@ -1191,7 +1191,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Q2_ExcReco->Fill(calcQ2_Elec(beame4, scate4_rec[0]), TMath::Power(TMath::Sin(tphi_rec),2));
 	
 	h_2D_xVt_RP->Fill(xB_rec,t_rec);
-	if(binq2>=0) h_2D_xVtDiff_RP[binq2]->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
+	//if(binq2>=0) h_2D_xVtDiff_RP[binq2]->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
+	if(binq2>=0) h_2D_xVtDiff_RP[binq2]->Fill(xB_rec,t_rec);
 	h_2D_xVtSin2_RP->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
 	h_2D_xVtCos2_RP->Fill(xB_rec,t_rec,TMath::Power(TMath::Cos(tphi_rec),2));
 
@@ -1259,7 +1260,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Q2_ExcReco->Fill(calcQ2_Elec(beame4, scate4_rec[0]), TMath::Power(TMath::Sin(tphi_rec),2));
 
 	h_2D_xVt_RP->Fill(xB_rec,t_rec);
-	if(binq2>=0) h_2D_xVtDiff_RP[binq2]->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
+	//if(binq2>=0) h_2D_xVtDiff_RP[binq2]->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
+	if(binq2>=0) h_2D_xVtDiff_RP[binq2]->Fill(xB_rec,t_rec);
 	h_2D_xVtSin2_RP->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
 	h_2D_xVtCos2_RP->Fill(xB_rec,t_rec,TMath::Power(TMath::Cos(tphi_rec),2));
 
