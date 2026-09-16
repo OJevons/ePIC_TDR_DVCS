@@ -1,7 +1,7 @@
 // Running macro for ePIC DVCS analysis
-//#include "ePIC_DVCS_TASK.cxx"
+//#include "/include/ePIC_DVCS_TASK.cxx"
 //#include "ePIC_DVCS_Res.cxx"
-#include "ePIC_DVCS_PODIO.cxx"
+#include "class/ePIC_DVCS_PODIO.cxx"
 //#include "ePIC_DVCS_NoDiff.cxx"
 
 //#include "ePIC_DISBkg_PODIO.cxx"
@@ -33,6 +33,7 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   TString sOutFileName;
   if(comment=="X") sOutFileName = "rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
   else sOutFileName = "rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
+  //sOutFileName = "/scratch1/ojj2x/dvcs_test.root";
   
   objDVCS->setOutFileName(sOutFileName);
   

@@ -189,7 +189,7 @@ void splitByEntries_print(const h& hist, int nentries){
     // If count above threshold, print new bin edges
      if(hist->Integral(binlo,bin) > nentries*0.95){
       edgehi = hist->GetBinLowEdge(bin+1);
-      cout<<"["<<edgelo<<" - "<<edgehi<<"] ("<<hist->Integral(binlo,bin)<<")     ";
+      cout<<"["<<edgelo<<" - "<<edgehi<<"] ("<<hist->Integral(binlo,bin)<<")\n";
       
       binlo = bin+1;
       edgelo = edgehi;
