@@ -600,7 +600,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   gPad->SetLogz();
   gPad->SetRightMargin(0.12);
   h_y_Res->GetYaxis()->SetTitle("(y_{reco}-y_{MC})/y_{MC}");
-  h_y_Res->GetYaxis()->SetTitle("y_{MC}");
+  h_y_Res->GetXaxis()->SetTitle("y_{MC}");
   h_y_Res->Draw("colz");
   // Save figure
   if(kSAVE) cy_Res->SaveAs(sFigsPath + "TDR_" + energy +"_y_Res.png");
