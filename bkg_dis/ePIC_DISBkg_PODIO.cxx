@@ -28,7 +28,7 @@
 #include <fstream>
 
 // Class header include
-#include "../include/ePIC_DVCS_TASK.h"
+#include "$BASE_DIR/include/ePIC_DVCS_TASK.h"
 
 //----------------------------------------------------
 //----------------------------------------------------
