@@ -10,6 +10,8 @@
 // Include ePIC event kinematic utilities
 #include "./ePIC_IncKinUtils.h"
 #include "./ePIC_ExcKinUtils.h"
+#include "./ePIC_BinUtils.h"
+#include "./ePIC_MiscUtils.h"
 
 // ROOT::Math aliases
 using ROOT::Math::VectorUtil::boost;

@@ -1,5 +1,5 @@
 // ePIC DVCS analysis class definition
-#include "../include/preLoadLib.hh"
+#include "$BASE_DIR/include/preLoadLib.hh"
 
 // Data model headers
 #include "edm4eic/ReconstructedParticleCollection.h"
@@ -26,9 +26,9 @@
 #include <fstream>
 
 // Class header include
-#include "../include/ePIC_DVCS_TASK.h"
+#include "$BASE_DIR/include/ePIC_DVCS_TASK.h"
 // Flexible (ragged) Q2/xB/|t| binning read from a text file
-#include "../include/DVCSBinning.hh"
+#include "$BASE_DIR/include/DVCSBinning.hh"
 
 //----------------------------------------------------
 //----------------------------------------------------
