@@ -6,7 +6,7 @@
 ### A script to process DVCS file lists with provided arguments.
 ### As is, takes 3 arguments, campaign, beam energy combination and setting/comment for filelist
 
-RunDir="/w/halla-scshelf2102/sbs/ojevons/eic/DVCS_ep" # Put in the path of your directory here 
+RunDir="/w/halla-scshelf2102/sbs/ojevons/eic/ePIC_DVCS_TDR" # Put in the path of your directory here 
 # Put in the path of your directory here (where your eic-shell is)
 echo "Running as ${USER}"
 echo "Assuming directory - ${RunDir}"

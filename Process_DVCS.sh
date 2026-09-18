@@ -6,7 +6,7 @@
 ### A script to create and submit analysis jobs to the JLab farm.
 ### As is, takes 3 arguments, campaign, beam energy combination and setting/comment for filelist
 
-RunDir="/w/halla-scshelf2102/sbs/ojevons/eic/DVCS_ep" # Put in the path of your directory here 
+RunDir="/w/halla-scshelf2102/sbs/ojevons/eic/ePIC_TDR_DVCS" # Put in the path of your directory here 
 echo "Running as ${USER}"
 echo "Assuming simulation directory - ${RunDir}"
 
@@ -64,12 +64,12 @@ eval 'swif2 run ${Workflow}'
 exit 0
 
 # Old version making a batch job card and submitting
-#batch="${DVCS_ep}/${Campaign}_${BeamE}_${Setting}_FileList_Chunk_${ChunkNum}.txt"
+#batch="${BASE_DIR}/${Campaign}_${BeamE}_${Setting}_FileList_Chunk_${ChunkNum}.txt"
 #echo "Running ${batch}"
 #cp /dev/null ${batch}
 #echo "PROJECT: eic" >> ${batch}
 #echo "TRACK: analysis" >> ${batch}    
-#batch="${DVCS_ep}/${Campaign}_${BeamE}_${Setting}_FileList_Chunk_${ChunkNum}.txt"
+#batch="${BASE_DIR}/${Campaign}_${BeamE}_${Setting}_FileList_Chunk_${ChunkNum}.txt"
 #echo "Running ${batch}"
 #cp /dev/null ${batch}
 #echo "PROJECT: eic" >> ${batch}
