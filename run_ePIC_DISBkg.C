@@ -26,7 +26,7 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   // Output file name
   // DO NOT INCLUDE ".root" EXTENSION
   TString sOutFileName;
-  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_minQ2="+sett;
+  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+sett;
   else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment;
   
   objDIS->setOutFileName(sOutFileName);
