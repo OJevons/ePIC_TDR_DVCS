@@ -35,9 +35,11 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   TString sInFileList = DVCS_ep_Path+"/filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
   objDVCS->setInFileList(sInFileList);
 
+  // Output file name
+  // DO NOT INCLUDE ".root" EXTENSION
   TString sOutFileName;
-  if(comment=="X") sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett+".root";
-  else sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment+".root";
+  if(comment=="X") sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
+  else sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
    
   objDVCS->setOutFileName(sOutFileName);
   
