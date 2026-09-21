@@ -1,6 +1,6 @@
 // Running macro for ePIC DVCS analysis
 // ----> VARIANT FOR DIS PHYSICS BACKGROUND
-#include "$BASE_DIR/bkg_dis/ePIC_DISBkg_PODIO.cxx"
+#include "./bkg_dis/ePIC_DISBkg_PODIO.cxx"
 
 const float fMass_proton{0.938272};
 const Float_t fMass_electron{0.000511};
@@ -20,14 +20,14 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="10x100", TString sett=
   
   ePIC_DVCS_TASK *objDIS = new ePIC_DVCS_TASK(camp,energy,sett);
   
-  TString sInFileList = "$BASE_DIR/filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
-  sInFileList="$BASE_DIR/filelists/inputFileList_ePIC_DIS_26.02.0_10x100_minQ2=1.list";
+  TString sInFileList = "./bkg_dis/inputFileList_DIS_"+camp+"_"+energy+"_minQ2="+sett+".list";
+  sInFileList="./bkg_dis/inputFileList_DIS_test.list";
   objDIS->setInFileList(sInFileList);
 
   TString sOutFileName;
-  if(comment=="X") sOutFileName = "$BASE_DIR/rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett+".root";
-  else sOutFileName = "$BASE_DIR/rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment+".root";
-  sOutFileName = "$BASE_DIR/rootfiles/ePIC_DIS_26.02.0_10x100_minQ2=1_NewCuts-.root";
+  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_minQ2="+sett+".root";
+  else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment+".root";
+  sOutFileName = "./bkg_dis/ePIC_DIS_test.root";
 
   objDIS->setOutFile(sOutFileName);
 
