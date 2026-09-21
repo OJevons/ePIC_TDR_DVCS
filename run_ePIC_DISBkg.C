@@ -21,7 +21,6 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   ePIC_DVCS_TASK *objDIS = new ePIC_DVCS_TASK(camp,energy,sett);
   
   TString sInFileList = "./bkg_dis/inputFileList_DIS_"+camp+"_"+energy+"_minQ2="+sett+".list";
-  sInFileList="./bkg_dis/inputFileList_DIS_test.list";
   objDIS->setInFileList(sInFileList);
 
   // Output file name
@@ -29,8 +28,7 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   TString sOutFileName;
   if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_minQ2="+sett;
   else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment;
-  sOutFileName = "./bkg_dis/ePIC_DIS_test";
-
+  
   objDIS->setOutFileName(sOutFileName);
 
   // Set DVCS cut values

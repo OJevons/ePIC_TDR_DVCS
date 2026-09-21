@@ -28,7 +28,7 @@ fi
 Setting="${3:-}" # Assigns third argument if it was provided, set to blank if not
 
 # Construct file list from arguments and check it exists
-FileList="${RunDir}/bkg_dis/inputFileList_ePIC_${Campaign}_${BeamE}_${Setting}.list"
+FileList="${RunDir}/bkg_dis/inputFileList_DIS_${Campaign}_${BeamE}_${Setting}.list"
 if [ ! -f ${FileList} ]; then
     echo "${FileList} not found!"
     echo "Check path and input arguments carefully!"
