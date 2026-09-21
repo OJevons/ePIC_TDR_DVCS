@@ -24,12 +24,14 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="10x100", TString sett=
   sInFileList="./bkg_dis/inputFileList_DIS_test.list";
   objDIS->setInFileList(sInFileList);
 
+  // Output file name
+  // DO NOT INCLUDE ".root" EXTENSION
   TString sOutFileName;
-  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_minQ2="+sett+".root";
-  else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment+".root";
-  sOutFileName = "./bkg_dis/ePIC_DIS_test.root";
+  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_minQ2="+sett;
+  else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment;
+  sOutFileName = "./bkg_dis/ePIC_DIS_test";
 
-  objDIS->setOutFile(sOutFileName);
+  objDIS->setOutFileName(sOutFileName);
 
   // Set DVCS cut values
   objDIS->setMomCutFactors(10.,10.);

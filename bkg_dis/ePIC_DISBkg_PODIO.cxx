@@ -1,7 +1,7 @@
 // ePIC DVCS analysis class definition
 // USE CASE - DIS PHYSICS BACKGROUND
 
-#include "preLoadLib.hh"
+#include "../include/preLoadLib.hh"
 
 // Data model headers
 #include "edm4eic/ReconstructedParticleCollection.h"
@@ -28,7 +28,7 @@
 #include <fstream>
 
 // Class header include
-#include "$BASE_DIR/include/ePIC_DVCS_TASK.h"
+#include "../include/ePIC_DVCS_TASK.h"
 
 //----------------------------------------------------
 //----------------------------------------------------
@@ -64,9 +64,9 @@ void ePIC_DVCS_TASK::setInFileList(TString name){
 }
 
 // Set output file name and create new
-void ePIC_DVCS_TASK::setOutFile(TString name){
-  std::cout<<"Output ROOT file: "<<name<<std::endl;
-  fOutFile = new TFile(name,"RECREATE");
+void ePIC_DVCS_TASK::setOutFileName(TString name){
+  std::cout<<"Output ROOT files: "<<name<<std::endl;
+  sOutFileName = name;
 }
 
 void ePIC_DVCS_TASK::setBeamMomenta(){
@@ -1208,6 +1208,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   //------------------------------------------------------------
   // Write to output file
   //------------------------------------------------------------
+  TString sOutName = sOutFileName+".root";
+  TFile* fOutFile = new TFile(sOutName,"RECREATE");
   fOutFile->cd();
   
   // Eta - MC
