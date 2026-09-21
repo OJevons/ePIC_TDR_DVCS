@@ -78,6 +78,10 @@ void ePIC_DVCS_TASK::setBeamMomenta(){
     fPBeam_p=100.0;
     fPBeam_e=10.0;
   }
+  else if(sEnergy == "9x130"){
+    fPBeam_p=130.0;
+    fPBeam_e=9.0;
+  }
   else if(sEnergy == "10x130"){
     fPBeam_p=130.0;
     fPBeam_e=10.0;
@@ -85,6 +89,10 @@ void ePIC_DVCS_TASK::setBeamMomenta(){
   else if(sEnergy == "10x250"){
     fPBeam_p=250.0;
     fPBeam_e=10.0;
+  }
+  else if(sEnergy == "9x275"){
+    fPBeam_p=275.0;
+    fPBeam_e=9.0;
   }
   else if(sEnergy == "10x275"){
     fPBeam_p=275.0;

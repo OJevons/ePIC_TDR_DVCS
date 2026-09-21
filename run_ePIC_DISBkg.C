@@ -5,7 +5,7 @@
 const float fMass_proton{0.938272};
 const Float_t fMass_electron{0.000511};
 
-void run_ePIC_DISBkg(TString camp="Camp", TString energy="10x100", TString sett="test", TString comment="X"){
+void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="test", TString comment="X"){
 
   std::cout<<"----------------------------------------------------"<<std::endl;
   std::cout<<"            ePIC DVCS Analysis - DIS bkg            "<<std::endl;
