@@ -889,7 +889,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	if(omdreco.getTracks()) kOtherFFTrack_Rec = true;
       }
       // ZDC
-      const auto& ZDCparts = event.get<edm4eic::ReconstructedParticleCollection>("ReconstructedFarForwardZDCNeutrals");
+      const auto& ZDCparts = event.get<edm4eic::ReconstructedParticleCollection>("ReconstructedHcalFarForwardZDCNeutrals");
       for(const auto& zdcreco : ZDCparts){
 	// Check for associated clusters
 	if(zdcreco.getClusters()) kOtherFFTrack_Rec = true;
