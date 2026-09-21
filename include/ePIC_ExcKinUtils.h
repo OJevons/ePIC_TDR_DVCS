@@ -32,19 +32,6 @@ using ROOT::Math::VectorUtil::boost;
 // FUNCTION DEFINITIONS
 //-----------------------------------------------------------------------------------------------------------------------------
 
-// Calculate energy from momentum and mass
-// 1. Using vector structures for momentum
-// Works for ANY structure which contains Mag2() operator
-template<typename P>
-Double_t calcE(const P& mom, const Float_t& M){ 
-  return TMath::Sqrt(mom.Mag2() + TMath::Power(M,2)); 
-}
-// 2. Using separate floats for momentum components
-Double_t calcE(const Float_t& px, const Float_t& py, const Float_t& pz, const Float_t& M){ 
-  return TMath::Sqrt(TMath::Power(px,2) + TMath::Power(py,2) + TMath::Power(pz,2) + TMath::Power(M,2)); 
-}
-
-
 // Calculate Mandelstam t - BABE method using tRECO conventions
 // Uses incoming proton BEam and scattered BAryon 4-vectors
 // Another way of saying t = -(p' - p)^2
