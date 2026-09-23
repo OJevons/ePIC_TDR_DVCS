@@ -151,7 +151,7 @@ Bool_t ePIC_DVCS_TASK::applyCuts_Photon(std::vector<P3EVector> scatg){
    // KINEMATIC CUTS
    // Energy cut - beam bkg photons at low energy
    if(scatg[0].E() < 1) passCuts = kFALSE;
-   
+  
    return passCuts;
 }
 
