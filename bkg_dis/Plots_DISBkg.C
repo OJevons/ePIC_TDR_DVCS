@@ -5,9 +5,76 @@ using namespace std;
 #include <TH1.h>
 #include <TH2.h>
 
-#include "./ePIC_style.C"
+#include "../plotting/ePIC_style.C"
 
 bool kSAVE = false;
+
+double calcScalingDVCS(TString energy, TString hel, float lumi){
+  // Holding variables - No. of events generated, integrated cross-section
+  // These vary by beam settings
+  Double_t fXSint{0}, NEv{0};
+
+  if(energy == "9x130"){
+    NEv = 1e6;
+    if(hel.Contains("T")){
+      if(hel == "emhTm") fXSint = 6.91502943051105e-9;
+      else if(hel == "emhTp") fXSint = 7.00501745732437e-9;
+      else if(hel == "ephTm") fXSint = 6.92070657974331e-9;
+      else if(hel == "ephTp") fXSint = 7.00302210771398e-9;
+    }
+    else if(hel.Contains("L")){
+      if(hel == "emhTm") fXSint = 6.94645727655662e-9;
+      else if(hel == "emhTp") fXSint = 6.97831632951577e-9;
+      else if(hel == "ephTm") fXSint = 6.97649277129601e-9;
+      else if(hel == "ephTp") fXSint = 6.95324310420876e-9;
+    }
+    else fXSint = 1;
+  }
+  else if(energy == "9x275"){
+    NEv = 2.5e6;
+    if(hel.Contains("T")){
+      if(hel == "emhTm") fXSint = 7.65782690151261e-9;
+      else if(hel == "emhTp") fXSint = 7.73125664480267e-9;
+      else if(hel == "ephTm") fXSint = 7.65495841373398e-9;
+      else if(hel == "ephTp") fXSint = 7.73434664504977e-9;
+    }
+    else if(hel.Contains("L")){
+      if(hel == "emhTm") fXSint = 7.6845279388898e-9;
+      else if(hel == "emhTp") fXSint = 7.70176410396224e-9;
+      else if(hel == "ephTm") fXSint = 7.70861721413337e-9;
+      else if(hel == "ephTp") fXSint = 7.68892983520446e-9;
+    }
+    else fXSint = 1;
+  }
+
+  Double_t genlumi = NEv/fXSint;
+  Double_t scale = lumi/genlumi;
+
+  return scale;
+}
+
+double calcScalingDIS(TString energy, TString q2range, int n_gen, float lumi){
+  // Holding variables - No. of events generated, integrated cross-section
+  // These vary by beam settings
+  Double_t fXSint{0}
+
+  // Cross-sections taken from pythia8 samples
+  if(energy == "9x130"){
+    if(q2range == "lo") fXSint = 5.29241e-7;
+    else if(q2range == "hi") fXSint = 4.06442e-8;
+    else fXSint = 1;
+  }
+  else if(energy == "9x275"){
+    if(q2range == "lo") fXSint = 6.00707e-7;
+    else if(q2range == "hi") fXSint = 5.24191e-8;
+    else fXSint = 1;
+  }
+
+  Double_t genlumi = n_gen/fXSint;
+  Double_t scale = lumi/genlumi;
+
+  return scale;
+}
 
 //---------------------------------------------------------------------
 // MAIN
@@ -19,8 +86,8 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   cout<<"\n--------------------------------------"<<endl;
   cout<<"Processing DIS background plots"<<endl;
   cout<<"\tCampaign: "<<campaign<<endl;
-  cout<<"\tDVCS sample energy: "<<energy<<endl;
-  cout<<"\te- DVCS sample beam helicity: "<<hel<<endl;
+  cout<<"\tBeam energy combination: "<<energy<<endl;
+  cout<<"\tPolarization state: "<<hel<<endl;
   cout<<"--------------------------------------\n"<<endl;
 
   // Set beam energies
@@ -73,45 +140,19 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // Calculations on histograms
   // Scaling to 5fb-1
   //---------------------------------------------------------------------
-  // Calculations - SCALING FACTOR TO 5FB-1
-  Double_t fXSint{0}, NEv{0};
-  if(energy == "5x41"){
-    NEv = 1e6;
-    if(hel == "minus") fXSint = 5.02849207976343e-9;
-    if(hel == "plus") fXSint = 5.0297340302691e-9;
-  }
-  else if(energy == "10x100"){
-    NEv = 1.3e6;
-    if(hel == "minus") fXSint = 6.49238407587587e-9;
-    if(hel == "plus") fXSint = 6.49388763015155e-9;
-  }
-  else if(energy == "10x130"){
-    NEv = 1.3e6;
-    if(hel == "minus") fXSint = 6.73508639641424e-9;
-    if(hel == "plus") fXSint = 6.74022528459919e-9;
-  }
-  else if(energy == "10x250"){
-    NEv = 1e6;
-    if(hel == "minus") fXSint = 7.34712332835456e-9;
-    if(hel == "plus") fXSint = 7.34179803172751e-9;
-  }
-  else if(energy == "18x275"){
-    NEv = 1e6;
-    if(hel == "minus") fXSint = 7.96572820985694e-9;
-    if(hel == "plus") fXSint = 7.95421883076817e-9;
-  }
-  Double_t lumi = NEv/fXSint;
-  Double_t scaleTo5 = 5e15/lumi;
-
-  // Need 5fb-1 scaling factor for DIS data too
-  Double_t fXS_DISlo{5.55970643e-7};
-  Double_t fXS_DIShi{3.99634216e-8};
-  Double_t lumi_DISlo = 1e6/fXS_DISlo;
-  Double_t lumi_DIShi = 1e6/fXS_DIShi;
-  Double_t scaleTo5_DISlo = 5e15/lumi_DISlo;
-  Double_t scaleTo5_DIShi = 5e15/lumi_DIShi;
-
-  cout<<"DVCS data represents "<<lumi/1e15<<" fb-1\n\tDIS low Q2 = "<<lumi_DISlo/1e15<<" fb-1\n\tDIS high Q2 = "<<lumi_DIShi/1e15<<" fb-1\n"<<endl;
+  // 1. Scaling factor to EIC lumi
+  double EIClumi{1.};
+  if(energy == "9x130") EIClumi = 1e15;
+  else if(energy == "9x275") EIClumi = 2.5e15;
+  else EIClumi = 2.5e15;
+  Double_t scaleToEIC = calcScaling(energy, hel, EIClumi);
+  
+  // Calculations - SCALING FACTOR TO EIC luminosities
+  scale_DVCS = calcScalingDVCS(energy, hel, EIClumi);
+  scale_DISLo = calcScalingDIS(energy, "lo", int n_gen, EIClumi);
+  scale_DISHi = calcScalingDIS(energy, "hi", int n_gen, EIClumi);
+  
+  //cout<<"DVCS data represents "<<lumi/1e15<<" fb-1\n\tDIS low Q2 = "<<lumi_DISlo/1e15<<" fb-1\n\tDIS high Q2 = "<<lumi_DIShi/1e15<<" fb-1\n"<<endl;
 
   //---------------------------------------------------------------------
   // Detector efficiency corrections
@@ -179,13 +220,13 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   gStyle->SetCanvasPreferGL(kTRUE);
   
   // Draw options and scaling
-  h_t_Truth->Scale(scaleTo5);
-  h_t_GoodCorr->Scale(scaleTo5);
-  h_t_GoodReco->Scale(scaleTo5);
-  h_tDISLQ2_B0Rec->Scale(scaleTo5_DISlo);
-  h_tDISLQ2_RPRec->Scale(scaleTo5_DISlo);
-  h_tDISHQ2_B0Rec->Scale(scaleTo5_DIShi);
-  h_tDISHQ2_RPRec->Scale(scaleTo5_DIShi);
+  h_t_Truth->Scale(scale_DVCS);
+  h_t_GoodCorr->Scale(scale_DVCS);
+  h_t_GoodReco->Scale(scale_DVCS);
+  h_tDISLQ2_B0Rec->Scale(scale_DISLo);
+  h_tDISLQ2_RPRec->Scale(scale_DISLo);
+  h_tDISHQ2_B0Rec->Scale(scale_DISHi);
+  h_tDISHQ2_RPRec->Scale(scale_DISHi);
   
   h_t_B0Rec->Scale(scaleTo5);
   h_t_B0Rec->SetLineColor(kP6Blue);
@@ -257,7 +298,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_DISlo->AddEntry(h_tDISLQ2_B0Rec,"Raw reco. DIS","lp");
   lt_DISlo->Draw();
   // Save figure
-  if(kSAVE) ct_DISlo->SaveAs("figs/DISComp_" + energy +"_t_Q2lo.png");
+  if(kSAVE) ct_DISlo->SaveAs("../figs/DISComp_" + energy +"_t_Q2lo.png");
   
   
   // CANVAS - DVCS vs DIS high Q2 ONLY
@@ -285,7 +326,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_DIShi->AddEntry(h_tDISHQ2_B0Rec,"Raw reco. DIS","lp");
   lt_DIShi->Draw();
   // Save figure
-  if(kSAVE) ct_DIShi->SaveAs("figs/DISComp_" + energy +"_t_Q2hi.png");
+  if(kSAVE) ct_DIShi->SaveAs("../figs/DISComp_" + energy +"_t_Q2hi.png");
   
   
   // CANVAS - DVCS vs DIS both energies
@@ -316,7 +357,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_DISall->AddEntry(h_tDISHQ2_B0Rec,"Raw reco. DIS - Q^{2} < 10 GeV^{2}","lp");
   lt_DISall->Draw();
   // Save figure
-  if(kSAVE) ct_DISall->SaveAs("figs/DISComp_" + energy +"_t_Q2hi.png");
+  if(kSAVE) ct_DISall->SaveAs("../figs/DISComp_" + energy +"_t_Q2hi.png");
   
 
   // CANVAS - eXBE calculation
@@ -352,7 +393,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_DISeg->AddEntry(h_tDISHQ2_LCRec,"Raw reco. DIS - Q^{2} < 10 GeV^{2}","lp");
   lt_DISeg->Draw();
   // Save figure
-  if(kSAVE) ct_DISeg->SaveAs("figs/DISComp_" + energy +"_t_Q2hi.png");
+  if(kSAVE) ct_DISeg->SaveAs("../figs/DISComp_" + energy +"_t_Q2hi.png");
 
 
   // CANVAS - Ratios DIS/DVCS
@@ -501,7 +542,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   TLatex* tePICLabel_RatLC = new TLatex(0.12, 1.1, "DIS - all/DVCS - eXBE");
   tePICLabel_RatLC->SetTextSize(0.14);
   tePICLabel_RatLC->Draw("same");
-  if(kSAVE) ct_Ratio->SaveAs("figs/DISComp_" + energy +"_Ratio.png");
+  if(kSAVE) ct_Ratio->SaveAs("../figs/DISComp_" + energy +"_Ratio.png");
 
   
   // Print ratios
