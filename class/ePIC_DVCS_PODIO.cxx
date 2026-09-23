@@ -151,7 +151,7 @@ Bool_t ePIC_DVCS_TASK::applyCuts_Photon(std::vector<P3EVector> scatg){
    // KINEMATIC CUTS
    // Energy cut - beam bkg photons at low energy
    if(scatg[0].E() < 1) passCuts = kFALSE;
-
+   
    return passCuts;
 }
 
@@ -561,7 +561,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   DVCSBinning binning;
   // NOTE: change this if your binning file lives elsewhere or is named per
   //       configuration, e.g. "bins_"+camp+"_"+energy+".txt".
-  TString sBinFile = "./binning/bins_"+sEnergy+".txt";
+  //TString sBinFile = "./binning/bins_"+sEnergy+".txt";
+  TString sBinFile = "./binning/bins_9x130_q2int_tint.txt";
   if(!binning.load(sBinFile.Data())){
     std::cerr << "[ePIC_DVCS] FATAL: could not load binning from " << sBinFile << std::endl;
     return;
