@@ -15,14 +15,14 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   std::cout<<std::endl;
 
   // Check pathing
-  char* DVCS_ep_Path_char;
-  DVCS_ep_Path_char = getenv("DVCS_ep");
-  if (DVCS_ep_Path_char == nullptr) {
-      cerr << "!!!!! ERROR !!!!! DVCS_ep environment variable not set !!!!! ERROR !!!!!" << endl;
-      cerr << "!!!!! ERROR !!!!! Source the setup.sh (or .csh) script and rerun !!!!! ERROR !!!!!" << endl;
-      exit(0);
-  }
-  TString DVCS_ep_Path(DVCS_ep_Path_char);
+  //char* DVCS_ep_Path_char;
+  //DVCS_ep_Path_char = getenv("DVCS_ep");
+  //if (DVCS_ep_Path_char == nullptr) {
+  //    cerr << "!!!!! ERROR !!!!! DVCS_ep environment variable not set !!!!! ERROR !!!!!" << endl;
+  //    cerr << "!!!!! ERROR !!!!! Source the setup.sh (or .csh) script and rerun !!!!! ERROR !!!!!" << endl;
+  //    exit(0);
+  //}
+  //TString DVCS_ep_Path(DVCS_ep_Path_char);
   
   // Initialize DVCS analysis object
   std::cout<<"Settings:"<<std::endl;
@@ -32,15 +32,18 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   
   ePIC_DVCS_TASK *objDVCS = new ePIC_DVCS_TASK(camp,energy,sett);
   
-  TString sInFileList = DVCS_ep_Path+"/filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
+  //TString sInFileList = DVCS_ep_Path+"/filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
+  TString sInFileList = "./filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
   objDVCS->setInFileList(sInFileList);
 
   // Output file name
   // DO NOT INCLUDE ".root" EXTENSION
   TString sOutFileName;
-  if(comment=="X") sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
-  else sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
-   
+  //if(comment=="X") sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
+  //else sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
+  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
+  else sOutFileName = "./rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
+  
   objDVCS->setOutFileName(sOutFileName);
   
   // Set DVCS cut values
