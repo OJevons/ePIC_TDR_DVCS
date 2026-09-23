@@ -14,7 +14,7 @@ bool kSAVE = false;
 // 
 // DIS physics background plots to DVCS analysis
 //---------------------------------------------------------------------
-void Plots_DISBkg(TString campaign = "26.02.0", TString energy = "10x130", TString hel = "minus"){
+void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TString hel = "emhTm"){
   // Print plot settings
   cout<<"\n--------------------------------------"<<endl;
   cout<<"Processing DIS background plots"<<endl;
@@ -25,29 +25,21 @@ void Plots_DISBkg(TString campaign = "26.02.0", TString energy = "10x130", TStri
 
   // Set beam energies
   Float_t fEBeam{0}, fPBeam{0};
-  if(energy == "5x41"){
-    fEBeam = 5.;
-    fPBeam = 41.;
-  }
-  else if(energy == "10x100" || energy == "10x130" || energy == "10x250"){
-    fEBeam = 10.;
-    if(energy == "10x100") fPBeam = 100.;
-    if(energy == "10x130") fPBeam = 130.;
-    if(energy == "10x250") fPBeam = 250.;
-  }
-  else if(energy == "18x275"){
-    fEBeam = 18.;
-    fPBeam = 275;
-  }
-  else{
-    cout<<"Invalid beam energy."<<endl;
+  if(energy != "9x130" && energy != "9x275"){
+    cout<<"Invalid beam energy for early science!"<<endl;
     return;
   }
+  else{
+    fEBeam = 9.0;
 
+    if(energy == "9x130") fPBeam = 130.;
+    else if(energy == "9x275") fPBeam = 275.;
+  }
+  
   //--------------------------------------------------------------------
   // Load histograms from file - DVCS baseline
   //--------------------------------------------------------------------
-  TString sDVCS = "$EIC_WORK_DIR/DVCS_Analysis/RootFiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TString sDVCS = "../rootfiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
   TFile* fDVCS = TFile::Open(sDVCS);
   // Mandelstam t distributions
   // MC truth
@@ -66,11 +58,13 @@ void Plots_DISBkg(TString campaign = "26.02.0", TString energy = "10x130", TStri
   // "Low Q2" -> minQ2=1
   // "High Q2" -> minQ2=10
   //--------------------------------------------------------------------
-  TFile* fDISLQ2 = TFile::Open("$EIC_WORK_DIR/DVCS_Analysis/RootFiles/ePIC_DIS_26.02.0_10x100_minQ2=1_MoreVetoes.root");
+  TString sDISLQ2 = "../rootfiles/ePIC_DIS_"+campaign+"_"+energy+"_minQ2=1.root";
+  TFile* fDISLQ2 = TFile::Open(sDISLQ2);
   TH1D* h_tDISLQ2_B0Rec = (TH1D*)fDISLQ2->Get("t_b0reco");
   TH1D* h_tDISLQ2_RPRec = (TH1D*)fDISLQ2->Get("t_rpreco");
   TH1D* h_tDISLQ2_LCRec = (TH1D*)fDISLQ2->Get("t_lcreco");
-  TFile* fDISHQ2 = TFile::Open("$EIC_WORK_DIR/DVCS_Analysis/RootFiles/ePIC_DIS_26.02.0_10x100_minQ2=10_MoreVetoes.root");
+  TString sDISHQ2 = "../rootfiles/ePIC_DIS_"+campaign+"_"+energy+"_minQ2=10.root";
+  TFile* fDISHQ2 = TFile::Open(sDISLQ2);
   TH1D* h_tDISHQ2_B0Rec = (TH1D*)fDISHQ2->Get("t_b0reco");
   TH1D* h_tDISHQ2_RPRec = (TH1D*)fDISHQ2->Get("t_rpreco");
   TH1D* h_tDISHQ2_LCRec = (TH1D*)fDISHQ2->Get("t_lcreco");
