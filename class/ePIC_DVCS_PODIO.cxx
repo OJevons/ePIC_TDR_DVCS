@@ -620,11 +620,18 @@ void ePIC_DVCS_TASK::doAnalysis(){
   bookGrid(h_TPhiResDiff_RP,  DVCSBinning::kRP, "tphi_rpres",  "#delta#phi_{h}(Reco - RP) [deg]", 450, -45., 45.);
 
   bookGrid(h_Q2Diff_B0, DVCSBinning::kB0, "q2diff_b0", "Q^{2}(MCA) [GeV^{2}]", 550,   0., 110.);
-  bookGrid(h_xBDiff_B0, DVCSBinning::kB0, "xbdiff_b0", "x_{B}",              10000,   0.,   1.);
+  bookGrid(h_xBDiff_B0, DVCSBinning::kB0, "xbdiff_b0", "x_{B}(MCA)",           10000,   0.,   1.);
   bookGrid(h_tDiff_B0,  DVCSBinning::kB0, "tdiff_b0",  "|t|(MCA) [GeV^{2}]",   20,   0.,   2.);
   bookGrid(h_Q2Diff_RP, DVCSBinning::kRP, "q2diff_rp", "Q^{2}(MCA) [GeV^{2}]", 550,   0., 110.);
-  bookGrid(h_xBDiff_RP, DVCSBinning::kRP, "xbdiff_rp", "x_{B}",              10000,   0.,   1.);
+  bookGrid(h_xBDiff_RP, DVCSBinning::kRP, "xbdiff_rp", "x_{B}(MCA)",           10000,   0.,   1.);
   bookGrid(h_tDiff_RP,  DVCSBinning::kRP, "tdiff_rp",  "|t|(MCA) [GeV^{2}]",   20,   0.,   2.);
+
+  bookGrid(h_Q2Rec_B0, DVCSBinning::kB0, "q2rec_b0", "Q^{2}(Rec) [GeV^{2}]", 550,   0., 110.);
+  bookGrid(h_xBRec_B0, DVCSBinning::kB0, "xbrec_b0", "x_{B}(Rec)",           10000,   0.,   1.);
+  bookGrid(h_tRec_B0,  DVCSBinning::kB0, "trec_b0",  "|t|(Rec) [GeV^{2}]",   20,   0.,   2.);
+  bookGrid(h_Q2Rec_RP, DVCSBinning::kRP, "q2rec_rp", "Q^{2}(Rec) [GeV^{2}]", 550,   0., 110.);
+  bookGrid(h_xBRec_RP, DVCSBinning::kRP, "xbrec_rp", "x_{B}(Rec)",           10000,   0.,   1.);
+  bookGrid(h_tRec_RP,  DVCSBinning::kRP, "trec_rp",  "|t|(Rec) [GeV^{2}]",   20,   0.,   2.);
 
   // 2D xB:|t| per Q2 bin
   for(int q{0}; q<nQ2bins; q++)
@@ -1189,6 +1196,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  h_Q2Diff_B0[binq2][binxB][bint]->Fill(q2_acc);
 	  h_xBDiff_B0[binq2][binxB][bint]->Fill(xB_acc);
 	  h_tDiff_B0[binq2][binxB][bint]->Fill(t_acc);
+
+	  h_Q2Rec_B0[binq2][binxB][bint]->Fill(q2_rec);
+	  h_xBRec_B0[binq2][binxB][bint]->Fill(xB_rec);
+	  h_tRec_B0[binq2][binxB][bint]->Fill(t_rec);
 	}
 
 	h_Q2_ExcReco->Fill(calcQ2_Elec(beame4, scate4_rec[0]), TMath::Power(TMath::Sin(tphi_rec),2));
@@ -1254,6 +1265,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  h_Q2Diff_RP[binq2][binxB][bint]->Fill(q2_acc);
 	  h_xBDiff_RP[binq2][binxB][bint]->Fill(xB_acc);
 	  h_tDiff_RP[binq2][binxB][bint]->Fill(t_acc);
+
+	  h_Q2Rec_RP[binq2][binxB][bint]->Fill(q2_rec);
+	  h_xBRec_RP[binq2][binxB][bint]->Fill(xB_rec);
+	  h_tRec_RP[binq2][binxB][bint]->Fill(t_rec);
 	}
 	
 	//cout<<"[DEBUG] 3D diff. histos filled"<<endl;
@@ -1671,6 +1686,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Q2Diff_B0[q][x][t]->Write();
 	h_xBDiff_B0[q][x][t]->Write();
 	h_tDiff_B0[q][x][t]->Write();
+	h_Q2Rec_B0[q][x][t]->Write();
+	h_xBRec_B0[q][x][t]->Write();
+	h_tRec_B0[q][x][t]->Write();
 	h_TPhiDiff_B0MC[q][x][t]->Write();
 	h_TPhiDiff_B0Acc[q][x][t]->Write();
 	h_TPhiDiff_B0Reco[q][x][t]->Write();
@@ -1683,6 +1701,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Q2Diff_RP[q][x][t]->Write();
 	h_xBDiff_RP[q][x][t]->Write();
 	h_tDiff_RP[q][x][t]->Write();
+	h_Q2Rec_RP[q][x][t]->Write();
+	h_xBRec_RP[q][x][t]->Write();
+	h_tRec_RP[q][x][t]->Write();
 	h_TPhiDiff_RPMC[q][x][t]->Write();
 	h_TPhiDiff_RPAcc[q][x][t]->Write();
 	h_TPhiDiff_RPReco[q][x][t]->Write();
