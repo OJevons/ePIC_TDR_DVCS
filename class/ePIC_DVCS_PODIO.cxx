@@ -561,8 +561,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   DVCSBinning binning;
   // NOTE: change this if your binning file lives elsewhere or is named per
   //       configuration, e.g. "bins_"+camp+"_"+energy+".txt".
-  //TString sBinFile = "./binning/bins_"+sEnergy+".txt";
-  TString sBinFile = "./binning/bins_9x130_q2int_tint.txt";
+  TString sBinFile = "./binning/bins_"+sEnergy+".txt";
+  //TString sBinFile = "./binning/bins_9x130_q2int_tint.txt";
   if(!binning.load(sBinFile.Data())){
     std::cerr << "[ePIC_DVCS] FATAL: could not load binning from " << sBinFile << std::endl;
     return;
@@ -578,10 +578,12 @@ void ePIC_DVCS_TASK::doAnalysis(){
   // B0 region (B0 binning)
   H1Grid h_TPhiDiff_B0Acc, h_TPhiDiff_B0Reco, h_TPhiResDiff_B0;
   H1Grid h_Q2Diff_B0, h_xBDiff_B0, h_tDiff_B0;
+  H1Grid h_Q2Rec_B0, h_xBRec_B0, h_tRec_B0;
   // RP region (RP binning)
   H1Grid h_TPhiDiff_RPAcc, h_TPhiDiff_RPReco, h_TPhiResDiff_RP;
   H1Grid h_Q2Diff_RP, h_xBDiff_RP, h_tDiff_RP;
-
+  H1Grid h_Q2Rec_RP, h_xBRec_RP, h_tRec_RP;
+ 
   // xB:t 2D distribution - 1 per Q2 bin (continuous, unchanged)
   std::vector<TH2D*> h_2D_xVtDiff_RP(nQ2bins, nullptr);
 
