@@ -20,7 +20,7 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   
   ePIC_DVCS_TASK *objDIS = new ePIC_DVCS_TASK(camp,energy,sett);
   
-  TString sInFileList = "./bkg_dis/inputFileList_DIS_"+camp+"_"+energy+"_minQ2="+sett+".list";
+  TString sInFileList = "./bkg_dis/inputFileList_DIS_"+camp+"_"+energy+"_"+sett+".list";
   objDIS->setInFileList(sInFileList);
 
   // Output file name
