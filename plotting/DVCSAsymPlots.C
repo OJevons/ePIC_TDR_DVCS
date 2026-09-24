@@ -6,9 +6,9 @@ using namespace std;
 #include <TH2.h>
 
 // Ragged Q2/xB/|t| binning reader - the SAME one used by the analysis.
-#include "DVCSBinning.hh"
+#include "../include/DVCSBinning.hh"
 // ePIC plotting style
-#include "../DVCS_ep/ePIC_style.C"
+#include "./ePIC_style.C"
 
 // DECIDE ON OUTPUT BEHAVIOUR
 Bool_t kPRINT{kFALSE};
@@ -98,15 +98,15 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
     return;
   }
 
-  TString path = "$EIC_WORK_DIR/DVCS_Analysis/RootFiles/";
+  TString path = "../rootfiles/";
   //path = "/scratch/oliver/";
-  TString sInMM = path + "ePIC_DVCS_"+campaign+"_"+energy+"_emh"+haddir+"m.root";
+  TString sInMM = path + "ePIC_DVCS_"+campaign+"_"+energy+"_emh"+haddir+"m_diff.root";
   gSystem->ExpandPathName(sInMM);
-  TString sInMP = path + "ePIC_DVCS_"+campaign+"_"+energy+"_emh"+haddir+"p.root";
+  TString sInMP = path + "ePIC_DVCS_"+campaign+"_"+energy+"_emh"+haddir+"p_diff.root";
   gSystem->ExpandPathName(sInMP);
-  TString sInPM = path + "ePIC_DVCS_"+campaign+"_"+energy+"_eph"+haddir+"m.root";
+  TString sInPM = path + "ePIC_DVCS_"+campaign+"_"+energy+"_eph"+haddir+"m_diff.root";
   gSystem->ExpandPathName(sInPM);
-  TString sInPP = path + "ePIC_DVCS_"+campaign+"_"+energy+"_eph"+haddir+"p.root";
+  TString sInPP = path + "ePIC_DVCS_"+campaign+"_"+energy+"_eph"+haddir+"p_diff.root";
   gSystem->ExpandPathName(sInPP);
 
   // Check files exist  
@@ -146,7 +146,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
   // NOTE: keep bins.txt reachable from the run directory, exactly like the
   //       analysis. Change the name here if it is configuration-specific.
   DVCSBinning binning;
-  TString sBinFile = "bins_"+energy+".txt";
+  TString sBinFile = "../binning/bins_"+energy+".txt";
   if(!binning.load(sBinFile.Data())){
     cout<<"[DVCSAsymPlots] FATAL: could not load bins.txt"<<endl;
     return;
@@ -464,9 +464,27 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  h_TDiff_Tot->Add((TH1D*)fInPM->Get(Form("tdiff_%s[%d][%d][%d]",preg,q,x,t)));
 	  h_TDiff_Tot->Add((TH1D*)fInPP->Get(Form("tdiff_%s[%d][%d][%d]",preg,q,x,t)));
 	  float tmean = h_TDiff_Tot->GetMean();
+
+	  TH1D* h_Q2Rec_Tot = (TH1D*)fInMM->Get(Form("q2rec_%s[%d][%d][%d]",preg,q,x,t))->Clone("q2tot");
+	  h_Q2Rec_Tot->Add((TH1D*)fInMP->Get(Form("q2rec_%s[%d][%d][%d]",preg,q,x,t)));
+	  h_Q2Rec_Tot->Add((TH1D*)fInPM->Get(Form("q2rec_%s[%d][%d][%d]",preg,q,x,t)));
+	  h_Q2Rec_Tot->Add((TH1D*)fInPP->Get(Form("q2rec_%s[%d][%d][%d]",preg,q,x,t)));
+	  float q2recmean = h_Q2Rec_Tot->GetMean();
+	  TH1D* h_XBRec_Tot = (TH1D*)fInMM->Get(Form("xbrec_%s[%d][%d][%d]",preg,q,x,t))->Clone("xbtot");
+	  h_XBRec_Tot->Add((TH1D*)fInMP->Get(Form("xbrec_%s[%d][%d][%d]",preg,q,x,t)));
+	  h_XBRec_Tot->Add((TH1D*)fInPM->Get(Form("xbrec_%s[%d][%d][%d]",preg,q,x,t)));
+	  h_XBRec_Tot->Add((TH1D*)fInPP->Get(Form("xbrec_%s[%d][%d][%d]",preg,q,x,t)));
+	  float xbrecmean = h_XBRec_Tot->GetMean();
+	  TH1D* h_TRec_Tot = (TH1D*)fInMM->Get(Form("trec_%s[%d][%d][%d]",preg,q,x,t))->Clone("ttot");
+	  h_TRec_Tot->Add((TH1D*)fInMP->Get(Form("trec_%s[%d][%d][%d]",preg,q,x,t)));
+	  h_TRec_Tot->Add((TH1D*)fInPM->Get(Form("trec_%s[%d][%d][%d]",preg,q,x,t)));
+	  h_TRec_Tot->Add((TH1D*)fInPP->Get(Form("trec_%s[%d][%d][%d]",preg,q,x,t)));
+	  float trecmean = h_TRec_Tot->GetMean();
 	  
-	  if(region == DVCSBinning::kB0) cout<<"\nHigh-t: ["<<q<<"]["<<x<<"]["<<t<<"] = ["<<q2mean<<"]["<<xbmean<<"]["<<tmean<<"]"<<endl;
-	  else cout<<"\nLow-t: ["<<q<<"]["<<x<<"]["<<t<<"] = ["<<q2mean<<"]["<<xbmean<<"]["<<tmean<<"]"<<endl;
+	  if(region == DVCSBinning::kB0) cout<<"\nHigh-t: ["<<q<<"]["<<x<<"]["<<t<<"] = ["<<q2mean<<"]["<<xbmean<<"]["<<tmean<<"] (accepted) \n\t\t["
+					     <<q2recmean<<"]["<<xbrecmean<<"]["<<trecmean<<"] (reconstructed)"<<endl;
+	  else cout<<"\nLow-t: ["<<q<<"]["<<x<<"]["<<t<<"] = ["<<q2mean<<"]["<<xbmean<<"]["<<tmean<<"] (accepted) \n\t\t["
+		   <<q2recmean<<"]["<<xbrecmean<<"]["<<trecmean<<"] (reconstructed)"<<endl;
 	  cout<<"  - Total raw events (scaled to "<<EIClumi/1e15<<" fb-1) = "<<counts<<endl;
 	  
 	  cout<<"  - A_LU (raw rec.): [";
@@ -529,7 +547,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
   } // rof (Q2 bins)
 
   //std::cout<<"...Cleaning up files..."<<std::endl;
-  TString filePlots = "$EIC_WORK_DIR/DVCS_Analysis/Plots/DVCSAsymPlots_" + campaign + "_" + energy + "_" + haddir + ".pdf";
+  TString filePlots = "../figs/DVCSAsymPlots_" + campaign + "_" + energy + "_" + haddir + ".pdf";
   //std::cout<<"Moving plots to "<<filePlots<<std::endl;
   gSystem->Exec("pdfunite DVCSasym_temp*.pdf " + filePlots);
   gSystem->Exec("rm DVCSasym_temp*.pdf");
