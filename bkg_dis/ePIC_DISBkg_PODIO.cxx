@@ -553,6 +553,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
   
   TH1D* h_PTMepg_Rec  = new TH1D("ptmepg_rec",";P_{T, miss, e'p'#gamma}(Reco.) [GeV]",300,-5.,10.);
 
+  // 5) Q2 distribution
+  TH1D* h_Q2_MC   = new TH1D("q2_mc"  , "Counts/0.2 GeV^{2};Q^{2}(MC) [GeV^{2}]"     , 550, 0., 110.);
+  TH1D* h_Q2_Reco = new TH1D("q2_reco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 550, 0., 110.);
+  
   //---------------------------------------------------------
   // Loop over files in list
   //---------------------------------------------------------
@@ -936,11 +940,14 @@ void ePIC_DVCS_TASK::doAnalysis(){
       //cout<<"[DEBUG]: EVENT COUNTER FILLED"<<endl;
       
       // Look at all reco. for eta
-      for(int ele_ind{0}; ele_ind<scate4_rec.size(); ele_ind++)	h_eta_RPe->Fill(scate4_rec[ele_ind].Eta());  // Electrons
+      for(int ele_ind{0}; ele_ind<scate4_rec.size(); ele_ind++) h_eta_RPe->Fill(scate4_rec[ele_ind].Eta());  // Electrons
       for(int pho_ind{0}; pho_ind<scatg4_rec.size(); pho_ind++)	h_eta_RPg->Fill(scatg4_rec[pho_ind].Eta());  // Photons
       for(int pro_ind{0}; pro_ind<scatp4_rec.size(); pro_ind++)	h_eta_RPp->Fill(scatp4_rec[pro_ind].Eta());  // B0 protons
       for(int pro_ind{0}; pro_ind<scatp4_rom.size(); pro_ind++)	h_eta_RPPp->Fill(scatp4_rom[pro_ind].Eta()); // RP tracks - assume proton
 
+      if(applyCuts_Electron(beame4, scate4_gen)) h_Q2_MC->Fill(calcQ2_Elec(beame4, scate4_gen[0]));
+      if(applyCuts_Electron(beame4, scate4_rec)) h_Q2_Reco->Fill(calcQ2_Elec(beame4, scate4_rec[0]));
+	  
       //cout<<"[DEBUG]: ALL RECO FILLED"<<endl;
 
       // Count no. of events which pass cuts - MC only
@@ -1251,6 +1258,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_PTMeg_Rec->Write();
   h_EMeg_Rec->Write();
   h_PTMepg_Rec->Write();
-
+  // Q2
+  h_Q2_MC->Write();
+  h_Q2_Reco->Write();
+      
   return;
 }
