@@ -70,7 +70,7 @@ double calcScalingDIS(TString energy, TString q2range, int n_gen, float lumi){
     else fXSint = 1;
   }
 
-  Double_t genlumi = n_gen/fXSint;
+  Double_t genlumi = (float)n_gen/fXSint;
   Double_t scale = lumi/genlumi;
 
   return scale;
@@ -106,7 +106,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   //--------------------------------------------------------------------
   // Load histograms from file - DVCS baseline
   //--------------------------------------------------------------------
-  TString sDVCS = "../rootfiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TString sDVCS = "../rootfiles/ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+"_simple.root";
   TFile* fDVCS = TFile::Open(sDVCS);
   // Mandelstam t distributions
   // MC truth
@@ -141,16 +141,19 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // Scaling to 5fb-1
   //---------------------------------------------------------------------
   // 1. Scaling factor to EIC lumi
+  // -> SET LUMINOSITY TO SCALE TO
   double EIClumi{1.};
   if(energy == "9x130") EIClumi = 1e15;
   else if(energy == "9x275") EIClumi = 2.5e15;
   else EIClumi = 2.5e15;
-  Double_t scaleToEIC = calcScaling(energy, hel, EIClumi);
   
   // Calculations - SCALING FACTOR TO EIC luminosities
+  // -> DIS: NEED TO KNOW NO. OF GENERATED EVENTS
   scale_DVCS = calcScalingDVCS(energy, hel, EIClumi);
-  scale_DISLo = calcScalingDIS(energy, "lo", int n_gen, EIClumi);
-  scale_DISHi = calcScalingDIS(energy, "hi", int n_gen, EIClumi);
+  int n_gen_lo = (TH1D*)fDISLQ2->Get("count")->GetEntries();
+  scale_DISLo = calcScalingDIS(energy, "lo", n_gen_lo, EIClumi);
+  int n_gen_hi = (TH1D*)fDISHQ2->Get("count")->GetEntries();
+  scale_DISHi = calcScalingDIS(energy, "hi", n_gen_hi, EIClumi);
   
   //cout<<"DVCS data represents "<<lumi/1e15<<" fb-1\n\tDIS low Q2 = "<<lumi_DISlo/1e15<<" fb-1\n\tDIS high Q2 = "<<lumi_DIShi/1e15<<" fb-1\n"<<endl;
 
