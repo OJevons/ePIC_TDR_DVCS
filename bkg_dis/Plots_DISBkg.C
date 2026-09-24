@@ -135,7 +135,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   TH1D* h_tDISHQ2_B0Rec = (TH1D*)fDISHQ2->Get("t_b0reco");
   TH1D* h_tDISHQ2_RPRec = (TH1D*)fDISHQ2->Get("t_rpreco");
   TH1D* h_tDISHQ2_LCRec = (TH1D*)fDISHQ2->Get("t_lcreco");
- 
+
   //---------------------------------------------------------------------
   // Calculations on histograms
   // Scaling to 5fb-1
@@ -157,7 +157,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   int n_gen_hi = count_hq2->GetEntries();
   float scale_DISHi = calcScalingDIS(energy, "hi", n_gen_hi, EIClumi);
   
-  //cout<<"DVCS data represents "<<lumi/1e15<<" fb-1\n\tDIS low Q2 = "<<lumi_DISlo/1e15<<" fb-1\n\tDIS high Q2 = "<<lumi_DIShi/1e15<<" fb-1\n"<<endl;
+  cout<<"DVCS data represents "<<1./scale_DVCS<<" fb-1\n\tDIS low Q2 = "<<1./scale_DISLo<<" fb-1\n\tDIS high Q2 = "<<1./scale_DISHi<<" fb-1\n"<<endl;
 
   //---------------------------------------------------------------------
   // Detector efficiency corrections
@@ -556,6 +556,23 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
     cout<<"["<<h_t_Truth->GetBinLowEdge(bin)<<" - "<<h_t_Truth->GetBinLowEdge(bin+1)<<"]\t"<<hRatio_B0->GetBinContent(bin)<<"\t"<<hRatio_RP->GetBinContent(bin)<<"\t"<<hRatio_Corr->GetBinContent(bin)<<endl;
   }
 
+
+  cout<<"\n\nEFFECT OF CUTS:"<<endl;
+  TH1D* PassCuts_LQ2 = (TH1D*)fDISLQ2->Get("passcuts_rec")->Clone("pc_lq2");
+  TH1D* PassCuts_HQ2 = (TH1D*)fDISHQ2->Get("passcuts_rec")->Clone("pc_hq2");
+
+  for(int bin{1}; bin<PassCuts_LQ2->GetNbinsX(); bin++){
+    const char* label = PassCuts_LQ2->GetXaxis()->GetBinLabel(bin);
+    int n_lq2 = PassCuts_LQ2->GetBinContent(bin);
+    int n_hq2 = PassCuts_HQ2->GetBinContent(bin);
+
+    int tot_lq2 = count_lq2->Integral();
+    int tot_hq2 = count_hq2->Integral();
+    
+    cout<<"["<<label<<"]\t Low Q2 = "<<n_lq2<<"/"<<tot_lq2<<" = "<<100*(float)n_lq2/tot_lq2<<" \%\t"
+	<<"\t High Q2 = "<<n_hq2<<"/"<<tot_hq2<<" = "<<100*(float)n_hq2/tot_hq2<<" \%"<<endl;
+  }
+    
   // Close canvases
   /*ct_DISlo->Close();
   ct_DIShi->Close();
