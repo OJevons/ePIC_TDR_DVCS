@@ -56,7 +56,7 @@ double calcScalingDVCS(TString energy, TString hel, float lumi){
 double calcScalingDIS(TString energy, TString q2range, int n_gen, float lumi){
   // Holding variables - No. of events generated, integrated cross-section
   // These vary by beam settings
-  Double_t fXSint{0}
+  Double_t fXSint{0};
 
   // Cross-sections taken from pythia8 samples
   if(energy == "9x130"){
@@ -149,11 +149,13 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   
   // Calculations - SCALING FACTOR TO EIC luminosities
   // -> DIS: NEED TO KNOW NO. OF GENERATED EVENTS
-  scale_DVCS = calcScalingDVCS(energy, hel, EIClumi);
-  int n_gen_lo = (TH1D*)fDISLQ2->Get("count")->GetEntries();
-  scale_DISLo = calcScalingDIS(energy, "lo", n_gen_lo, EIClumi);
-  int n_gen_hi = (TH1D*)fDISHQ2->Get("count")->GetEntries();
-  scale_DISHi = calcScalingDIS(energy, "hi", n_gen_hi, EIClumi);
+  float scale_DVCS = calcScalingDVCS(energy, hel, EIClumi);
+  TH1D* count_lq2 = (TH1D*)fDISLQ2->Get("count");
+  int n_gen_lo = count_lq2->GetEntries();
+  float scale_DISLo = calcScalingDIS(energy, "lo", n_gen_lo, EIClumi);
+  TH1D* count_hq2 = (TH1D*)fDISHQ2->Get("count");
+  int n_gen_hi = count_hq2->GetEntries();
+  float scale_DISHi = calcScalingDIS(energy, "hi", n_gen_hi, EIClumi);
   
   //cout<<"DVCS data represents "<<lumi/1e15<<" fb-1\n\tDIS low Q2 = "<<lumi_DISlo/1e15<<" fb-1\n\tDIS high Q2 = "<<lumi_DIShi/1e15<<" fb-1\n"<<endl;
 
@@ -231,21 +233,21 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_tDISHQ2_B0Rec->Scale(scale_DISHi);
   h_tDISHQ2_RPRec->Scale(scale_DISHi);
   
-  h_t_B0Rec->Scale(scaleTo5);
+  h_t_B0Rec->Scale(scale_DVCS);
   h_t_B0Rec->SetLineColor(kP6Blue);
   h_t_B0Rec->SetLineWidth(2);
   h_t_B0Rec->SetMarkerColor(kP6Blue);
   h_t_B0Rec->SetMarkerStyle(24);
   h_t_B0Rec->SetMarkerSize(2);
 
-  h_t_RPRec->Scale(scaleTo5);
+  h_t_RPRec->Scale(scale_DVCS);
   h_t_RPRec->SetLineColor(kP6Blue);
   h_t_RPRec->SetLineWidth(2);
   h_t_RPRec->SetMarkerColor(kP6Blue);
   h_t_RPRec->SetMarkerStyle(25);
   h_t_RPRec->SetMarkerSize(2);
 
-  h_t_LCRec->Scale(scaleTo5);
+  h_t_LCRec->Scale(scale_DVCS);
   h_t_LCRec->SetLineColor(kP6Blue);
   h_t_LCRec->SetLineWidth(2);
   h_t_LCRec->SetMarkerColor(kP6Blue);
@@ -364,8 +366,8 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   
 
   // CANVAS - eXBE calculation
-  h_tDISLQ2_LCRec->Scale(scaleTo5_DISlo);
-  h_tDISHQ2_LCRec->Scale(scaleTo5_DIShi);
+  h_tDISLQ2_LCRec->Scale(scale_DISLo);
+  h_tDISHQ2_LCRec->Scale(scale_DISHi);
   
   h_tDISLQ2_LCRec->SetLineColor(kP6Grape);
   h_tDISLQ2_LCRec->SetLineWidth(2);
