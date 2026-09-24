@@ -33,7 +33,7 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   ePIC_DVCS_TASK *objDVCS = new ePIC_DVCS_TASK(camp,energy,sett);
   
   //TString sInFileList = DVCS_ep_Path+"/filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
-  TString sInFileList = "./filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
+  TString sInFileList = "./filelists/"+camp+"_"+energy+"_"+sett+"/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
   objDVCS->setInFileList(sInFileList);
 
   // Output file name
@@ -41,7 +41,7 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   TString sOutFileName;
   //if(comment=="X") sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
   //else sOutFileName = DVCS_ep_Path+"rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
-  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
+  if(comment=="X") sOutFileName = "./rootfiles/"+camp+"_"+energy+"_"+sett+"/ePIC_DVCS_"+camp+"_"+energy+"_"+sett;
   else sOutFileName = "./rootfiles/ePIC_DVCS_"+camp+"_"+energy+"_"+comment;
   
   objDVCS->setOutFileName(sOutFileName);

@@ -20,13 +20,13 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   
   ePIC_DVCS_TASK *objDIS = new ePIC_DVCS_TASK(camp,energy,sett);
   
-  TString sInFileList = "./bkg_dis/inputFileList_DIS_"+camp+"_"+energy+"_"+sett+".list";
+  TString sInFileList = "./bkg_dis/"+camp+"_"+energy+"_"+sett+"/inputFileList_DIS_"+camp+"_"+energy+"_"+sett+".list";
   objDIS->setInFileList(sInFileList);
 
   // Output file name
   // DO NOT INCLUDE ".root" EXTENSION
   TString sOutFileName;
-  if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+sett;
+  if(comment=="X") sOutFileName = "./rootfiles/"+camp+"_"+energy+"_"+sett+"/ePIC_DIS_"+camp+"_"+energy+"_"+sett;
   else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment;
   
   objDIS->setOutFileName(sOutFileName);
