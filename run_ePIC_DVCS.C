@@ -33,7 +33,7 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   ePIC_DVCS_TASK *objDVCS = new ePIC_DVCS_TASK(camp,energy,sett);
   
   //TString sInFileList = DVCS_ep_Path+"/filelists/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
-  TString sInFileList = "./filelists/"+camp+"_"+energy+"_"+sett+"/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
+  TString sInFileList = "./filelists/"+camp+"_"+energy+"/inputFileList_ePIC_"+camp+"_"+energy+"_"+sett+".list";
   objDVCS->setInFileList(sInFileList);
 
   // Output file name

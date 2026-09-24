@@ -5,7 +5,7 @@
 const float fMass_proton{0.938272};
 const Float_t fMass_electron{0.000511};
 
-void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="test", TString comment="X"){
+void run_ePIC_DISBkg(TString camp="Camp", TString energy="10x100", TString sett="test", TString comment="X"){
 
   std::cout<<"----------------------------------------------------"<<std::endl;
   std::cout<<"            ePIC DVCS Analysis - DIS bkg            "<<std::endl;
@@ -20,16 +20,16 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   
   ePIC_DVCS_TASK *objDIS = new ePIC_DVCS_TASK(camp,energy,sett);
   
-  TString sInFileList = "./bkg_dis/"+camp+"_"+energy+"/inputFileList_DIS_"+camp+"_"+energy+"_"+sett+".list";
+  TString sInFileList = "$BASE_DIR/bkg_dis/inputFileList_DIS_"+camp+"_"+energy+"_minQ2="+sett+".list";
+  sInFileList="$BASE_DIR/bkg_dis/inputFileList_DIS_test.list";
   objDIS->setInFileList(sInFileList);
 
-  // Output file name
-  // DO NOT INCLUDE ".root" EXTENSION
   TString sOutFileName;
-  if(comment=="X") sOutFileName = "./rootfiles/"+camp+"_"+energy+"/ePIC_DIS_"+camp+"_"+energy+"_"+sett;
-  else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment;
-  
-  objDIS->setOutFileName(sOutFileName);
+  if(comment=="X") sOutFileName = "$BASE_DIR/rootfiles/ePIC_DIS_"+camp+"_"+energy+"_minQ2="+sett+".root";
+  else sOutFileName = "$BASE_DIR/rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment+".root";
+  sOutFileName = "$BASE_DIR/bkg_dis/ePIC_DIS_test.root";
+
+  objDIS->setOutFile(sOutFileName);
 
   // Set DVCS cut values
   objDIS->setMomCutFactors(10.,10.);

@@ -49,8 +49,8 @@ Timestamp=$(date +'%d_%m_%Y')
 Workflow="ePIC_DISBkg_Analysis_${BeamE}_${Setting}_${USER}_${Timestamp}" # Change this as desired
 
 # Make directories for the input filelists and output ROOT
-eval "mkdir ./bkg_dis/${Campaign}_${BeamE}_${Setting}"
-eval "mkdir ./rootfiles/${Campaign}_${BeamE}_${Setting}"
+eval "mkdir ./bkg_dis/${Campaign}_${BeamE}"
+eval "mkdir ./rootfiles/${Campaign}_${BeamE}"
 
 # Define a disk space request. Change depending upon your needs. 
 Disk_Space=1
