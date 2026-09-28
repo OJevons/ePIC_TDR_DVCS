@@ -448,9 +448,13 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
           hdsa->SetMaximum(1.);
 	  hdsa->Draw();
 	  hdsamc->Draw("same");
-	  
-	  //c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
-	  //c->Close();
+
+	  // Print out plots
+	  // If lowest x/t bin, print out as png for analysis note
+	  if(page == 1) c->Print(Form("../figs/TDRAsym_%s_%i_%i.png",energy.Data(),x,t));
+			  
+	  c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
+	  c->Close();
 
 	  // Print Asymmetry values
 	  float counts =  hrec_mm->Integral()+hrec_mp->Integral()+hrec_pm->Integral()+hrec_pp->Integral();
