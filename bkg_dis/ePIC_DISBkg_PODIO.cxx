@@ -530,7 +530,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TString cutname[17] = {"inc-sing_ele","e'-Q^{2}",
                          "inc-sing_pho","#gamma-E_{#gamma}",
                          "inc-sing_pro","p'-#theta_{p}",
-                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}"
+                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}",
                          "e'#gamma-mult","e'#gamma-NegTrackVeto","e'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'#gamma-(E-pz)","e'#gamma-p_{T,miss}"};
   TH1D* hPassCuts_MC = new TH1D("passcuts_mc",";;",nCuts,0,nCuts);
   TH1D* hPassCuts_Rec = new TH1D("passcuts_rec",";;",nCuts,0,nCuts);
