@@ -935,7 +935,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   TH1D* counter = (TH1D*)fIn->Get("mult_rec_neu");
   const int tot = counter->Integral();
   
-  for(int bin{1}; bin<PassCuts->GetNbinsX(); bin++){
+  for(int bin{1}; bin<=PassCuts->GetNbinsX(); bin++){
     const char* label = PassCuts->GetXaxis()->GetBinLabel(bin);
     int n = PassCuts->GetBinContent(bin);
     
