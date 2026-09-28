@@ -331,19 +331,20 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  htsamc->Scale(1./Ph);
 	  hdsamc->Scale(1./(Pe*Ph));*/
 
-	  // Pad 1 - reconstructed phi
-	  c->cd(1);
+	  // Pad 4 - reconstructed phi
+	  c->cd(4);
 	  // Histogram with maximum bin defines the frame; scale y to fit all.
           double ymax=0.;
 	  for(TH1D* h : {hrec_mm,hrec_mp,hrec_pm,hrec_pp}) if(h){ if(h->GetMaximum()>ymax) ymax=std::max(ymax,h->GetMaximum()); }
 	  
 	  // Start from first polarisation state
-	  hrec_mm->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];Counts/%.3g deg",
-				 rname,
-				 binning.q2Low(q), binning.q2High(q),
-				 binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
-				 binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t),
-				 hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
+	  // hrec_mm->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];Counts/%.3g deg",
+	  // 			 rname,
+	  // 			 binning.q2Low(q), binning.q2High(q),
+	  // 			 binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
+	  // 			 binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t),
+	  // 			 hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
+	  hrec_mm->SetTitle(Form(";#phi_{h} [deg];Counts / %.3g deg",hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
           hrec_mm->SetMinimum(0.);
           hrec_mm->SetMaximum(1.3*ymax + 1.);
 	  hrec_mm->GetYaxis()->SetTitleSize(0.05);
@@ -364,8 +365,8 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  leg->AddEntry(hrec_pp,"e+, p+","l");
 	  leg->Draw();
 	  
-	  // Pad 2 - BSA
-	  c->cd(2);
+	  // Pad 1 - BSA
+	  c->cd(1);
 	  ymax = 0;
 	  for(TH1D* h : {hbsa,hbsamc}) if(h){ if(h->GetMaximum()>ymax) ymax=std::max(ymax,h->GetMaximum()); }
 	  style(hbsa, kBlue);
@@ -376,27 +377,34 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hbsamc->SetMarkerStyle(kOpenCircle);
 	  hbsamc->SetMarkerColor(kBlack);
 	  hbsamc->SetMarkerSize(2);
-	  hbsa->SetTitle(";#phi_{h} [deg];A_{LU}");
-	  hbsa->GetYaxis()->SetRangeUser(-1.,1.);
+	  hbsa->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];A_{LU}",
+				 rname,
+				 binning.q2Low(q), binning.q2High(q),
+				 binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
+				 binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t),
+				 hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
+	  //hbsa->SetTitle(";#phi_{h} [deg];A_{LU}");
 	  hbsa->GetYaxis()->SetTitleSize(0.05);
 	  hbsa->GetYaxis()->SetTitleOffset(1.);
           hbsa->GetYaxis()->SetLabelSize(0.05);
 	  hbsa->GetXaxis()->SetTitleSize(0.05);
 	  hbsa->GetXaxis()->SetTitleOffset(0.90);
           hbsa->GetXaxis()->SetLabelSize(0.05);
-	  hbsa->SetMinimum(-2*ymax);
-          hbsa->SetMaximum(2*ymax);
+	  //hbsa->SetMinimum(-2*ymax);
+          //hbsa->SetMaximum(2*ymax);
+	  hbsa->SetMinimum(-1.);
+          hbsa->SetMaximum(1.);
 	  hbsa->Draw();
 	  hbsamc->Draw("same");
-	  TLegend* leg2 = new TLegend(0.57,0.68,0.96,0.87);
-	  leg2->SetLineWidth(0);
-	  leg2->SetFillStyle(1);
-	  leg2->AddEntry(hbsamc,"MC gen.","lp");
-	  leg2->AddEntry(hbsa,"Raw reco.","lp");
-	  leg2->Draw();
-
-	  // Pad 3 - TSA
-	  c->cd(3);
+	  // ePIC text label
+	  TLatex* tePICLabel = new TLatex(0.14, 0.21, 
+					  Form("#splitline{ePIC #bf{Performance %s, %s GeV}}{#bf{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+	  tePICLabel->SetNDC();
+	  tePICLabel->SetTextSize(0.05);
+	  tePICLabel->Draw("same");
+  
+	  // Pad 2 - TSA
+	  c->cd(2);
 	  ymax = 0;
 	  for(TH1D* h : {htsa,htsamc}) if(h){ if(h->GetMaximum()>ymax) ymax=std::max(ymax,h->GetMaximum()); }
 	  style(htsa, kBlue);
@@ -409,20 +417,28 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  htsamc->SetMarkerSize(1.5);
 	  if(haddir == "T") htsa->SetTitle(";#phi_{h} [deg];A_{UT}");
 	  else htsa->SetTitle(";#phi_{h} [deg];A_{UL}");
-	  htsa->GetYaxis()->SetRangeUser(-1.,1.);
+	  //htsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  htsa->GetYaxis()->SetTitleSize(0.05);
 	  htsa->GetYaxis()->SetTitleOffset(1.);
           htsa->GetYaxis()->SetLabelSize(0.05);
 	  htsa->GetXaxis()->SetTitleSize(0.05);
 	  htsa->GetXaxis()->SetTitleOffset(0.90);
           htsa->GetXaxis()->SetLabelSize(0.05);
-	  htsa->SetMinimum(-2*ymax);
-          htsa->SetMaximum(2*ymax);
+	  //htsa->SetMinimum(-2*ymax);
+          //htsa->SetMaximum(2*ymax);
+	  htsa->SetMinimum(-1.);
+          htsa->SetMaximum(1.);
 	  htsa->Draw();
 	  htsamc->Draw("same");
+	   TLegend* leg2 = new TLegend(0.14,0.15,0.53,0.35);
+	  leg2->SetLineWidth(0);
+	  leg2->SetFillStyle(1);
+	  leg2->AddEntry(htsamc,"MC gen.","lp");
+	  leg2->AddEntry(htsa,"Raw reco.","lp");
+	  leg2->Draw();
 	  
-	  // Pad 4 - DSA
-	  c->cd(4);
+	  // Pad 3 - DSA
+	  c->cd(3);
 	  ymax = 0;
 	  for(TH1D* h : {hdsa,hdsamc}) if(h){ if(h->GetMaximum()>ymax) ymax=std::max(ymax,h->GetMaximum()); }
 	  style(hdsa, kBlue);
@@ -435,20 +451,22 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hdsamc->SetMarkerSize(2);
 	  if(haddir == "T") hdsa->SetTitle(";#phi_{h} [deg];A_{LT}");
 	  else hdsa->SetTitle(";#phi_{h} [deg];A_{LL}");
-	  hdsa->GetYaxis()->SetRangeUser(-1.,1.);
+	  //hdsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  hdsa->GetYaxis()->SetTitleSize(0.05);
 	  hdsa->GetYaxis()->SetTitleOffset(1.);
           hdsa->GetYaxis()->SetLabelSize(0.05);
 	  hdsa->GetXaxis()->SetTitleSize(0.05);
 	  hdsa->GetXaxis()->SetTitleOffset(0.90);
           hdsa->GetXaxis()->SetLabelSize(0.05);
-	  hdsa->SetMinimum(-2*ymax);
-          hdsa->SetMaximum(2*ymax);
+	  //hdsa->SetMinimum(-2*ymax);
+          //hdsa->SetMaximum(2*ymax);
+	  hdsa->SetMinimum(-1.);
+          hdsa->SetMaximum(1.);
 	  hdsa->Draw();
 	  hdsamc->Draw("same");
 	  
-	  c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
-	  c->Close();
+	  //c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
+	  //c->Close();
 
 	  // Print Asymmetry values
 	  float counts =  hrec_mm->Integral()+hrec_mp->Integral()+hrec_pm->Integral()+hrec_pp->Integral();
