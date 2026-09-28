@@ -208,7 +208,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   }
 
   // Load chosen input file
-  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+"_simple.root";
   TFile* fIn = TFile::Open(sIn);
 
   //--------------------------------------------------------------------
@@ -334,7 +334,8 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   // Global style
   gROOT->ProcessLine("set_ePIC_style()");
   gStyle->SetCanvasPreferGL(kTRUE);
-
+  gStyle->SetOptStat(00000000);
+  
   // CANVAS: Q2 distribution
   TCanvas* cQ2 = new TCanvas("cq2","",1000,1000);
   TPad* upperq2 = new TPad("upperq2","",0.05,0.3,0.95,0.95);
@@ -361,7 +362,8 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_Q2_Corr->SetLineColor(kP6Blue);
   h_Q2_Corr->SetLineWidth(2);
   // Axes
-  h_Q2_MC->GetYaxis()->SetTitle("Counts / 0.02 GeV^{2}");
+  h_Q2_MC->SetTitle("");
+  h_Q2_MC->GetYaxis()->SetTitle(Form("Counts / %.1f GeV^{2}",h_Q2_MC->GetBinWidth(1)));
   h_Q2_MC->GetYaxis()->SetTitleSize(0.05);
   h_Q2_MC->GetYaxis()->SetLabelSize(0.05);
   // Drawing
@@ -389,6 +391,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_Q2_Eff->SetLineColor(kBlack);
   h_Q2_Eff->SetLineWidth(2);
   // Axes
+  h_Q2_Eff->SetTitle("");
   h_Q2_Eff->GetXaxis()->SetTitle("Q^{2} [GeV^{2}]");
   h_Q2_Eff->GetXaxis()->SetTitleSize(0.11);
   h_Q2_Eff->GetXaxis()->SetTitleOffset(0.93);
@@ -407,8 +410,8 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   TCanvas* cQ2_2D = new TCanvas("cq2_2d","",1000,1000);
   gPad->SetLogz();
   gPad->SetRightMargin(0.12);
-  h_Q2_2D->GetXaxis()->SetTitle("Q^{2}_{MC} [GeV^2]");
-  h_Q2_2D->GetYaxis()->SetTitle("Q^{2}_{reco} [GeV^2]");
+  h_Q2_2D->GetXaxis()->SetTitle("Q^{2}_{MC} [GeV^{2}]");
+  h_Q2_2D->GetYaxis()->SetTitle("Q^{2}_{reco} [GeV^{2}]");
   h_Q2_2D->Draw("colz");
   // Save figure
   if(kSAVE) cQ2_2D->SaveAs(sFigsPath + "TDR_" + energy +"_Q2_2D.png");
@@ -578,6 +581,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_y_Eff->GetYaxis()->SetTitleSize(0.13);
   h_y_Eff->GetYaxis()->SetTitleOffset(0.4);
   h_y_Eff->GetYaxis()->SetLabelSize(0.13);
+  h_y_Eff->GetYaxis()->SetNdivisions(505);
   // Draw
   h_y_Eff->Draw();
   // Save figure
@@ -732,7 +736,10 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   gPad->SetLogy();
   h_tResLC_Proj->GetXaxis()->SetTitle("#Deltat [GeV^{2}]");
   h_tResLC_Proj->GetXaxis()->SetRangeUser(-2.,2.);
-  h_tResLC_Proj->GetYaxis()->SetTitle("Counts/0.02 GeV^{ 2}");
+  h_tResLC_Proj->GetYaxis()->SetTitle("Counts/0.02 GeV^{2}");
+  h_tResLC_Proj->GetYaxis()->SetLabelSize(0.03);
+  h_tResLC_Proj->GetYaxis()->SetTitleSize(0.04);
+  h_tResLC_Proj->GetYaxis()->SetTitleOffset(1.3);
   h_tResLC_Proj->GetYaxis()->SetRangeUser(1,1000*h_tResLC_Proj->GetMaximum());
   // Draw
   // Method L first, others depending on which has more entries
@@ -746,12 +753,12 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
     h_tResB0_Proj->Draw("hist same");
   }
   // Add text
-  TLatex* tePICLabel_tres = new TLatex(-1.9, 0.25*h_tResLC_Proj->GetMaximum(),
+  TLatex* tePICLabel_tres = new TLatex(-1.85, 0.25*h_tResLC_Proj->GetMaximum(),
 				       Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma}", campaign.Data(), energy.Data()));
   tePICLabel_tres->SetTextSize(0.037);
   tePICLabel_tres->Draw("same");
   // Add legend
-  TLegend* ltRes = new TLegend(0.16,0.70,0.45,0.84);
+  TLegend* ltRes = new TLegend(0.15,0.70,0.45,0.84);
   ltRes->SetLineWidth(0);
   ltRes->SetFillStyle(0);
   ltRes->SetTextSize(0.037);
@@ -861,12 +868,12 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   lEmPz->AddEntry(h_EmPz_RP,"Raw reco.","l");
   lEmPz->Draw();
   // Save figure
-  if(kSAVE) cEmPz->SaveAs(sFigsPath + "TDR_" + energy +"_ct_All.png");
+  if(kSAVE) cEmPz->SaveAs(sFigsPath + "TDR_" + energy +"_EmPz.png");
   cEmPz->Close();
   
 
   // CANVAS: Missing pT
-  TCanvas* cpTmiss3 = new TCanvas("cempz","",1000,1000);
+  TCanvas* cpTmiss3 = new TCanvas("cptm3","",1000,1000);
   gPad->SetLogy();
   // Markers and lines
   h_pTmiss_RP->SetLineColor(kBlack);
@@ -918,8 +925,22 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_xBvt_Rec->Draw("colz");
   // Save figure
   if(kSAVE) cxBvt->SaveAs(sFigsPath + "TDR_" + energy +"_xBvt_Rec.png");
-  cxBvQ2->Close();
+  cxBvt->Close();
 
+
+
+  // PRINT TO SCREEN - effect of cuts
+  cout<<"\n\nEFFECT OF CUTS:"<<endl;
+  TH1D* PassCuts = (TH1D*)fIn->Get("passcuts_rec");
+  TH1D* counter = (TH1D*)fIn->Get("mult_rec_neu");
+  const int tot = counter->Integral();
+  
+  for(int bin{1}; bin<PassCuts->GetNbinsX(); bin++){
+    const char* label = PassCuts->GetXaxis()->GetBinLabel(bin);
+    int n = PassCuts->GetBinContent(bin);
+    
+    cout<<"["<<label<<"]\t\t => "<<n<<"/"<<tot<<" = "<<100*(float)n/tot<<" \%"<<endl;
+  }
   
   return;
 }
