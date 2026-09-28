@@ -213,19 +213,19 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  
 	  // Extract and scale histograms
 	  // Gen.
-	  TH1D* hmc_mm = style((TH1D*)fInMM->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recmm"), kBlue);
-	  TH1D* hmc_mp = style((TH1D*)fInMP->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recmp"), kRed);
-	  TH1D* hmc_pm = style((TH1D*)fInPM->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recpm"), kBlack);
-	  TH1D* hmc_pp = style((TH1D*)fInPP->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recpp"), kGreen+2);
+	  TH1D* hmc_mm = style((TH1D*)fInMM->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_mcmm"), kBlack);
+	  TH1D* hmc_mp = style((TH1D*)fInMP->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_mcmp"), kP6Blue);
+	  TH1D* hmc_pm = style((TH1D*)fInPM->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_mcpm"), kP6Yellow);
+	  TH1D* hmc_pp = style((TH1D*)fInPP->Get(Form("tphi_%smc[%d][%d][%d]",preg,q,x,t))->Clone("tphi_mcpp"), kP6Red);
 	  hmc_mm->Scale(scaleMM);
 	  hmc_mp->Scale(scaleMP);
 	  hmc_pm->Scale(scalePM);
 	  hmc_pp->Scale(scalePP);
 	  // Reco.
-	  TH1D* hrec_mm = style((TH1D*)fInMM->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recmm"), kBlue);
-	  TH1D* hrec_mp = style((TH1D*)fInMP->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recmp"), kRed);
-	  TH1D* hrec_pm = style((TH1D*)fInPM->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recpm"), kBlack);
-	  TH1D* hrec_pp = style((TH1D*)fInPP->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recpp"), kGreen+2);
+	  TH1D* hrec_mm = style((TH1D*)fInMM->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recmm"), kBlack);
+	  TH1D* hrec_mp = style((TH1D*)fInMP->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recmp"), kP6Blue);
+	  TH1D* hrec_pm = style((TH1D*)fInPM->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recpm"), kP6Yellow);
+	  TH1D* hrec_pp = style((TH1D*)fInPP->Get(Form("tphi_%sreco[%d][%d][%d]",preg,q,x,t))->Clone("tphi_recpp"), kP6Red);
 	  hrec_mm->Scale(scaleMM);
 	  hrec_mp->Scale(scaleMP);
 	  hrec_pm->Scale(scalePM);
@@ -338,12 +338,6 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  for(TH1D* h : {hrec_mm,hrec_mp,hrec_pm,hrec_pp}) if(h){ if(h->GetMaximum()>ymax) ymax=std::max(ymax,h->GetMaximum()); }
 	  
 	  // Start from first polarisation state
-	  // hrec_mm->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];Counts/%.3g deg",
-	  // 			 rname,
-	  // 			 binning.q2Low(q), binning.q2High(q),
-	  // 			 binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
-	  // 			 binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t),
-	  // 			 hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
 	  hrec_mm->SetTitle(Form(";#phi_{h} [deg];Counts / %.3g deg",hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
           hrec_mm->SetMinimum(0.);
           hrec_mm->SetMaximum(1.3*ymax + 1.);
@@ -378,20 +372,16 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hbsamc->SetMarkerColor(kBlack);
 	  hbsamc->SetMarkerSize(2);
 	  hbsa->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];A_{LU}",
-				 rname,
-				 binning.q2Low(q), binning.q2High(q),
-				 binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
-				 binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t),
-				 hrec_mm->GetBinLowEdge(hrec_mm->GetNbinsX()+1)/hrec_mm->GetNbinsX()));
-	  //hbsa->SetTitle(";#phi_{h} [deg];A_{LU}");
+			      rname,
+			      binning.q2Low(q), binning.q2High(q),
+			      binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
+			      binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t)));
 	  hbsa->GetYaxis()->SetTitleSize(0.05);
 	  hbsa->GetYaxis()->SetTitleOffset(1.);
           hbsa->GetYaxis()->SetLabelSize(0.05);
 	  hbsa->GetXaxis()->SetTitleSize(0.05);
 	  hbsa->GetXaxis()->SetTitleOffset(0.90);
           hbsa->GetXaxis()->SetLabelSize(0.05);
-	  //hbsa->SetMinimum(-2*ymax);
-          //hbsa->SetMaximum(2*ymax);
 	  hbsa->SetMinimum(-1.);
           hbsa->SetMaximum(1.);
 	  hbsa->Draw();
@@ -417,15 +407,12 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  htsamc->SetMarkerSize(1.5);
 	  if(haddir == "T") htsa->SetTitle(";#phi_{h} [deg];A_{UT}");
 	  else htsa->SetTitle(";#phi_{h} [deg];A_{UL}");
-	  //htsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  htsa->GetYaxis()->SetTitleSize(0.05);
 	  htsa->GetYaxis()->SetTitleOffset(1.);
           htsa->GetYaxis()->SetLabelSize(0.05);
 	  htsa->GetXaxis()->SetTitleSize(0.05);
 	  htsa->GetXaxis()->SetTitleOffset(0.90);
           htsa->GetXaxis()->SetLabelSize(0.05);
-	  //htsa->SetMinimum(-2*ymax);
-          //htsa->SetMaximum(2*ymax);
 	  htsa->SetMinimum(-1.);
           htsa->SetMaximum(1.);
 	  htsa->Draw();
@@ -451,15 +438,12 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hdsamc->SetMarkerSize(2);
 	  if(haddir == "T") hdsa->SetTitle(";#phi_{h} [deg];A_{LT}");
 	  else hdsa->SetTitle(";#phi_{h} [deg];A_{LL}");
-	  //hdsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  hdsa->GetYaxis()->SetTitleSize(0.05);
 	  hdsa->GetYaxis()->SetTitleOffset(1.);
           hdsa->GetYaxis()->SetLabelSize(0.05);
 	  hdsa->GetXaxis()->SetTitleSize(0.05);
 	  hdsa->GetXaxis()->SetTitleOffset(0.90);
           hdsa->GetXaxis()->SetLabelSize(0.05);
-	  //hdsa->SetMinimum(-2*ymax);
-          //hdsa->SetMaximum(2*ymax);
 	  hdsa->SetMinimum(-1.);
           hdsa->SetMaximum(1.);
 	  hdsa->Draw();
