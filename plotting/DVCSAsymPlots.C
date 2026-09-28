@@ -377,6 +377,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hbsamc->SetMarkerColor(kBlack);
 	  hbsamc->SetMarkerSize(2);
 	  hbsa->SetTitle(";#phi_{h} [deg];A_{LU}");
+	  hbsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  hbsa->GetYaxis()->SetTitleSize(0.05);
 	  hbsa->GetYaxis()->SetTitleOffset(1.);
           hbsa->GetYaxis()->SetLabelSize(0.05);
@@ -408,6 +409,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  htsamc->SetMarkerSize(1.5);
 	  if(haddir == "T") htsa->SetTitle(";#phi_{h} [deg];A_{UT}");
 	  else htsa->SetTitle(";#phi_{h} [deg];A_{UL}");
+	  htsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  htsa->GetYaxis()->SetTitleSize(0.05);
 	  htsa->GetYaxis()->SetTitleOffset(1.);
           htsa->GetYaxis()->SetLabelSize(0.05);
@@ -433,6 +435,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hdsamc->SetMarkerSize(2);
 	  if(haddir == "T") hdsa->SetTitle(";#phi_{h} [deg];A_{LT}");
 	  else hdsa->SetTitle(";#phi_{h} [deg];A_{LL}");
+	  hdsa->GetYaxis()->SetRangeUser(-1.,1.);
 	  hdsa->GetYaxis()->SetTitleSize(0.05);
 	  hdsa->GetYaxis()->SetTitleOffset(1.);
           hdsa->GetYaxis()->SetLabelSize(0.05);
