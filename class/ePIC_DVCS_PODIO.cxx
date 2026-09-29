@@ -1139,14 +1139,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_2D_xVt_MC->Fill(xB_gen,t_gen);
 	h_2D_xVtSin2_MC->Fill(xB_gen,t_gen,TMath::Power(TMath::Sin(tphi_gen),2));
 	h_2D_xVtCos2_MC->Fill(xB_gen,t_gen,TMath::Power(TMath::Cos(tphi_gen),2));
-       
-	h_Pmiss3_MC->Fill(calcPMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
-	h_Ptmiss3_MC->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
-      	
-	Float_t pmiss = calcPMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
-	Float_t ptmiss = calcPtMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
-	h_Pmiss2eg_MC->Fill(pmiss);
-	h_Ptmiss2eg_MC->Fill(ptmiss);
       }
       
       //cout<<"[DEBUG] MC TPhi filled"<<endl;
@@ -1210,10 +1202,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_2D_xVtSin2_RP->Fill(xB_rec,t_rec,TMath::Power(TMath::Sin(tphi_rec),2));
 	h_2D_xVtCos2_RP->Fill(xB_rec,t_rec,TMath::Power(TMath::Cos(tphi_rec),2));
 
-	h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
-	h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
-	h_Pmiss3_RP->Fill(calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-	h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	//h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
+	//h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
+	// h_Pmiss3_RP->Fill(calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	// h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
       }
       
       //cout<<"[DEBUG] TPhi and differential histos. (B0 proton) filled"<<endl;
@@ -1285,10 +1277,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	//cout<<"[DEBUG] 2D x:t distribution filled"<<endl;
 
-	h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
-	h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
-	h_Pmiss3_RP->Fill(calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-	h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+	// h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
+	// h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
+	// h_Pmiss3_RP->Fill(calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+	// h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
       
 	//cout<<"[DEBUG] Missing kinematics filled"<<endl;
       }
@@ -1318,10 +1310,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
 	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
 	
-	h_Pmiss2eg_MCA->Fill(calcPMiss_2Body(beame4, beamp4, scate4_aso[0], scatg4_aso[0]));
-	h_Ptmiss2eg_MCA->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_aso[0], scatg4_aso[0]));
-	h_Pmiss2eg_RP->Fill(calcPMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-	h_Ptmiss2eg_RP->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
+	// h_Pmiss2eg_MCA->Fill(calcPMiss_2Body(beame4, beamp4, scate4_aso[0], scatg4_aso[0]));
+	// h_Ptmiss2eg_MCA->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_aso[0], scatg4_aso[0]));
+	// h_Pmiss2eg_RP->Fill(calcPMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
+	// h_Ptmiss2eg_RP->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
       }
       
       //cout<<"[DEBUG] Semi-inclusive kinematics filled"<<endl;
@@ -1412,7 +1404,11 @@ void ePIC_DVCS_TASK::doAnalysis(){
             if(EmPz >= 15. && EmPz <= 25.){
               hPassCuts_MC->Fill(9);
 
-              // ...and missing pT cut
+	      // Plot missing kinematics (all cuts applied except missing pT)
+	      h_Pmiss3_MC->Fill(calcPMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
+	      h_Ptmiss3_MC->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
+	      
+	      // ...and missing pT cut
 	      float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]);
               if(pTmiss <= 0.5) hPassCuts_MC->Fill(10); //fi (pTmiss cut)
 	    } //fi (E-pz cut)
@@ -1439,6 +1435,12 @@ void ePIC_DVCS_TASK::doAnalysis(){
               if(EmPz >= 15. && EmPz <= 25.){
                 hPassCuts_MC->Fill(15);
 
+		// Plot missing kinematics (all cuts applied except missing pT)
+		Float_t pmiss = calcPMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
+		Float_t ptmiss = calcPtMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
+		h_Pmiss2eg_MC->Fill(pmiss);
+		h_Ptmiss2eg_MC->Fill(ptmiss);
+	      
                 // ...and missing pT cut
 		float pTmiss = calcPtMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
                 if(pTmiss <= 0.5) hPassCuts_MC->Fill(16); //fi (pTmiss cut)
@@ -1498,6 +1500,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
             if(EmPz >= 15. && EmPz <= 25.){
               hPassCuts_Rec->Fill(9);
 
+	      // Filling missing kinematics (applied all cuts except mssing pT)
+	      h_Pmiss3_RP->Fill(calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	      h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	
               // ...and missing pT cut
 	      float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
               if(pTmiss <= 0.5) hPassCuts_Rec->Fill(10); //fi (pTmiss cut)
@@ -1521,6 +1527,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
             if(EmPz >= 15. && EmPz <= 25.){
               hPassCuts_Rec->Fill(9);
 
+	      // Filling missing kinematics (applied all cuts except missing pT)
+	      h_Pmiss3_RP->Fill(calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+	      h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+	
               // ...and missing pT cut
 	      float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
               if(pTmiss <= 0.5) hPassCuts_Rec->Fill(10); //fi (pTmiss cut)
@@ -1548,6 +1558,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
               if(EmPz >= 15. && EmPz <= 25.){
                 hPassCuts_Rec->Fill(15);
 
+		// Fill missing kinematics (applied all cuts except missing pT)
+		h_Pmiss2eg_RP->Fill(calcPMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
+		h_Ptmiss2eg_RP->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
+	
                 // ...and missing pT cut
 		float pTmiss = calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
                 if(pTmiss <= 0.5) hPassCuts_Rec->Fill(16); //fi (pTmiss cut)
