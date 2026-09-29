@@ -471,15 +471,15 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_Q2_Acc  = new TH1D("q2_acc" , "Counts/0.2 GeV^{2};Q^{2}(MC|Reco) [GeV^{2}]", 220, 0., 110.);
   TH1D* h_Q2_Reco = new TH1D("q2_reco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 220, 0., 110.);
   TH1D* h_Q2_ExcReco = new TH1D("q2_excreco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 220, 0., 110.);
-  TH1D* h_xB_MC   = new TH1D("xb_mc"  , ";x_{B}(MC)"     , 2500, 0., 1.);
-  TH1D* h_xB_Acc  = new TH1D("xb_acc" , ";x_{B}(MC|Reco)", 2500, 0., 1.);
-  TH1D* h_xB_Reco = new TH1D("xb_reco", ";x_{B}(Reco)"   , 2500, 0., 1.);
+  TH1D* h_xB_MC   = new TH1D("xb_mc"  , ";x_{B}(MC)"     , 5000, 0., 1.);
+  TH1D* h_xB_Acc  = new TH1D("xb_acc" , ";x_{B}(MC|Reco)", 5000, 0., 1.);
+  TH1D* h_xB_Reco = new TH1D("xb_reco", ";x_{B}(Reco)"   , 5000, 0., 1.);
   TH1D* h_y_MC   = new TH1D("y_mc"  , ";y(MC)"     , 100, 0., 1.);
   TH1D* h_y_Acc  = new TH1D("y_acc" , ";y(MC|Reco)", 100, 0., 1.);
   TH1D* h_y_Reco = new TH1D("y_reco", ";y(Reco)"   , 100, 0., 1.);
   // 5b) 2D distributions
   TH2D* h_Q2_2d = new TH2D("q2_2d",";Q^{2}(MC) [GeV^{2}];Q^{2}(Reco.) [GeV^{2}]", 220, 0., 110., 220, 0., 110.);
-  TH2D* h_xB_2d = new TH2D("xb_2d",";x_{B}(MC);x_{B}(Reco.)", 2500, 0., 1., 2500, 0., 1.);
+  TH2D* h_xB_2d = new TH2D("xb_2d",";x_{B}(MC);x_{B}(Reco.)", 5000, 0., 1., 5000, 0., 1.);
   TH2D* h_y_2d  = new TH2D("y_2d" ,";y(MC);y(Reco.)", 100, 0.,  1.,100, 0., 1.);
   // 5c) Resolutions
   TH2D* h_PctResQ2 = new TH2D("q2_pctres",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
