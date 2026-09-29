@@ -1333,15 +1333,15 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rec, scatg4_rec, "B0") && scatp4_rom.size()==0){
 	t_gen = calcT_BABE(beamp4, scatp4_gen[0]);
 	t_rec = calcT_BABE(beamp4, scatp4_rec[0]);
-	h_tResB0_2d->Fill(t_gen, TMath::Abs(t_rec-t_gen));
-	h_tResB0Pct_2d->Fill(t_gen, TMath::Abs(t_rec-t_gen)/t_gen);
+	h_tResB0_2d->Fill(t_gen, t_rec-t_gen);
+	h_tResB0Pct_2d->Fill(t_gen, (t_rec-t_gen)/t_gen);
       }
       if(applyCuts_All(beame4, beamp4, scate4_gen, scatp4_gen, scatg4_gen, "all") 
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rom, scatg4_rec, "RP") && scatp4_rec.size()==0){
 	t_gen = calcT_BABE(beamp4, scatp4_gen[0]);
 	t_rec = calcT_BABE(beamp4, scatp4_rom[0]);
-	h_tResRP_2d->Fill(t_gen, TMath::Abs(t_rec-t_gen));
-	h_tResRPPct_2d->Fill(t_gen, TMath::Abs(t_rec-t_gen)/t_gen);
+	h_tResRP_2d->Fill(t_gen, t_rec-t_gen);
+	h_tResRPPct_2d->Fill(t_gen, (t_rec-t_gen)/t_gen);
       }
       if(applyCuts_All(beame4, beamp4, scate4_gen, scatp4_gen, scatg4_gen, "semi")
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rec, scatg4_rec, "semi")){
@@ -1349,8 +1349,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	 //&& applyCuts_Electron(beame4,scate4_gen) && applyCuts_Photon(scatg4_gen)){
 	t_gen = calcT_MethodL(beame4,beamp4,scate4_gen[0],fMass_proton,scatg4_gen[0]);
 	t_rec = calcT_MethodL(beame4,beamp4,scate4_rec[0],fMass_proton,scatg4_rec[0]);
-	h_tResLC_2d->Fill(t_gen, TMath::Abs(t_rec-t_gen));
-	h_tResLCPct_2d->Fill(t_gen, TMath::Abs(t_rec-t_gen)/t_gen);
+	h_tResLC_2d->Fill(t_gen, t_rec-t_gen);
+	h_tResLCPct_2d->Fill(t_gen, (t_rec-t_gen)/t_gen);
       }
 
       //cout<<"[DEBUG] Mandelstam t filled"<<endl;
