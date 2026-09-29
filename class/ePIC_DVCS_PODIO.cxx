@@ -467,10 +467,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
   // 5) Inclusive event kinematics - distributions, 2D response and resolution
   // 5a) 1D distributions
-  TH1D* h_Q2_MC   = new TH1D("q2_mc"  , "Counts/0.2 GeV^{2};Q^{2}(MC) [GeV^{2}]"     , 550, 0., 110.);
-  TH1D* h_Q2_Acc  = new TH1D("q2_acc" , "Counts/0.2 GeV^{2};Q^{2}(MC|Reco) [GeV^{2}]", 550, 0., 110.);
-  TH1D* h_Q2_Reco = new TH1D("q2_reco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 550, 0., 110.);
-  TH1D* h_Q2_ExcReco = new TH1D("q2_excreco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 550, 0., 110.);
+  TH1D* h_Q2_MC   = new TH1D("q2_mc"  , "Counts/0.2 GeV^{2};Q^{2}(MC) [GeV^{2}]"     , 220, 0., 110.);
+  TH1D* h_Q2_Acc  = new TH1D("q2_acc" , "Counts/0.2 GeV^{2};Q^{2}(MC|Reco) [GeV^{2}]", 220, 0., 110.);
+  TH1D* h_Q2_Reco = new TH1D("q2_reco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 220, 0., 110.);
+  TH1D* h_Q2_ExcReco = new TH1D("q2_excreco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 220, 0., 110.);
   TH1D* h_xB_MC   = new TH1D("xb_mc"  , ";x_{B}(MC)"     , 2500, 0., 1.);
   TH1D* h_xB_Acc  = new TH1D("xb_acc" , ";x_{B}(MC|Reco)", 2500, 0., 1.);
   TH1D* h_xB_Reco = new TH1D("xb_reco", ";x_{B}(Reco)"   , 2500, 0., 1.);
@@ -478,11 +478,11 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_y_Acc  = new TH1D("y_acc" , ";y(MC|Reco)", 100, 0., 1.);
   TH1D* h_y_Reco = new TH1D("y_reco", ";y(Reco)"   , 100, 0., 1.);
   // 5b) 2D distributions
-  TH2D* h_Q2_2d = new TH2D("q2_2d",";Q^{2}(MC) [GeV^{2}];Q^{2}(Reco.) [GeV^{2}]", 500, 0., 100., 500, 0., 100.);
+  TH2D* h_Q2_2d = new TH2D("q2_2d",";Q^{2}(MC) [GeV^{2}];Q^{2}(Reco.) [GeV^{2}]", 220, 0., 110., 220, 0., 110.);
   TH2D* h_xB_2d = new TH2D("xb_2d",";x_{B}(MC);x_{B}(Reco.)", 2500, 0., 1., 2500, 0., 1.);
   TH2D* h_y_2d  = new TH2D("y_2d" ,";y(MC);y(Reco.)", 100, 0.,  1.,100, 0., 1.);
   // 5c) Resolutions
-  TH2D* h_PctResQ2 = new TH2D("q2_pctres",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 500, 0., 100., 200, -1., 1.);
+  TH2D* h_PctResQ2 = new TH2D("q2_pctres",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
   TH2D* h_PctResxB = new TH2D("xb_pctres",";x_{B};#Deltax_{B}/x_{B}", 1e4, 0., 1., 1000, -5., 5.);
   TH2D* h_PctResy  = new TH2D("y_pctres" ,";y;#Deltay/y", 100, 0.,  1., 200, -1., 1.);
   // 5d) Cross-variable coverages
@@ -619,17 +619,17 @@ void ePIC_DVCS_TASK::doAnalysis(){
   bookGrid(h_TPhiDiff_RPReco, DVCSBinning::kRP, "tphi_rpreco", "#phi_{h}(Reco) [deg]",            10,  0.,  360.);
   bookGrid(h_TPhiResDiff_RP,  DVCSBinning::kRP, "tphi_rpres",  "#delta#phi_{h}(Reco - RP) [deg]", 450, -45., 45.);
 
-  bookGrid(h_Q2Diff_B0, DVCSBinning::kB0, "q2diff_b0", "Q^{2}(MCA) [GeV^{2}]", 550,   0., 110.);
+  bookGrid(h_Q2Diff_B0, DVCSBinning::kB0, "q2diff_b0", "Q^{2}(MCA) [GeV^{2}]", 220,   0., 110.);
   bookGrid(h_xBDiff_B0, DVCSBinning::kB0, "xbdiff_b0", "x_{B}(MCA)",           10000,   0.,   1.);
   bookGrid(h_tDiff_B0,  DVCSBinning::kB0, "tdiff_b0",  "|t|(MCA) [GeV^{2}]",   20,   0.,   2.);
-  bookGrid(h_Q2Diff_RP, DVCSBinning::kRP, "q2diff_rp", "Q^{2}(MCA) [GeV^{2}]", 550,   0., 110.);
+  bookGrid(h_Q2Diff_RP, DVCSBinning::kRP, "q2diff_rp", "Q^{2}(MCA) [GeV^{2}]", 220,   0., 110.);
   bookGrid(h_xBDiff_RP, DVCSBinning::kRP, "xbdiff_rp", "x_{B}(MCA)",           10000,   0.,   1.);
   bookGrid(h_tDiff_RP,  DVCSBinning::kRP, "tdiff_rp",  "|t|(MCA) [GeV^{2}]",   20,   0.,   2.);
 
-  bookGrid(h_Q2Rec_B0, DVCSBinning::kB0, "q2rec_b0", "Q^{2}(Rec) [GeV^{2}]", 550,   0., 110.);
+  bookGrid(h_Q2Rec_B0, DVCSBinning::kB0, "q2rec_b0", "Q^{2}(Rec) [GeV^{2}]", 220,   0., 110.);
   bookGrid(h_xBRec_B0, DVCSBinning::kB0, "xbrec_b0", "x_{B}(Rec)",           10000,   0.,   1.);
   bookGrid(h_tRec_B0,  DVCSBinning::kB0, "trec_b0",  "|t|(Rec) [GeV^{2}]",   20,   0.,   2.);
-  bookGrid(h_Q2Rec_RP, DVCSBinning::kRP, "q2rec_rp", "Q^{2}(Rec) [GeV^{2}]", 550,   0., 110.);
+  bookGrid(h_Q2Rec_RP, DVCSBinning::kRP, "q2rec_rp", "Q^{2}(Rec) [GeV^{2}]", 220,   0., 110.);
   bookGrid(h_xBRec_RP, DVCSBinning::kRP, "xbrec_rp", "x_{B}(Rec)",           10000,   0.,   1.);
   bookGrid(h_tRec_RP,  DVCSBinning::kRP, "trec_rp",  "|t|(Rec) [GeV^{2}]",   20,   0.,   2.);
 
