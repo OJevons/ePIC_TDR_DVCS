@@ -49,7 +49,7 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   // Set DVCS cut values
   objDVCS->setMomCutFactors(10.,10.);
   objDVCS->setMin_Q2(1);         // GeV^2
-  objDVCS->setMax_pTmiss(0.5);   // GeV
+  objDVCS->setMax_pTmiss(0.25);  // GeV
   objDVCS->setEmPzCuts(15.,25.); // GeV
 
   // Set other behaviours

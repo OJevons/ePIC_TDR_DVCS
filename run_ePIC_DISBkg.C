@@ -34,7 +34,7 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   // Set DVCS cut values
   objDIS->setMomCutFactors(10.,10.);
   objDIS->setMin_Q2(1);         // GeV^2
-  objDIS->setMax_pTmiss(0.5);   // GeV
+  objDIS->setMax_pTmiss(0.25);  // GeV
   objDIS->setEmPzCuts(15.,25.); // GeV
 
   // Set other behaviours
