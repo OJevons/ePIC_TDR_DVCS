@@ -131,7 +131,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   TH1D* h_tDISLQ2_RPRec = (TH1D*)fDISLQ2->Get("t_rpreco");
   TH1D* h_tDISLQ2_LCRec = (TH1D*)fDISLQ2->Get("t_lcreco");
   TString sDISHQ2 = "../rootfiles/ePIC_DIS_"+campaign+"_"+energy+"_minQ2=10.root";
-  TFile* fDISHQ2 = TFile::Open(sDISLQ2);
+  TFile* fDISHQ2 = TFile::Open(sDISHQ2);
   TH1D* h_tDISHQ2_B0Rec = (TH1D*)fDISHQ2->Get("t_b0reco");
   TH1D* h_tDISHQ2_RPRec = (TH1D*)fDISHQ2->Get("t_rpreco");
   TH1D* h_tDISHQ2_LCRec = (TH1D*)fDISHQ2->Get("t_lcreco");
