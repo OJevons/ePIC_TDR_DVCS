@@ -1490,9 +1490,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
       } //fi (RP proton)
       // ------------------Event---------------------
       // Full DVCS multiplicity (using B0 protons)...
-      if(applyCuts_Electron(beame4,scate4_rec) && 
-	 applyCuts_Photon(scatg4_rec)          &&
-	 applyCuts_Proton(scatp4_rec, "B0") && scatp4_rom.size() == 0){
+      if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rec, "B0") && scatp4_rom.size() == 0){
         hPassCuts_Rec->Fill(6);
         // ...and no extra -ve tracks
 	if(!kNonElecNeg_Rec){
@@ -1524,9 +1522,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	}       //fi (non-electron -ve particles)
       }         //fi (e'p'gamma)
       // Full DVCS multiplicity (using RP tracks)...
-      if(applyCuts_Electron(beame4,scate4_rec) && 
-	 applyCuts_Photon(scatg4_rec)          &&
-	 applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0){
+      if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0){
         hPassCuts_Rec->Fill(6);
         // ...and no extra -ve tracks
 	if(!kNonElecNeg_Rec){

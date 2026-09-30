@@ -1161,6 +1161,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rec, scatg4_rec, "B0") // Single e', single photon, single p', proton w/in B0
 	 && scatp4_rom.size() == 0                                                  // No RP tracks (assume all RP are protons)
 	 && !kNonElecNeg_Rec                                                        // Non-electron -ve track veto
+	 && !kBarrelPos_Rec                                                         // Barrel +ve track veto
 	 && !kOtherFFTrack_Rec){                                                    // OMD/ZDC veto
 	
 	// Calculations
@@ -1176,6 +1177,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rom, scatg4_rec, "RP") // Single e', single photon, single p', proton w/in RP (assume RP = p')
 	 && scatp4_rec.size() == 0                                                  // No B0 tracks
 	 && !kNonElecNeg_Rec                                                        // Non-electron -ve track veto
+	 && !kBarrelPos_Rec                                                         // Barrel +ve track veto
 	 && !kOtherFFTrack_Rec){                                                    // OMD/ZDC veto
 	
 	//cout<<"[DEBUG]: TRYING FULL EPG (RP)"<<endl;
