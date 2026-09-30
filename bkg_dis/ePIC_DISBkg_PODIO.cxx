@@ -526,11 +526,11 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* hCount = new TH1D("count",";;",2,0,2);
   hCount->GetXaxis()->SetBinLabel(1,"Not_epg");
   hCount->GetXaxis()->SetBinLabel(2,"Is_epg");
-  const int nCuts{17};
-  TString cutname[17] = {"inc-sing_ele","e'-Q^{2}",
+  const int nCuts{18};
+  TString cutname[18] = {"inc-sing_ele","e'-Q^{2}",
                          "inc-sing_pho","#gamma-E_{#gamma}",
                          "inc-sing_pro","p'-#theta_{p}",
-                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}",
+                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}",
                          "e'#gamma-mult","e'#gamma-NegTrackVeto","e'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'#gamma-(E-pz)","e'#gamma-p_{T,miss}"};
   TH1D* hPassCuts_MC = new TH1D("passcuts_mc",";;",nCuts,0,nCuts);
   TH1D* hPassCuts_Rec = new TH1D("passcuts_rec",";;",nCuts,0,nCuts);
@@ -986,41 +986,46 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  if(!kOtherFFTrack_MC){
             hPassCuts_MC->Fill(8);
 
-            // ...and (E-pz) cut
-	    float EmPz = (scate4_gen[0]+scatp4_gen[0]+scatg4_gen[0]).E() - (scate4_gen[0]+scatp4_gen[0]+scatg4_gen[0]).Pz();
-            if(EmPz >= 15. && EmPz <= 25.){
+	    // ...and barrel +ve track veto
+	    if(!kBarrelPos_MC){
               hPassCuts_MC->Fill(9);
-
-              // ...and missing pT cut
-	      float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]);
-              if(pTmiss <= 0.5) hPassCuts_MC->Fill(10); //fi (pTmiss cut)
-	    } //fi (E-pz cut)
-	  }   //fi (ZDC/OMD veto)
-	}     //fi (non-electron -ve particles)
-      }       //fi (e'p'gamma)
-      // e'gamma final state (fakes for eXBE reco.
+	      
+	      // ...and (E-pz) cut
+	      float EmPz = (scate4_gen[0]+scatp4_gen[0]+scatg4_gen[0]).E() - (scate4_gen[0]+scatp4_gen[0]+scatg4_gen[0]).Pz();
+	      if(EmPz >= 15. && EmPz <= 25.){
+		hPassCuts_MC->Fill(10);
+		
+		// ...and missing pT cut
+		float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]);
+		if(pTmiss <= 0.5) hPassCuts_MC->Fill(11); //fi (pTmiss cut)
+	      } //fi (E-pz cut)
+	    }   //fi (barrel +ve veto)
+	  }     //fi (ZDC/OMD veto)
+	}       //fi (non-electron -ve particles)
+      }         //fi (e'p'gamma)
+      // e'gamma final state (fakes for eXBE reco.)
       if(scate4_gen.size() == 1 && scatg4_gen.size() == 1 && !kGenDVCS){
-        hPassCuts_MC->Fill(11);
+        hPassCuts_MC->Fill(12);
 
         // ...and non-elec -ve veto
 	if(!kNonElecNeg_MC){
-          hPassCuts_MC->Fill(12);
+          hPassCuts_MC->Fill(13);
           // ...and ZDC/OMD veto
 	  if(!kOtherFFTrack_MC){
-            hPassCuts_MC->Fill(13);
+            hPassCuts_MC->Fill(14);
 
             // ...and barrel +ve track veto
 	    if(!kBarrelPos_MC){
-              hPassCuts_MC->Fill(14);
+              hPassCuts_MC->Fill(15);
 
               // ...and (E-pz cut)
 	      float EmPz = (scate4_gen[0]+scatg4_gen[0]).E() - (scate4_gen[0]+scatg4_gen[0]).Pz();
               if(EmPz >= 15. && EmPz <= 25.){
-                hPassCuts_MC->Fill(15);
+                hPassCuts_MC->Fill(16);
 
                 // ...and missing pT cut
 		float pTmiss = calcPtMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
-                if(pTmiss <= 0.5) hPassCuts_MC->Fill(16); //fi (pTmiss cut)
+                if(pTmiss <= 0.5) hPassCuts_MC->Fill(17); //fi (pTmiss cut)
 	      } //fi (E-pz cut)
 	    }   //fi (barrel +ve tracks)
 	  }     //fi (ZDC/OMD veto)
@@ -1062,7 +1067,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
       } //fi (RP proton)
       // ------------------Event---------------------
       // Full DVCS multiplicity (using B0 protons)...
-      if(scate4_rec.size() == 1 && scatg4_rec.size() == 1 && scatp4_rec.size() == 1 && scatp4_rom.size() == 0 && !kGenDVCS){
+      if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rec, "B0") && scatp4_rom.size() == 0 && !kGenDVCS){
         hPassCuts_Rec->Fill(6);
         // ...and no extra -ve tracks
 	if(!kNonElecNeg_Rec){
@@ -1072,20 +1077,25 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  if(!kOtherFFTrack_Rec){
             hPassCuts_Rec->Fill(8);
 
-            // ...and (E-pz) cut
-	    float EmPz = (scate4_rec[0]+scatp4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatp4_rec[0]+scatg4_rec[0]).Pz();
-            if(EmPz >= 15. && EmPz <= 25.){
+	    // ...and barrel +ve track veto
+	    if(!kBarrelPos_Rec){
               hPassCuts_Rec->Fill(9);
-
-              // ...and missing pT cut
-	      float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
-              if(pTmiss <= 0.5) hPassCuts_Rec->Fill(10); //fi (pTmiss cut)
-	    } //fi (E-pz cut)
-	  }   //fi (ZDC/OMD veto)
-	}     //fi (non-electron -ve particles)
-      }       //fi (e'p'gamma)
+	      
+	      // ...and (E-pz) cut
+	      float EmPz = (scate4_rec[0]+scatp4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatp4_rec[0]+scatg4_rec[0]).Pz();
+	      if(EmPz >= 15. && EmPz <= 25.){
+		hPassCuts_Rec->Fill(10);
+		
+		// ...and missing pT cut
+		float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
+		if(pTmiss <= 0.5) hPassCuts_Rec->Fill(11); //fi (pTmiss cut)
+	      } //fi (E-pz cut)
+	    }   //fi (barrel +ve veto)
+	  }     //fi (ZDC/OMD veto)
+	}       //fi (non-electron -ve particles)
+      }         //fi (e'p'gamma)
       // Full DVCS multiplicity (using RP tracks)...
-      if(scate4_rec.size() == 1 && scatg4_rec.size() == 1 && scatp4_rom.size() == 1 && scatp4_rec.size() == 0 && !kGenDVCS){
+      if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0 && !kGenDVCS){
         hPassCuts_Rec->Fill(6);
         // ...and no extra -ve tracks
 	if(!kNonElecNeg_Rec){
@@ -1095,41 +1105,46 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  if(!kOtherFFTrack_Rec){
             hPassCuts_Rec->Fill(8);
 
-            // ...and (E-pz) cut
-	    float EmPz = (scate4_rec[0]+scatp4_rom[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatp4_rom[0]+scatg4_rec[0]).Pz();
-            if(EmPz >= 15. && EmPz <= 25.){
+	    // ...and barrel +ve track veto
+	    if(!kBarrelPos_Rec){
               hPassCuts_Rec->Fill(9);
-
-              // ...and missing pT cut
-	      float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
-              if(pTmiss <= 0.5) hPassCuts_Rec->Fill(10); //fi (pTmiss cut)
-	    } //fi (E-pz cut)
-	  }   //fi (ZDC/OMD veto)
-	}     //fi (non-electron -ve particles)
-      }       //fi (e'p'gamma)
+	      
+	      // ...and (E-pz) cut
+	      float EmPz = (scate4_rec[0]+scatp4_rom[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatp4_rom[0]+scatg4_rec[0]).Pz();
+	      if(EmPz >= 15. && EmPz <= 25.){
+		hPassCuts_Rec->Fill(10);
+		
+		// ...and missing pT cut
+		float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
+		if(pTmiss <= 0.5) hPassCuts_Rec->Fill(11); //fi (pTmiss cut)
+	      } //fi (E-pz cut)
+	    }   //fi (barrel +ve veto)
+	  }     //fi (ZDC/OMD veto)
+	}       //fi (non-electron -ve particles)
+      }         //fi (e'p'gamma)
       // e'gamma final state (fakes for eXBE reco.)
       if(scate4_rec.size() == 1 && scatg4_rec.size() == 1 && !kGenDVCS){
-        hPassCuts_Rec->Fill(11);
+        hPassCuts_Rec->Fill(12);
 
         // ...and non-elec -ve veto
 	if(!kNonElecNeg_Rec){
-          hPassCuts_Rec->Fill(12);
+          hPassCuts_Rec->Fill(13);
           // ...and ZDC/OMD veto
 	  if(!kOtherFFTrack_Rec){
-            hPassCuts_Rec->Fill(13);
+            hPassCuts_Rec->Fill(14);
 
             // ...and barrel +ve track veto
 	    if(!kBarrelPos_Rec){
-              hPassCuts_Rec->Fill(14);
+              hPassCuts_Rec->Fill(15);
 
               // ...and (E-pz cut)
 	      float EmPz = (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz();
               if(EmPz >= 15. && EmPz <= 25.){
-                hPassCuts_Rec->Fill(15);
+                hPassCuts_Rec->Fill(16);
 
                 // ...and missing pT cut
 		float pTmiss = calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
-                if(pTmiss <= 0.5) hPassCuts_Rec->Fill(16); //fi (pTmiss cut)
+                if(pTmiss <= 0.5) hPassCuts_Rec->Fill(17); //fi (pTmiss cut)
 	      } //fi (E-pz cut)
 	    }   //fi (barrel +ve tracks)
 	  }     //fi (ZDC/OMD veto)
