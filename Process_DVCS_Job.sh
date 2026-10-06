@@ -46,6 +46,6 @@ EOF
 
 sleep 2
 
-rm $FileList
+#rm $FileList
 
 exit 0
