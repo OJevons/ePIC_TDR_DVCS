@@ -50,8 +50,11 @@ void run_ePIC_DVCS(TString camp="Camp", TString energy="10x100", TString sett="t
   objDVCS->setMomCutFactors(10.,10.);
   objDVCS->setMin_Q2(1);         // GeV^2
   objDVCS->setMax_pTmiss(0.25);  // GeV
-  objDVCS->setEmPzCuts(15.,25.); // GeV
 
+  // E-pz cut: 3 GeV around electron beam energy
+  if(energy == "10x130") objDVCS->setEmPzCuts(17.,23.); // GeV
+  else if(energy == "9x130" || energy == "9x275") objDVCS->setEmPzCuts(15.,21.); // GeV
+  
   // Set other behaviours
   objDVCS->setUsePID(kFALSE);
   objDVCS->setUseExplicitMatch(kFALSE);
