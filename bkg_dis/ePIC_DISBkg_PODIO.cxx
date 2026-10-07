@@ -556,6 +556,15 @@ void ePIC_DVCS_TASK::doAnalysis(){
   // 5) Q2 distribution
   TH1D* h_Q2_MC   = new TH1D("q2_mc"  , "Counts/0.2 GeV^{2};Q^{2}(MC) [GeV^{2}]"     , 550, 0., 110.);
   TH1D* h_Q2_Reco = new TH1D("q2_reco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 550, 0., 110.);
+
+  
+  TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",1e4,0.,1.,1e4,0.,2.);
+  TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",1e4,0.,1.,1e4,0.,2.);
+  TH2D* h_Pmiss2Vt = new TH2D("pmiss2vt",";|t|;p_{miss,e'#gamma}",20,0.,2.,5*nbins,protlower,protupper);
+  TH2D* h_Ptmiss2Vt = new TH2D("ptmiss2vt",";|t|;p_{T,miss,e'#gamma}",20,0.,2.,300,0.,3.);
+  TH2D* h_Pmiss3Vt = new TH2D("pmiss3vt",";|t|;p_{miss,e'p'#gamma}",20,0.,2.,30,-5,25);
+  TH2D* h_Ptmiss3Vt = new TH2D("ptmiss3vt",";|t|;p_{T,miss,e'p'#gamma}",20,0.,2.,300,0.,3.);
+  TH1D* h_dPhi_prot = new TH1D("dphi_prot",";#delta#phi [rad];",130,-6.5,6.5);
   
   //---------------------------------------------------------
   // Loop over files in list
@@ -1155,7 +1164,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
       // Mandelstam t distributions
       // MC truth
-      if(kGenDVCS) h_t_Truth->Fill(calcT_BABE(beamp4,scatp4_gen[0])); 
+      if(kGenDVCS){
+	h_t_Truth->Fill(calcT_BABE(beamp4,scatp4_gen[0]));
+	h_tq2Vx_MC->Fill(calcX_Elec(beame4, beamp4, scate4_gen[0]),calcT_BABE(beamp4,scatp4_gen[0])/calcQ2_Elec(beame4, scate4_gen[0]));
+      }
       // Reconstructed and MC accepted - B0 only
       if(!kGenDVCS                                                                  // Not generated DVCS
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rec, scatg4_rec, "B0") // Single e', single photon, single p', proton w/in B0
@@ -1170,6 +1182,12 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	// Distributions
        	h_t_B0Acc->Fill(t_acc);
 	h_t_B0Reco->Fill(t_rec);
+
+	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
+
+	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
+	h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
+	
 	//cout<<"[DEBUG]: RECO T (B0) FILLED"<<endl;
       }
       // Reconstructed and accepted - RP only
@@ -1189,6 +1207,12 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	}
 	Float_t t_rec = calcT_BABE(beamp4,scatp4_rom[0]);
 	h_t_RPReco->Fill(t_rec);
+
+	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
+
+	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
+	h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
+	
 	//cout<<"[DEBUG]: RECO T (RP) FILLED"<<endl;
       }
       // Semi-inclusive calculation - ignore if proton is detected or not
@@ -1212,6 +1236,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_PTMeg_Rec->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
 	h_EMeg_Rec->Fill(calcEMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
 
+	h_Pmiss2Vt->Fill(t_rec,calcPMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
+	h_Ptmiss2Vt->Fill(t_rec,calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
+
 	//cout<<"[DEBUG]: RECO T (SEMI-INC) FILLED"<<endl;
       }
 
@@ -1221,14 +1248,23 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	 && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() >= fMin_EmPz && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() <= fMax_EmPz
 	 && !kBarrelPos_Rec                                                    
 	 && !kNonElecNeg_Rec                                                  
-	 && !kOtherFFTrack_Rec) h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	 && !kOtherFFTrack_Rec){
+
+	h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+	h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+      }
       if(!kGenDVCS
 	 && applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0
 	 && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() >= fMin_EmPz && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() <= fMax_EmPz
 	 && !kBarrelPos_Rec                                                    
 	 && !kNonElecNeg_Rec                                                  
-	 && !kOtherFFTrack_Rec) h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-      
+	 && !kOtherFFTrack_Rec){
+
+	h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+	h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+	h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+      }
       
       //cout<<"[DEBUG]: MANDELSTAM T FILLED"<<endl;
 
@@ -1278,6 +1314,14 @@ void ePIC_DVCS_TASK::doAnalysis(){
   // Q2
   h_Q2_MC->Write();
   h_Q2_Reco->Write();
-      
+  // Extra cuts?
+  h_tq2Vx_MC->Write();
+  h_tq2Vx_RP->Write();
+  h_Pmiss2Vt->Write();
+  h_Ptmiss2Vt->Write();
+  h_Pmiss3Vt->Write();
+  h_Ptmiss3Vt->Write();
+  h_dPhi_prot->Write();
+  
   return;
 }
