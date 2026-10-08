@@ -1185,9 +1185,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
 
-	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
-	h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
-	
 	//cout<<"[DEBUG]: RECO T (B0) FILLED"<<endl;
       }
       // Reconstructed and accepted - RP only
@@ -1209,9 +1206,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_t_RPReco->Fill(t_rec);
 
 	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
-
-	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
-	h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
 	
 	//cout<<"[DEBUG]: RECO T (RP) FILLED"<<endl;
       }
@@ -1253,6 +1247,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 	h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 	h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+
+	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
+	h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
       }
       if(!kGenDVCS
 	 && applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0
@@ -1264,6 +1261,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 	h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 	h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+
+	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
+	h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
       }
       
       //cout<<"[DEBUG]: MANDELSTAM T FILLED"<<endl;

@@ -1219,9 +1219,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
-	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
-	h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
-	  
 	//h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
 	//h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
 	
@@ -1295,9 +1292,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
-	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
-	h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
-	
 	//cout<<"[DEBUG] 2D x:t distribution filled"<<endl;
 
 	// h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
@@ -1535,6 +1529,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 		h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 		h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+
+		P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
+		h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1571,6 +1568,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		h_Ptmiss3_RP->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 		h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 		h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+
+		P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
+		h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
