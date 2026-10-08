@@ -649,7 +649,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH2D* h_Ptmiss3Vt = new TH2D("ptmiss3vt",";|t|;p_{T,miss,e'p'#gamma}",20,0.,2.,300,0.,3.);
   
   // dPhi (rec. - exp. proton)
-  TH1D* h_dPhi_prot = new TH1D("dphi_prot",";#delta#phi [rad];",130,-6.5,6.5);
+  TH1D* h_dPhi_prot = new TH1D("dphi_prot",";#delta#phi [rad];",260,-6.5,6.5);
   
   //---------------------------------------------------------
   // Loop over files in list
