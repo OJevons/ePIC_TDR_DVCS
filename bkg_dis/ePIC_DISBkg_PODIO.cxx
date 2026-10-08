@@ -1132,7 +1132,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	}       //fi (non-electron -ve particles)
       }         //fi (e'p'gamma)
       // e'gamma final state (fakes for eXBE reco.)
-      if(scate4_rec.size() == 1 && scatg4_rec.size() == 1 && !kGenDVCS){
+      if(applyCuts_Electron(beame4,scate4_gen) && applyCuts_Photon(scatg4_gen) && !kGenDVCS){
         hPassCuts_Rec->Fill(12);
 
         // ...and non-elec -ve veto
