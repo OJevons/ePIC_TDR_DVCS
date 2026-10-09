@@ -639,8 +639,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   
 
   //|t|/Q2 vs x
-  TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",1e4,0.,1.,1e4,0.,2.);
-  TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",1e4,0.,1.,1e4,0.,2.);
+  TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",1e3,0.,1.,1e3,0.,2.);
+  TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",1e3,0.,1.,1e3,0.,2.);
   
   // missing p/pT vs t
   TH2D* h_Pmiss2Vt = new TH2D("pmiss2vt",";|t|;p_{miss,e'#gamma}",20,0.,2.,5*nbins,protlower,protupper);
