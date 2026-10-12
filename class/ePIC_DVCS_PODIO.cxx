@@ -396,6 +396,24 @@ Double_t ePIC_DVCS_TASK::calcConeAngle(P3EVector k, P3EVector p, P3EVector kprim
   return Angle(gp3,gExpected);
 }
 
+// Calculation of difference in azimuthal angle of real photon and scattered proton, in the qp CoM frame
+Double_t ePIC_DVCS_TASK::calcAzimGP(P3EVector k, P3EVector p, P3EVector kprime, P3EVector pprime, P3EVector gprime){
+  // Before calculating angle, boost into gamma*-p rest frame
+  // Calculate q in lab frame
+  P3EVector q = (k-kprime);
+  // Boost vector
+  MomVector vTgtRest = (p+q).BoostToCM();
+
+  gprime = boost(gprime,vTgtRest);
+  pprime = boost(pprime,vTgtRest);
+
+  // Extract azimuthal angles and calculate difference
+  double phi_gp = gprime.Phi();
+  double phi_pp = pprime.Phi();
+
+  return phi_gp-phi_pp;
+}
+
 //----------------------------------------------------
 //----------------------------------------------------
 //                     DO ANALYSIS
@@ -650,6 +668,14 @@ void ePIC_DVCS_TASK::doAnalysis(){
   
   // dPhi (rec. - exp. proton)
   TH1D* h_dPhi_prot = new TH1D("dphi_prot",";#delta#phi [rad];",260,-6.5,6.5);
+
+  // dPhi (photon); i.e. cone angle
+  TH1D* h_Cone_MC = = new TH1D("cone_mc",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
+  TH1D* h_Cone_RP = = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
+
+  // dPhi (photon to proton - expect coplanar)
+  TH1D* h_dPhigp_MC = = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
+  TH1D* h_dPhigp_RP = = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
   
   //---------------------------------------------------------
   // Loop over files in list
@@ -1422,6 +1448,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		// Plot missing kinematics (all cuts applied except missing pT)
 		h_Pmiss3_MC->Fill(calcPMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
 		h_Ptmiss3_MC->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
+		h_Cone_MC->Fill(calcConeAngle(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
+		h_dPhigp_MC->Fill(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1532,6 +1560,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 		P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
 		h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
+
+		h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+		h_dPhigp_RP->Fill(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1571,6 +1602,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 		P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
 		h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
+
+		h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+		h_dPhigp_RP->Fill(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1738,6 +1772,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_Pmiss3Vt->Write();
   h_Ptmiss3Vt->Write();
   h_dPhi_prot->Write();
+  h_Cone_MC->Write();
+  h_Cone_RP->Write();
+  h_dPhigp_MC->Write();
+  h_dPhigp_RP->Write();
   
   hPassCuts_MC->Write();
   hPassCuts_Rec->Write();
