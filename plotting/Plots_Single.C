@@ -157,7 +157,7 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   }
 
   // Load chosen input file
-  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+".root";
+  TString sIn = sFilePath + "ePIC_DVCS_"+campaign+"_"+energy+"_"+hel+"_simple.root";
   TFile* fIn = TFile::Open(sIn);
 
   //--------------------------------------------------------------------
