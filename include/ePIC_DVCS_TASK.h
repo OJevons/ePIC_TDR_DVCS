@@ -109,7 +109,8 @@ class ePIC_DVCS_TASK{
   Int_t LeviCivita(int i, int j, int k, int l);
   Double_t calcPhiQPQG(P3EVector k, P3EVector p, P3EVector kprime, P3EVector gprime);
   Double_t calcConeAngle(P3EVector k, P3EVector p, P3EVector kprime, P3EVector pprime, P3EVector gprime);
-
+  Double_t calcAzimGP(P3EVector k, P3EVector p, P3EVector kprime, P3EVector pprime, P3EVector gprime);
+  
   void doAnalysis();
 };
 
