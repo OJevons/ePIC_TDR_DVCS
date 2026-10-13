@@ -938,7 +938,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	if(zdcreco.getClusters()) kOtherFFTrack_Rec = true;
       }
       
-
+      //cout<<"[DEBUG]: PARTICLES AND VETOES FOUND"<<endl;
+      
       //---------------------------------------------------------
       // Fill histograms
       //---------------------------------------------------------
@@ -1103,6 +1104,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
         // ...and proton track theta cut (RP region)
 	if(scatp4_rom[0].Theta() > 0 && scatp4_rom[0].Theta() <= 0.005) hPassCuts_Rec->Fill(5); //fi (p'theta cut)
       } //fi (RP proton)
+      //cout<<"[DEBUG]: RECO PASSCUTS - EPG SINGLE GOOD"<<endl;
       // ------------------Event---------------------
       // Full DVCS multiplicity (using B0 protons)...
       if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rec, "B0") && scatp4_rom.size() == 0 && !kGenDVCS){
@@ -1132,6 +1134,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  }     //fi (ZDC/OMD veto)
 	}       //fi (non-electron -ve particles)
       }         //fi (e'p'gamma)
+      //cout<<"[DEBUG]: RECO PASSCUTS - B0 EXCLUSIVE GOOD"<<endl;
       // Full DVCS multiplicity (using RP tracks)...
       if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0 && !kGenDVCS){
         hPassCuts_Rec->Fill(6);
@@ -1160,8 +1163,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  }     //fi (ZDC/OMD veto)
 	}       //fi (non-electron -ve particles)
       }         //fi (e'p'gamma)
+      //cout<<"[DEBUG]: RECO PASSCUTS - RP EXCLUSIVE GOOD"<<endl;
       // e'gamma final state (fakes for eXBE reco.)
-      if(applyCuts_Electron(beame4,scate4_gen) && applyCuts_Photon(scatg4_gen) && !kGenDVCS){
+      if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && !kGenDVCS){
         hPassCuts_Rec->Fill(12);
 
         // ...and non-elec -ve veto
@@ -1188,6 +1192,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  }     //fi (ZDC/OMD veto)
 	}       //fi (non-elec -ve veto)
       }         //fi (e'gamma)
+      //cout<<"[DEBUG]: RECO PASSCUTS - SEMI-INCLUSIVE GOOD"<<endl;
 
       //cout<<"[DEBUG]: RECO PASSCUTS FILLED"<<endl;
 
@@ -1283,6 +1288,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 	h_dPhigp_RP->Fill(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
       }
+      //cout<<"[DEBUG]: MISSING KIN (B0) FILLED"<<endl;
+      
       if(!kGenDVCS
 	 && applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0
 	 && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() >= fMin_EmPz && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() <= fMax_EmPz
@@ -1300,6 +1307,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 	h_dPhigp_RP->Fill(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
       }
+      //cout<<"[DEBUG]: MISSING KIN (RP) FILLED"<<endl;
       
       //cout<<"[DEBUG]: MANDELSTAM T FILLED"<<endl;
 

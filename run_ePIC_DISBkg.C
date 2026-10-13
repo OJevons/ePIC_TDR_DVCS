@@ -28,7 +28,6 @@ void run_ePIC_DISBkg(TString camp="Camp", TString energy="9x130", TString sett="
   TString sOutFileName;
   if(comment=="X") sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+sett;
   else sOutFileName = "./rootfiles/ePIC_DIS_"+camp+"_"+energy+"_"+comment;
-  
   objDIS->setOutFileName(sOutFileName);
 
   // Set DVCS cut values
