@@ -583,10 +583,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH2D* h_Pmiss3Vt = new TH2D("pmiss3vt",";|t|;p_{miss,e'p'#gamma}",20,0.,2.,30,-5,25);
   TH2D* h_Ptmiss3Vt = new TH2D("ptmiss3vt",";|t|;p_{T,miss,e'p'#gamma}",20,0.,2.,300,0.,3.);
   TH1D* h_dPhi_prot = new TH1D("dphi_prot",";#delta#phi [rad];",260,-6.5,6.5);
-  TH1D* h_Cone_MC = = new TH1D("cone_mc",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
-  TH1D* h_Cone_RP = = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
-  TH1D* h_dPhigp_MC = = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
-  TH1D* h_dPhigp_RP = = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
+  TH1D* h_Cone_MC = new TH1D("cone_mc",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
+  TH1D* h_Cone_RP = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
+  TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
+  TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
   
   //---------------------------------------------------------
   // Loop over files in list
