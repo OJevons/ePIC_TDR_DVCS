@@ -411,6 +411,8 @@ Double_t ePIC_DVCS_TASK::calcAzimGP(P3EVector k, P3EVector p, P3EVector kprime, 
   double phi_gp = gprime.Phi();
   double phi_pp = pprime.Phi();
 
+  for(float phi : {phi_gp,phi_pp}){ if(phi < 0) phi += 2*TMath::Pi(); }
+
   return phi_gp-phi_pp;
 }
 
@@ -674,8 +676,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_Cone_RP = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
 
   // dPhi (photon to proton - expect coplanar)
-  TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
-  TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
+  TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
+  TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   
   //---------------------------------------------------------
   // Loop over files in list
@@ -1449,7 +1451,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		h_Pmiss3_MC->Fill(calcPMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
 		h_Ptmiss3_MC->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
 		h_Cone_MC->Fill(calcConeAngle(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
-		h_dPhigp_MC->Fill(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
+		h_dPhigp_MC->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0])));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1562,7 +1564,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
 
 		h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-		h_dPhigp_RP->Fill(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+		h_dPhigp_RP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0])));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1604,7 +1606,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
 
 		h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-		h_dPhigp_RP->Fill(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+		h_dPhigp_RP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0])));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
