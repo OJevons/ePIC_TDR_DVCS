@@ -585,8 +585,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_dPhi_prot = new TH1D("dphi_prot",";#delta#phi [rad];",260,-6.5,6.5);
   TH1D* h_Cone_MC = new TH1D("cone_mc",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
   TH1D* h_Cone_RP = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
-  TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
-  TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",260,-6.5,6.5);
+  TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
+  TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   
   //---------------------------------------------------------
   // Loop over files in list
