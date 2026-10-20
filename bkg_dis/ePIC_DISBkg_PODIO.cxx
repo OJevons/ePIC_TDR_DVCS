@@ -239,19 +239,17 @@ Bool_t ePIC_DVCS_TASK::applyCuts_All(P3EVector beame, P3EVector beamp, vector<P3
   if(sProtonDet == "semi"){
     // E-pz cut (general to fully exclusive and semi-inclusive reco.)
     fEmPz = (scate[0]+scatg[0]).E() - (scate[0]+scatg[0]).Pz();
-    //if(fEmPz < fMin_EmPz || fEmPz > fMax_EmPz) passCuts = false;
-    // Exit from function if failure
-    //if(!passCuts) return passCuts;
     
     fpTmiss = calcPtMiss_2Body(beame, beamp, scate[0], scatg[0]);
     passCuts = applyCuts_DVCS(sProtonDet);
   }
   else{
+    // Photon-proton coplanarity cut
+    float phigp =calcAzimGP(beame4, beamp4, scate4[0], scatp4[0], scatg4[0]); 
+    if(TMath::Abs(phigp)-TMath::Pi() < -0.18 || TMath::Abs(phigp)-TMath::Pi() > 0.18) passCuts = false;
+    
     // E-pz cut (general to fully exclusive and semi-inclusive reco.)
     fEmPz = (scate[0]+scatg[0]+scatp[0]).E() - (scate[0]+scatg[0]+scatp[0]).Pz();
-    //if(fEmPz < fMin_EmPz || fEmPz > fMax_EmPz) passCuts = false;
-    // Exit from function if failure
-    //if(!passCuts) return passCuts;
 
     // Last cuts - fully exclusive DVCS event kinematics
     fpTmiss = calcPtMiss_3Body(beame, beamp, scate[0], scatp[0], scatg[0]);
@@ -546,11 +544,11 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* hCount = new TH1D("count",";;",2,0,2);
   hCount->GetXaxis()->SetBinLabel(1,"Not_epg");
   hCount->GetXaxis()->SetBinLabel(2,"Is_epg");
-  const int nCuts{18};
-  TString cutname[18] = {"inc-sing_ele","e'-Q^{2}",
+  const int nCuts{19};
+  TString cutname[19] = {"inc-sing_ele","e'-Q^{2}",
                          "inc-sing_pho","#gamma-E_{#gamma}",
                          "inc-sing_pro","p'-#theta_{p}",
-                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-BarrelPosVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}",
+                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-BarrelPosVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}","e'p'#gamma-#Delta#phi_{#gamma p}",
                          "e'#gamma-mult","e'#gamma-NegTrackVeto","e'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'#gamma-(E-pz)","e'#gamma-p_{T,miss}"};
   TH1D* hPassCuts_MC = new TH1D("passcuts_mc",";;",nCuts,0,nCuts);
   TH1D* hPassCuts_Rec = new TH1D("passcuts_rec",";;",nCuts,0,nCuts);
@@ -1038,35 +1036,41 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		
 		// ...and missing pT cut
 		float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]);
-		if(pTmiss <= 0.5) hPassCuts_MC->Fill(11); //fi (pTmiss cut)
-	      } //fi (E-pz cut)
-	    }   //fi (barrel +ve veto)
-	  }     //fi (ZDC/OMD veto)
-	}       //fi (non-electron -ve particles)
-      }         //fi (e'p'gamma)
+		if(pTmiss <= 0.5){
+		  hPassCuts_MC->Fill(11);
+
+		  // ...and gamma-p coplanarity cut
+		  float dphi = TMath::Abs(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
+		  if(TMath::Abs(dphi - TMath::Pi()) <= 0.18) hPassCuts_MC->Fill(12); // fi (coplanarity cut)
+		} //fi (pTmiss cut)
+	      }   //fi (E-pz cut)
+	    }     //fi (barrel +ve veto)
+	  }       //fi (ZDC/OMD veto)
+	}         //fi (non-electron -ve particles)
+      }           //fi (e'p'gamma)
       // e'gamma final state (fakes for eXBE reco.)
       if(scate4_gen.size() == 1 && scatg4_gen.size() == 1 && !kGenDVCS){
-        hPassCuts_MC->Fill(12);
+        hPassCuts_MC->Fill(13);
 
         // ...and non-elec -ve veto
 	if(!kNonElecNeg_MC){
-          hPassCuts_MC->Fill(13);
+          hPassCuts_MC->Fill(14);
           // ...and ZDC/OMD veto
 	  if(!kOtherFFTrack_MC){
-            hPassCuts_MC->Fill(14);
+            hPassCuts_MC->Fill(15);
 
             // ...and barrel +ve track veto
 	    if(!kBarrelPos_MC){
-              hPassCuts_MC->Fill(15);
+              hPassCuts_MC->Fill(16);
 
               // ...and (E-pz cut)
 	      float EmPz = (scate4_gen[0]+scatg4_gen[0]).E() - (scate4_gen[0]+scatg4_gen[0]).Pz();
               if(EmPz >= 15. && EmPz <= 25.){
-                hPassCuts_MC->Fill(16);
+                hPassCuts_MC->Fill(17);
 
                 // ...and missing pT cut
 		float pTmiss = calcPtMiss_2Body(beame4, beamp4, scate4_gen[0], scatg4_gen[0]);
-                if(pTmiss <= 0.5) hPassCuts_MC->Fill(17); //fi (pTmiss cut)
+                if(pTmiss <= 0.5) hPassCuts_MC->Fill(18); //fi (pTmiss cut)
 	      } //fi (E-pz cut)
 	    }   //fi (barrel +ve tracks)
 	  }     //fi (ZDC/OMD veto)
@@ -1130,12 +1134,18 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		
 		// ...and missing pT cut
 		float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
-		if(pTmiss <= 0.5) hPassCuts_Rec->Fill(11); //fi (pTmiss cut)
-	      } //fi (E-pz cut)
-	    }   //fi (barrel +ve veto)
-	  }     //fi (ZDC/OMD veto)
-	}       //fi (non-electron -ve particles)
-      }         //fi (e'p'gamma)
+		if(pTmiss <= 0.5){
+		  hPassCuts_Rec->Fill(11);
+
+		  // ...and gamma-p coplanarity cut
+		  float dphi = TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
+		  if(TMath::Abs(dphi - TMath::Pi()) <= 0.18) hPassCuts_Rec->Fill(12); // fi (coplanarity cut)
+		} //fi (pTmiss cut)
+	      }   //fi (E-pz cut)
+	    }     //fi (barrel +ve veto)
+	  }       //fi (ZDC/OMD veto)
+	}         //fi (non-electron -ve particles)
+      }           //fi (e'p'gamma)
       //cout<<"[DEBUG]: RECO PASSCUTS - B0 EXCLUSIVE GOOD"<<endl;
       // Full DVCS multiplicity (using RP tracks)...
       if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0 && !kGenDVCS){
@@ -1159,36 +1169,42 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		
 		// ...and missing pT cut
 		float pTmiss = calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
-		if(pTmiss <= 0.5) hPassCuts_Rec->Fill(11); //fi (pTmiss cut)
-	      } //fi (E-pz cut)
-	    }   //fi (barrel +ve veto)
-	  }     //fi (ZDC/OMD veto)
-	}       //fi (non-electron -ve particles)
-      }         //fi (e'p'gamma)
+		if(pTmiss <= 0.5){
+		  hPassCuts_Rec->Fill(11);
+
+		  // ...and gamma-p coplanarity cut
+		  float dphi = TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
+		  if(TMath::Abs(dphi - TMath::Pi()) <= 0.18) hPassCuts_Rec->Fill(12); // fi (coplanarity cut)
+		} //fi (pTmiss cut)
+	      }   //fi (E-pz cut)
+	    }     //fi (barrel +ve veto)
+	  }       //fi (ZDC/OMD veto)
+	}         //fi (non-electron -ve particles)
+      }           //fi (e'p'gamma)
       //cout<<"[DEBUG]: RECO PASSCUTS - RP EXCLUSIVE GOOD"<<endl;
       // e'gamma final state (fakes for eXBE reco.)
       if(applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && !kGenDVCS){
-        hPassCuts_Rec->Fill(12);
+        hPassCuts_Rec->Fill(13);
 
         // ...and non-elec -ve veto
 	if(!kNonElecNeg_Rec){
-          hPassCuts_Rec->Fill(13);
+          hPassCuts_Rec->Fill(14);
           // ...and ZDC/OMD veto
 	  if(!kOtherFFTrack_Rec){
-            hPassCuts_Rec->Fill(14);
+            hPassCuts_Rec->Fill(15);
 
             // ...and barrel +ve track veto
 	    if(!kBarrelPos_Rec){
-              hPassCuts_Rec->Fill(15);
+              hPassCuts_Rec->Fill(16);
 
               // ...and (E-pz cut)
 	      float EmPz = (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz();
               if(EmPz >= 15. && EmPz <= 25.){
-                hPassCuts_Rec->Fill(16);
+                hPassCuts_Rec->Fill(17);
 
                 // ...and missing pT cut
 		float pTmiss = calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
-                if(pTmiss <= 0.5) hPassCuts_Rec->Fill(17); //fi (pTmiss cut)
+                if(pTmiss <= 0.5) hPassCuts_Rec->Fill(18); //fi (pTmiss cut)
 	      } //fi (E-pz cut)
 	    }   //fi (barrel +ve tracks)
 	  }     //fi (ZDC/OMD veto)
