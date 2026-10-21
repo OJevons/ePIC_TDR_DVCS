@@ -244,7 +244,7 @@ Bool_t ePIC_DVCS_TASK::applyCuts_All(P3EVector beame, P3EVector beamp, vector<P3
   }
   else{
     // Photon-proton coplanarity cut
-    float phigp =calcAzimGP(beame4, beamp4, scate4[0], scatp4[0], scatg4[0]); 
+    float phigp = calcAzimGP(beame, beamp, scate[0], scatp[0], scatg[0]); 
     if(TMath::Abs(phigp)-TMath::Pi() < -0.18 || TMath::Abs(phigp)-TMath::Pi() > 0.18) passCuts = false;
     
     // E-pz cut (general to fully exclusive and semi-inclusive reco.)
