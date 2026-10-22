@@ -29,6 +29,8 @@
 
 // Class header include
 #include "../include/ePIC_DVCS_TASK.h"
+// Flexible (ragged) Q2/xB/|t| binning read from a text file
+#include "../include/DVCSBinning.hh"
 
 //----------------------------------------------------
 //----------------------------------------------------
@@ -587,6 +589,68 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_Cone_RP = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
   TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
+
+   // 8) 3D differential distributions: Trento phi  ->  [Q2][xB][|t|]
+  // -------------------------------------------------------------------
+  //  Binning is now read from an external text file (see DVCSBinning.hh /
+  //  bins.txt) so that it can vary from one configuration to another. The
+  //  number of Q2/xB/|t| bins is defined entirely by that file. The binning
+  //  is region-dependent (B0 vs RP) and ragged (the |t| edges may depend on
+  //  the xB slice).
+  // -------------------------------------------------------------------
+  DVCSBinning binning;
+  // NOTE: change this if your binning file lives elsewhere or is named per
+  //       configuration, e.g. "bins_"+camp+"_"+energy+".txt".
+  TString sBinFile = "./binning/bins_"+sEnergy+".txt";
+  if(!binning.load(sBinFile.Data())){
+    std::cerr << "[ePIC_DVCS] FATAL: could not load binning from " << sBinFile << std::endl;
+    return;
+  }
+  binning.print();
+  const int nQ2bins = binning.nQ2();
+
+  // Ragged histogram containers: [Q2][xB][|t|]
+  typedef std::vector<std::vector<std::vector<TH1D*>>> H1Grid;
+
+  // B0 region (B0 binning)
+  H1Grid h_TPhiDiff_B0Reco;
+  H1Grid h_Q2Rec_B0, h_xBRec_B0, h_tRec_B0;
+  // RP region (RP binning)
+  H1Grid h_TPhiDiff_RPReco;
+  H1Grid h_Q2Rec_RP, h_xBRec_RP, h_tRec_RP;
+ 
+  // Helper: book a ragged [Q2][xB][|t|] grid of TH1D for a given region.
+  auto bookGrid = [&](H1Grid& grid, int reg, const char* nameBase, const char* yAxis,
+                      int nYbins, double yLo, double yHi){
+    grid.resize(nQ2bins);
+    for(int q{0}; q<nQ2bins; q++){
+      const int nx = binning.nXB(reg,q);
+      grid[q].resize(nx);
+      for(int x{0}; x<nx; x++){
+        const int nt = binning.nT(reg,q,x);
+        grid[q][x].resize(nt, nullptr);
+        for(int t{0}; t<nt; t++){
+          TString hname  = Form("%s[%i][%i][%i]", nameBase, q, x, t);
+          TString htitle = Form("%.2e<Q^{2}<%.2e GeV^{2}, %.2e<x_{B}<%.2e, %.2f<|t|<%.2f;%s;",
+                                binning.q2Low(q), binning.q2High(q),
+                                binning.xBLow(reg,q,x), binning.xBHigh(reg,q,x),
+                                binning.tLow(reg,q,x,t), binning.tHigh(reg,q,x,t), yAxis);
+          grid[q][x][t] = new TH1D(hname, htitle, nYbins, yLo, yHi);
+        }
+      }
+    }
+  };
+
+  // Book all differential families (y-axis binning kept as in the original code)
+  bookGrid(h_TPhiDiff_B0Reco, DVCSBinning::kB0, "tphi_b0reco", "#phi_{h}(Reco) [deg]",            10,  0.,  360.);
+  bookGrid(h_TPhiDiff_RPReco, DVCSBinning::kRP, "tphi_rpreco", "#phi_{h}(Reco) [deg]",            10,  0.,  360.);
+
+  bookGrid(h_Q2Rec_B0, DVCSBinning::kB0, "q2rec_b0", "Q^{2}(Rec) [GeV^{2}]", 220,   0., 110.);
+  bookGrid(h_xBRec_B0, DVCSBinning::kB0, "xbrec_b0", "x_{B}(Rec)",           10000,   0.,   1.);
+  bookGrid(h_tRec_B0,  DVCSBinning::kB0, "trec_b0",  "|t|(Rec) [GeV^{2}]",   20,   0.,   2.);
+  bookGrid(h_Q2Rec_RP, DVCSBinning::kRP, "q2rec_rp", "Q^{2}(Rec) [GeV^{2}]", 220,   0., 110.);
+  bookGrid(h_xBRec_RP, DVCSBinning::kRP, "xbrec_rp", "x_{B}(Rec)",           10000,   0.,   1.);
+  bookGrid(h_tRec_RP,  DVCSBinning::kRP, "trec_rp",  "|t|(Rec) [GeV^{2}]",   20,   0.,   2.);
   
   //---------------------------------------------------------
   // Loop over files in list
@@ -1235,6 +1299,28 @@ void ePIC_DVCS_TASK::doAnalysis(){
        	h_t_B0Acc->Fill(t_acc);
 	h_t_B0Reco->Fill(t_rec);
 
+	// 3D binned results
+	// Need Q2 and xB for events
+	Float_t q2_acc = calcQ2_Elec(beame4, scate4_aso[0]);
+	Float_t xB_acc = calcX_Elec(beame4, beamp4, scate4_aso[0]);
+
+	// Find bin numbers (B0 region binning)
+	int binq2 = binning.findQ2(q2_acc);
+	int binxB = binning.findXB(DVCSBinning::kB0, binq2, xB_acc);
+	int bint  = binning.findT (DVCSBinning::kB0, binq2, binxB, t_acc);
+	
+	Float_t tphi_rec = calcTrentoPhi_qg(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
+	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
+	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
+	
+	if(binq2>=0 && binxB>=0 && bint>=0){
+	  h_TPhiDiff_B0Reco[binq2][binxB][bint]->Fill(tphi_rec*TMath::RadToDeg());
+	  
+	  h_Q2Rec_B0[binq2][binxB][bint]->Fill(q2_rec);
+	  h_xBRec_B0[binq2][binxB][bint]->Fill(xB_rec);
+	  h_tRec_B0[binq2][binxB][bint]->Fill(t_rec);
+	}
+	
 	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
 
 	//cout<<"[DEBUG]: RECO T (B0) FILLED"<<endl;
@@ -1249,14 +1335,38 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	
 	//cout<<"[DEBUG]: TRYING FULL EPG (RP)"<<endl;
 	//cout<<"[DEBUG]: N_REC = "<<scatp4_rom.size()<<"\tN_GEN = "<<scatp4_gen.size()<<endl;
-	
+
+	int bint{0};
 	if(scatp4_gen.size() > 0){
 	  Float_t t_acc = calcT_BABE(beamp4,scatp4_gen[0]);
 	  h_t_RPAcc->Fill(t_acc);
+
+	  bint = binning.findT (DVCSBinning::kB0, binq2, binxB, t_acc);
 	}
 	Float_t t_rec = calcT_BABE(beamp4,scatp4_rom[0]);
 	h_t_RPReco->Fill(t_rec);
 
+	// 3D binned results
+	// Need Q2 and xB for events
+	Float_t q2_acc = calcQ2_Elec(beame4, scate4_aso[0]);
+	Float_t xB_acc = calcX_Elec(beame4, beamp4, scate4_aso[0]);
+
+	// Find bin numbers (B0 region binning)
+	int binq2 = binning.findQ2(q2_acc);
+	int binxB = binning.findXB(DVCSBinning::kB0, binq2, xB_acc);
+	
+	Float_t tphi_rec = calcTrentoPhi_qg(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
+	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
+	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
+	
+	if(binq2>=0 && binxB>=0 && bint>=0){
+	  h_TPhiDiff_RPReco[binq2][binxB][bint]->Fill(tphi_rec*TMath::RadToDeg());
+	  
+	  h_Q2Rec_RP[binq2][binxB][bint]->Fill(q2_rec);
+	  h_xBRec_RP[binq2][binxB][bint]->Fill(xB_rec);
+	  h_tRec_RP[binq2][binxB][bint]->Fill(t_rec);
+	}
+	
 	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
 	
 	//cout<<"[DEBUG]: RECO T (RP) FILLED"<<endl;
@@ -1387,6 +1497,29 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_Cone_RP->Write();
   h_dPhigp_MC->Write();
   h_dPhigp_RP->Write();
+
+  for(int q{0}; q<nQ2bins; q++){
+    // B0 region grids
+    for(int x{0}; x<binning.nXB(DVCSBinning::kB0,q); x++){
+      for(int t{0}; t<binning.nT(DVCSBinning::kB0,q,x); t++){
+	h_Q2Rec_B0[q][x][t]->Write();
+	h_xBRec_B0[q][x][t]->Write();
+	h_tRec_B0[q][x][t]->Write();
+	h_TPhiDiff_B0Reco[q][x][t]->Write();
+      }
+    }
+    // RP region grids (and MC truth, which uses the RP scheme)
+    for(int x{0}; x<binning.nXB(DVCSBinning::kRP,q); x++){
+      for(int t{0}; t<binning.nT(DVCSBinning::kRP,q,x); t++){
+	h_Q2Rec_RP[q][x][t]->Write();
+	h_xBRec_RP[q][x][t]->Write();
+	h_tRec_RP[q][x][t]->Write();
+	h_TPhiDiff_RPReco[q][x][t]->Write();
+      }
+    }
+  }
+
+  fOutFile->Close();
   
   return;
 }
