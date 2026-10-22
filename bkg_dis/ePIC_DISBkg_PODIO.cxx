@@ -1336,25 +1336,25 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	//cout<<"[DEBUG]: TRYING FULL EPG (RP)"<<endl;
 	//cout<<"[DEBUG]: N_REC = "<<scatp4_rom.size()<<"\tN_GEN = "<<scatp4_gen.size()<<endl;
 
+	// Need Q2 and xB for events
+	Float_t q2_acc = calcQ2_Elec(beame4, scate4_aso[0]);
+	Float_t xB_acc = calcX_Elec(beame4, beamp4, scate4_aso[0]);
+	
+	// Find bin numbers (RP region binning)
 	int bint{0};
+	int binq2 = binning.findQ2(q2_acc);
+	int binxB = binning.findXB(DVCSBinning::kRP, binq2, xB_acc);
+
 	if(scatp4_gen.size() > 0){
 	  Float_t t_acc = calcT_BABE(beamp4,scatp4_gen[0]);
 	  h_t_RPAcc->Fill(t_acc);
 
-	  bint = binning.findT (DVCSBinning::kB0, binq2, binxB, t_acc);
+	  bint = binning.findT (DVCSBinning::kRP, binq2, binxB, t_acc);
 	}
 	Float_t t_rec = calcT_BABE(beamp4,scatp4_rom[0]);
 	h_t_RPReco->Fill(t_rec);
 
 	// 3D binned results
-	// Need Q2 and xB for events
-	Float_t q2_acc = calcQ2_Elec(beame4, scate4_aso[0]);
-	Float_t xB_acc = calcX_Elec(beame4, beamp4, scate4_aso[0]);
-
-	// Find bin numbers (B0 region binning)
-	int binq2 = binning.findQ2(q2_acc);
-	int binxB = binning.findXB(DVCSBinning::kB0, binq2, xB_acc);
-	
 	Float_t tphi_rec = calcTrentoPhi_qg(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
 	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
 	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
