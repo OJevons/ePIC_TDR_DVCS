@@ -182,6 +182,14 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_t_RPCorr->Divide(h_t_RPEff);
   h_t_LCCorr->Divide(h_t_LCEff);
 
+  cout<<"-t \t eff. (B0) \t eff. (RP) \t eff. (LC)"<<endl;
+  for(int bin{1}; bin<h_t_B0Eff->GetNbinsX()+1;bin++){
+    cout<<"["<<h_t_B0Eff->GetBinLowEdge(bin)<<", "<<h_t_B0Eff->GetXaxis()->GetBinUpEdge(bin)<<"]\t"
+	<<h_t_B0Eff->GetBinContent(bin)<<"\t"
+	<<h_t_RPEff->GetBinContent(bin)<<"\t"
+	<<h_t_LCEff->GetBinContent(bin)<<endl;
+  }
+  
   //---------------------------------------------------------------------
   // Mandelstam t: combine corrected points
   //---------------------------------------------------------------------
@@ -194,12 +202,16 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // If proton methods have efficiency > 5%, use those (if both B0 and RP, use B0)
   // If not, use light-cone e'gamma method
   for(int bin{1}; bin<h_t_Truth->GetNbinsX()+1; ++bin){
+    cout<<"["<<h_t_Truth->GetBinLowEdge(bin)<<", "<<h_t_Truth->GetXaxis()->GetBinUpEdge(bin)<<"] - ";
+												  
     // 1. Check RP
     if(h_t_RPEff->GetBinContent(bin) >= 0.05){
       h_t_GoodCorr->SetBinContent(bin,h_t_RPCorr->GetBinContent(bin));
       h_t_GoodCorr->SetBinError(bin,h_t_RPCorr->GetBinError(bin));
       h_t_GoodReco->SetBinContent(bin,h_t_RPRec->GetBinContent(bin));
       h_t_GoodReco->SetBinError(bin,h_t_RPRec->GetBinError(bin));
+
+      cout<<"Using BABE (RP)"<<endl;
     }
     // 2. Then check B0 (will override RP in case of overlap)
     if(h_t_B0Eff->GetBinContent(bin) >= 0.05){
@@ -207,13 +219,17 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
       h_t_GoodCorr->SetBinError(bin,h_t_B0Corr->GetBinError(bin));
       h_t_GoodReco->SetBinContent(bin,h_t_B0Rec->GetBinContent(bin));
       h_t_GoodReco->SetBinError(bin,h_t_B0Rec->GetBinError(bin));
+
+      cout<<"Using BABE (B0)"<<endl;
     }
     // 3. If neither proton reconstruction method has good reconstruction, use e' and gamma
-    else{
+    if(h_t_B0Eff->GetBinContent(bin) < 0.05 && h_t_RPEff->GetBinContent(bin) < 0.05){
       h_t_GoodCorr->SetBinContent(bin,h_t_LCCorr->GetBinContent(bin));
       h_t_GoodCorr->SetBinError(bin,h_t_LCCorr->GetBinError(bin));
       h_t_GoodReco->SetBinContent(bin,h_t_LCRec->GetBinContent(bin));
       h_t_GoodReco->SetBinError(bin,h_t_LCRec->GetBinError(bin));
+
+      cout<<"Using eXBE"<<endl;
     }
   }
 
@@ -289,7 +305,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_t_RPRec->Draw("same");
   h_t_LCRec->Draw("same");  
   // Add text
-  TLatex* tePICLabel_tDIS = new TLatex(0.1, 0.18*h_t_Truth->GetMaximum(), "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep, 10x130 GeV , L_{proj} = 5 fb^{-1}}");
+  TLatex* tePICLabel_tDIS = new TLatex(0.1, 0.18*h_t_Truth->GetMaximum(), "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep, 10x130 GeV , L_{proj} = "+EIClumi/1e15+" fb^{-1}}");
   tePICLabel_tDIS->SetTextSize(0.037);
   tePICLabel_tDIS->Draw("same");
   // Add legend
@@ -358,8 +374,8 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_DISall->SetHeader("DIS - BABE only");
   lt_DISall->AddEntry(h_t_Truth,"EpIC MC truth","l");
   lt_DISall->AddEntry(h_t_GoodCorr,"Reco. DVCS (open: raw.; closed: corr.)","lp");
-  lt_DISall->AddEntry(h_tDISLQ2_B0Rec,"Raw reco. DIS - Q^{2} < 1 GeV^{2}","lp");
-  lt_DISall->AddEntry(h_tDISHQ2_B0Rec,"Raw reco. DIS - Q^{2} < 10 GeV^{2}","lp");
+  lt_DISall->AddEntry(h_tDISLQ2_B0Rec,"Raw reco. DIS - 1 < Q^{2} < 10 GeV^{2}","lp");
+  lt_DISall->AddEntry(h_tDISHQ2_B0Rec,"Raw reco. DIS - 10 < Q^{2} < 100 GeV^{2}","lp");
   lt_DISall->Draw();
   // Save figure
   if(kSAVE) ct_DISall->SaveAs("../figs/DISComp_" + energy +"_t_Q2hi.png");
@@ -394,8 +410,8 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_DISeg->SetHeader("DIS - eXBE only");
   lt_DISeg->AddEntry(h_t_Truth,"EpIC MC truth","l");
   lt_DISeg->AddEntry(h_t_GoodCorr,"Reco. DVCS (open: raw.; closed: corr.)","lp");
-  lt_DISeg->AddEntry(h_tDISLQ2_LCRec,"Raw reco. DIS - Q^{2} < 1 GeV^{2}","lp");
-  lt_DISeg->AddEntry(h_tDISHQ2_LCRec,"Raw reco. DIS - Q^{2} < 10 GeV^{2}","lp");
+  lt_DISeg->AddEntry(h_tDISLQ2_LCRec,"Raw reco. DIS - 1 < Q^{2} < 10 GeV^{2}","lp");
+  lt_DISeg->AddEntry(h_tDISHQ2_LCRec,"Raw reco. DIS - 10 < Q^{2} < 100 GeV^{2}","lp");
   lt_DISeg->Draw();
   // Save figure
   if(kSAVE) ct_DISeg->SaveAs("../figs/DISComp_" + energy +"_t_Q2hi.png");
@@ -466,12 +482,12 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   lt_Ratio->AddEntry(h_t_B0Rec,"Reco. DVCS (raw BABE - B0)","lp");
   lt_Ratio->AddEntry(h_t_RPRec,"Reco. DVCS (raw BABE - RP)","lp");
   lt_Ratio->AddEntry(h_t_LCRec,"Reco. DVCS (raw eXBE)","lp");
-  lt_Ratio->AddEntry(h_tDIS_AllRec,"Reco. DIS (10x100)","l");
+  lt_Ratio->AddEntry(h_tDIS_AllRec,"Reco. DIS","l");
   lt_Ratio->Draw();
   // Right pad - ratios
   // Starting from top: DIS/DVCS corrected
   pRight4->cd();
-  TH1D* hRatio_Corr = (TH1D*)h_tDIS_AllRec->Clone("hratio_corr");
+  TH1D* hRatio_Corr = (TH1D*)h_tDIS_AllBABE->Clone("hratio_corr");
   hRatio_Corr->Divide(h_t_GoodCorr);
   hRatio_Corr->SetLineColor(kBlack);
   hRatio_Corr->GetYaxis()->SetTitle("Ratio");
@@ -551,7 +567,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
 
   
   // Print ratios
-  cout<<"|t| [GeV^2]\tDIS(BABE)/DVCS(B0)\tDIS(BABE)/DVCS(RP)\tDIS(All)/DVCS(Corr.)"<<endl;
+  cout<<"|t| [GeV^2]\tDIS(BABE)/DVCS(B0)\tDIS(BABE)/DVCS(RP)\tDIS(BABE)/DVCS(Corr.)"<<endl;
   for(int bin{1}; bin<= h_t_Truth->GetNbinsX(); bin++){
     cout<<"["<<h_t_Truth->GetBinLowEdge(bin)<<" - "<<h_t_Truth->GetBinLowEdge(bin+1)<<"]\t"<<hRatio_B0->GetBinContent(bin)<<"\t"<<hRatio_RP->GetBinContent(bin)<<"\t"<<hRatio_Corr->GetBinContent(bin)<<endl;
   }
