@@ -245,7 +245,8 @@ Bool_t ePIC_DVCS_TASK::applyCuts_All(P3EVector beame, P3EVector beamp, vector<P3
   else{
     // Photon-proton coplanarity cut
     float phigp = calcAzimGP(beame, beamp, scate[0], scatp[0], scatg[0]); 
-    if(TMath::Abs(phigp)-TMath::Pi() < -0.18 || TMath::Abs(phigp)-TMath::Pi() > 0.18) passCuts = false;
+    float phidiff = TMath::Abs(phigp)-TMath::Pi();
+    if(TMath::Abs(phidiff) > 0.18) passCuts = false;
     
     // E-pz cut (general to fully exclusive and semi-inclusive reco.)
     fEmPz = (scate[0]+scatg[0]+scatp[0]).E() - (scate[0]+scatg[0]+scatp[0]).Pz();
@@ -1465,7 +1466,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		  
 		  // ...and gamma-p coplanarity cut
 		  float dphi = TMath::Abs(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
-		  if(TMath::Abs(dphi - TMath::Pi()) <= 0.18) hPassCuts_MC->Fill(12); // fi (coplanarity cut)
+		  if(TMath::Abs(TMath::Abs(dphi) - TMath::Pi()) <= 0.18) hPassCuts_MC->Fill(12); // fi (coplanarity cut)
 		} //fi (pTmiss cut)
 	      }   //fi (E-pz cut)
 	    }     //fi (Barrel +ve veto) 
@@ -1584,7 +1585,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 		  // ...and gamma-p coplanarity cut
 		  float dphi = TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-		  if(TMath::Abs(dphi - TMath::Pi()) <= 0.18) hPassCuts_Rec->Fill(12); // fi (coplanarity cut)
+		  if(TMath::Abs(TMath::Abs(dphi) - TMath::Pi()) <= 0.18) hPassCuts_Rec->Fill(12); // fi (coplanarity cut)
 		} //fi (pTmiss cut)
 	      }   //fi (E-pz cut)
 	    }     //fi (barrel +ve veto)
@@ -1632,7 +1633,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		  
 		  // ...and gamma-p coplanarity cut
 		  float dphi = TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-		  if(TMath::Abs(dphi - TMath::Pi()) <= 0.18) hPassCuts_Rec->Fill(12); // fi (coplanarity cut)
+		  if(TMath::Abs(TMath::Abs(dphi) - TMath::Pi()) <= 0.18) hPassCuts_Rec->Fill(12); // fi (coplanarity cut)
 		} //fi (pTmiss cut)
 	      }   //fi (E-pz cut)
 	    }     //fi (barrel +ve veto)
