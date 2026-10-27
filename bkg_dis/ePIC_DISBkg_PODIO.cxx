@@ -72,41 +72,13 @@ void ePIC_DVCS_TASK::setOutFileName(TString name){
 }
 
 void ePIC_DVCS_TASK::setBeamMomenta(){
-  if(sEnergy == "5x41"){
-    fPBeam_p=41.0;
-    fPBeam_e=5.0;
-  }
-  else if(sEnergy == "10x100"){
-    fPBeam_p=100.0;
-    fPBeam_e=10.0;
-  }
-  else if(sEnergy == "9x130"){
+  if(sEnergy == "9x130"){
     fPBeam_p=130.0;
     fPBeam_e=9.0;
-  }
-  else if(sEnergy == "10x130"){
-    fPBeam_p=130.0;
-    fPBeam_e=10.0;
-  }
-  else if(sEnergy == "10x250"){
-    fPBeam_p=250.0;
-    fPBeam_e=10.0;
   }
   else if(sEnergy == "9x275"){
     fPBeam_p=275.0;
     fPBeam_e=9.0;
-  }
-  else if(sEnergy == "10x275"){
-    fPBeam_p=275.0;
-    fPBeam_e=10.0;
-  }
-  else if(sEnergy == "18x275"){
-    fPBeam_p=275.0;
-    fPBeam_e=18.0;
-  }
-  else{
-    fPBeam_p=100.0;
-    fPBeam_e=10.0;
   }
 }
 
@@ -328,122 +300,41 @@ void ePIC_DVCS_TASK::undoAfterburn(P3EVector& a){
 //----------------------------------------------------
 //----------------------------------------------------
 
-// Alternate Trento Phi calculation using particle 4-vectors
-// Source: Bachetta, A. et al; JHEP 02 (2007); eq. 2.3
-Double_t ePIC_DVCS_TASK::calcTrentoPhi_4Vec(P3EVector k, P3EVector p, P3EVector kprime, P3EVector pprime){
-  // First, extract 4-vector components into arrays
-  Float_t ppcomp[4]{0.,0.,0.,0.};
-  Float_t kcomp[4]{0.,0.,0.,0.};
-  pprime.GetCoordinates(ppcomp);
-  k.GetCoordinates(kcomp);
-  
-  // Need q vector for gT calculations
-  P3EVector q = k-kprime;
-  
-  // Need kT^2 and p'T^2 for denominator
-  Float_t kTcomp[4]{0.,0.,0.,0.};
-  Float_t ppTcomp[4]{0.,0.,0.,0.};
-  
-  // Loop over indices of 4-vectors
-  Float_t numCos{0};
-  Float_t numSin{0};
-  
-  for(int i{0}; i<4; i++){
-    for(int j{0}; j<4; j++){
-      kTcomp[i] += calcgT_ij(q,p,i,j)*kcomp[j];
-      ppTcomp[i] += calcgT_ij(q,p,i,j)*ppcomp[j];
+// Calculate angle between hadronic and leptonic planes (Trento phi)
+// Using planes defined by [k, q] and [q, g']
+// Source: Bachetta, A. et al; Phys. Rev. D (2004); eq. 16
+Double_t ePIC_DVCS_TASK::calcTrentoPhi_qg(P3EVector k, P3EVector p, P3EVector kprime, P3EVector gprime){  
+  // Before calculating angle, boost into target rest frame
+  //MomVector vTgtRest = p.BoostToCM();
 
-      numCos += kcomp[i]*ppcomp[j]*calcgT_ij(q,p,i,j);
-      numSin += kcomp[i]*ppcomp[j]*calcepsT_ij(q,p,i,j);
-    } // Loop over index j
-  } // Loop over index i
+  // Before calculating angle, boost into gamma*-p rest frame
+  // Calculate q in lab frame
+  P3EVector q = (k-kprime);
+  // Boost vector
+  MomVector vTgtRest = (p+q).BoostToCM();
 
-  P3EVector kT(kTcomp[0],kTcomp[1],kTcomp[2],kTcomp[3]);
-  P3EVector ppT(ppTcomp[0],ppTcomp[1],ppTcomp[2],ppTcomp[3]);
+  k = boost(k,vTgtRest);
+  kprime = boost(kprime,vTgtRest);
+  gprime = boost(gprime,vTgtRest);
 
-  Float_t kTSq = (kTcomp[3]*kTcomp[3])-(kTcomp[0]*kTcomp[0])-(kTcomp[1]*kTcomp[1])-(kTcomp[2]*kTcomp[2]);
-  Float_t ppTSq = (ppTcomp[3]*ppTcomp[3])-(ppTcomp[0]*ppTcomp[0])-(ppTcomp[1]*ppTcomp[1])-(ppTcomp[2]*ppTcomp[2]);
+  MomVector k3 = k.Vect();
+  MomVector kp3 = kprime.Vect();
+  MomVector gp3 = gprime.Vect();
+  MomVector qhat3 = (k3-kp3).Unit();
 
-  Float_t den = TMath::Sqrt(kTSq*ppTSq);
-  Float_t cosphi = -numCos/den;
-  Float_t sinphi = -numSin/den;
+  // Define leptonic plane using virtual photon and scattered electron
+  MomVector lNorm = qhat3.Cross(kp3);
+  lNorm /= lNorm.R();
+  // Define hadronic plane using q vector and scattered photon
+  MomVector hNorm = qhat3.Cross(gp3);
+  hNorm /= hNorm.R();
 
-  return TMath::ACos(cosphi)*TMath::Sign(1.,TMath::ASin(sinphi));
-}
+  // Angle() function just returns magnitude of angle
+  // If photon vector has a component parallel to the leptonic normal, should be positive. If opposite, negative.
+  float phi = TMath::Sign(1.,gp3.Dot(lNorm))*Angle(lNorm,hNorm);
 
-// Calculate value of transverse metric tensor for 4-vector phi calculation
-// Source: Bachetta, A. et al; JHEP 02 (2007); eq. 2.4
-Double_t ePIC_DVCS_TASK::calcgT_ij(P3EVector q, P3EVector p, Int_t i, Int_t j){
-  // Extract 4-vector components into arrays
-  Float_t pcomp[4]{0.,0.,0.,0.};
-  Float_t qcomp[4]{0.,0.,0.,0.};
-  p.GetCoordinates(pcomp);
-  q.GetCoordinates(qcomp);
-
-  // First term comes from standard metric tensor
-  Int_t gij{0};
-  
-  // Metric tensor only contains diagonal components
-  if(i==j && i==3) gij = 1;
-  else if(i==j) gij = -1;
-  
-  // Second term comes from cross-product of 4-vector terms
-  Float_t fQ2 = -q.M2();
-  Float_t fpq = p.Dot(q);
-  Float_t fGamma2 = (TMath::Power(fMass_proton,2)*fQ2)/TMath::Power(fpq,2);
-  Float_t fPQTerm = qcomp[i]*pcomp[j] + pcomp[i]*qcomp[j];
-  fPQTerm /= (1+fGamma2)*fpq;
-  
-  // Final term comes from products of terms in the same vector
-  Float_t fQQTerm = (qcomp[i]*qcomp[j])/fQ2;
-  fQQTerm -= (pcomp[i]*pcomp[j])/p.M2();
-  fQQTerm *= fGamma2/(1+fGamma2);
-
-  Float_t gT = gij - fPQTerm + fQQTerm;
-  return gT;
-}
-
-// Calculate value of transverse Levi-Civita tensor for 4-vector phi calculation
-// Source: Bachetta, A. et al; JHEP 02 (2007); eq. 2.4
-Double_t ePIC_DVCS_TASK::calcepsT_ij(P3EVector q, P3EVector p, Int_t i, Int_t j){
-  // Extract 4-vector components into arrays
-  Float_t pcomp[4]{0.,0.,0.,0.};
-  Float_t qcomp[4]{0.,0.,0.,0.};
-  p.GetCoordinates(pcomp);
-  q.GetCoordinates(qcomp);
-
-  // Need gamma2 and p.q for calculation
-  Float_t fQ2 = -q.M2();
-  Float_t fpq = p.Dot(q);
-  Float_t fGamma2 = (TMath::Power(fMass_proton,2)*fQ2)/TMath::Power(fpq,2);
-
-  Float_t epsT{0};
-  
-  // Sum over all combinations of k and l
-  for(int k{0}; k<4; k++){
-    for(int l{0}; l<4; l++){
-      epsT += LeviCivita(i,j,k,l)*(1./fpq)*(1./TMath::Sqrt(1+fGamma2))*pcomp[k]*qcomp[l];
-    }
-  }
-
-  return epsT;
-}
-
-// Need Levi-Civita symbol for epsT calculation
-// Using form of epsilon using Pi notation
-Int_t ePIC_DVCS_TASK::LeviCivita(int i, int j, int k, int l){
-  int ai[4]{i+1,j+1,k+1,l+1};
-
-  int eps{1};
-
-  for(int ind1{3}; ind1>0; ind1--){
-    for(int ind2{0}; ind2<ind1; ind2++){
-      // epsilon = 0 if any 2 indices are the same
-      if(ai[ind1] == ai[ind2]) eps*=0;
-      else eps*=TMath::Sign(1.,ai[ind1]-ai[ind2]);
-    }
-  }
-  return eps;
+  if (phi < 0) return phi+2*TMath::Pi();
+  else return phi;
 }
 
 // Calculate angle between planes of qp and qg
@@ -533,7 +424,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH2D* h_2D_EvEta_g = new TH2D("2d_eveta_g",";#eta_{#gamma};E_{#gamma} [GeV]",200,-4.,4.,100,0.,50.);
   TH2D* h_2D_EvEta_e = new TH2D("2d_eveta_e",";#eta_{e'};E_{e'} [GeV]",200,-4.,4.,(Int_t)4*fPBeam_e, 0., 2.*fPBeam_e);
   TH2D* h_2D_EvEta_p = new TH2D("2d_eveta_p",";#eta_{p'};E_{p'} [GeV]",150,4.,10.,(Int_t)4.*fPBeam_p, 0., 2.*fPBeam_p);
-
+  
   // 2) t distribution
   TH1D* h_t_Truth  = new TH1D("t_truth" ,";|t|(MC) [(GeV/#it{c}^{2})^{2}]"           , 20, 0., 2.);
   TH1D* h_t_B0Acc  = new TH1D("t_b0acc" ,";|t|(MC|Reco. - B0) [(GeV/#it{c}^{2})^{2}]", 20, 0., 2.);
@@ -542,17 +433,17 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_t_RPReco = new TH1D("t_rpreco",";|t|(Reco. - RP) [(GeV/#it{c}^{2})^{2}]"   , 20, 0., 2.);
   TH1D* h_t_LCAcc  = new TH1D("t_lcacc" ,";|t_{e'#gamma}|(MC|Reco.) [(GeV/#it{c}^{2})^{2}]", 20, 0., 2.);
   TH1D* h_t_LCReco = new TH1D("t_lcreco",";|t_{e''gamma}|(Reco.) [(GeV/#it{c}^{2})^{2}]"   , 20, 0., 2.);
-
+  
   // 3) Counters
   TH1D* hCount = new TH1D("count",";;",2,0,2);
   hCount->GetXaxis()->SetBinLabel(1,"Not_epg");
   hCount->GetXaxis()->SetBinLabel(2,"Is_epg");
   const int nCuts{19};
   TString cutname[19] = {"inc-sing_ele","e'-Q^{2}",
-                         "inc-sing_pho","#gamma-E_{#gamma}",
-                         "inc-sing_pro","p'-#theta_{p}",
-                         "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-BarrelPosVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}","e'p'#gamma-#Delta#phi_{#gamma p}",
-                         "e'#gamma-mult","e'#gamma-NegTrackVeto","e'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'#gamma-(E-pz)","e'#gamma-p_{T,miss}"};
+    "inc-sing_pho","#gamma-E_{#gamma}",
+    "inc-sing_pro","p'-#theta_{p}",
+    "e'p'#gamma-mult","e'p'#gamma-NegTrackVeto","e'p'#gamma-FFVeto","e'p'#gamma-BarrelPosVeto","e'p'#gamma-(E-pz)","e'p'#gamma-p_{T,miss}","e'p'#gamma-#Delta#phi_{#gamma p}",
+    "e'#gamma-mult","e'#gamma-NegTrackVeto","e'#gamma-FFVeto","e'#gamma-BarrelPosVeto","e'#gamma-(E-pz)","e'#gamma-p_{T,miss}"};
   TH1D* hPassCuts_MC = new TH1D("passcuts_mc",";;",nCuts,0,nCuts);
   TH1D* hPassCuts_Rec = new TH1D("passcuts_rec",";;",nCuts,0,nCuts);
   
@@ -560,7 +451,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
     hPassCuts_MC->GetXaxis()->SetBinLabel(bin,cutname[bin-1]);
     hPassCuts_Rec->GetXaxis()->SetBinLabel(bin,cutname[bin-1]);
   }
-
+  
   // 4) 2-particle exclusivity variables
   // Missing mass, momentum and energy
   Float_t protlower = (Float_t)0.8*fPBeam_p;
@@ -573,11 +464,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_EMeg_Rec  = new TH1D("emeg_rec",";E_{miss, e'#gamma}(Reco.) [GeV]",800,-50,350);
   
   TH1D* h_PTMepg_Rec  = new TH1D("ptmepg_rec",";P_{T, miss, e'p'#gamma}(Reco.) [GeV]",300,-5.,10.);
-
+  
   // 5) Q2 distribution
   TH1D* h_Q2_MC   = new TH1D("q2_mc"  , "Counts/0.2 GeV^{2};Q^{2}(MC) [GeV^{2}]"     , 550, 0., 110.);
   TH1D* h_Q2_Reco = new TH1D("q2_reco", "Counts/0.2 GeV^{2};Q^{2}(Reco) [GeV^{2}]"   , 550, 0., 110.);
-
   
   TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",1e4,0.,1.,1e4,0.,2.);
   TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",1e4,0.,1.,1e4,0.,2.);
@@ -590,8 +480,8 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_Cone_RP = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
   TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
-
-   // 8) 3D differential distributions: Trento phi  ->  [Q2][xB][|t|]
+  
+  // 6) 3D differential distributions: Trento phi  ->  [Q2][xB][|t|]
   // -------------------------------------------------------------------
   //  Binning is now read from an external text file (see DVCSBinning.hh /
   //  bins.txt) so that it can vary from one configuration to another. The
@@ -641,10 +531,10 @@ void ePIC_DVCS_TASK::doAnalysis(){
       }
     }
   };
-
+  
   // Book all differential families (y-axis binning kept as in the original code)
-  bookGrid(h_TPhiDiff_B0Reco, DVCSBinning::kB0, "tphi_b0reco", "#phi_{h}(Reco) [deg]",            10,  0.,  360.);
-  bookGrid(h_TPhiDiff_RPReco, DVCSBinning::kRP, "tphi_rpreco", "#phi_{h}(Reco) [deg]",            10,  0.,  360.);
+  bookGrid(h_TPhiDiff_B0Reco, DVCSBinning::kB0, "tphi_b0reco", "#phi_{h}(Reco) [deg]", 10,  0.,  360.);
+  bookGrid(h_TPhiDiff_RPReco, DVCSBinning::kRP, "tphi_rpreco", "#phi_{h}(Reco) [deg]", 10,  0.,  360.);
 
   bookGrid(h_Q2Rec_B0, DVCSBinning::kB0, "q2rec_b0", "Q^{2}(Rec) [GeV^{2}]", 220,   0., 110.);
   bookGrid(h_xBRec_B0, DVCSBinning::kB0, "xbrec_b0", "x_{B}(Rec)",           10000,   0.,   1.);
@@ -850,9 +740,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	      float clus_e{0};
 	      for(auto& clust : mcreco.getRec().getClusters()) clus_e += clust.getEnergy();
 	      float eoverp = clus_e/edm4hep::utils::magnitude(mcreco.getRec().getMomentum());
-	      
-	      h_EoverP_elec->Fill(eoverp);
 
+	      h_EoverP_elec->Fill(eoverp);
+	       
 	      // Electron finder cuts
 	      if(eoverp < 0.8 || eoverp > 1.2){
 		// VETO - any negative tracks that aren't electrons
@@ -1003,12 +893,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	if(zdcreco.getClusters()) kOtherFFTrack_Rec = true;
       }
       
-      //cout<<"[DEBUG]: PARTICLES AND VETOES FOUND"<<endl;
-      
       //---------------------------------------------------------
       // Fill histograms
       //---------------------------------------------------------
-
       // Look at all MC
       for(int ele_ind{0}; ele_ind<scate4_gen.size(); ele_ind++){
 	h_eta_MCe->Fill(scate4_gen[ele_ind].Eta());
@@ -1022,8 +909,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_eta_MCp->Fill(scatp4_gen[pro_ind].Eta());
 	h_2D_EvEta_p->Fill(scatp4_gen[pro_ind].Eta(), scatp4_gen[pro_ind].E());
       }
-      
-      //cout<<"[DEBUG]: ALL MC FILLED"<<endl;
 
       // Count number of generated e'p'gamma events from event cuts
       // Flag event if so (only want to look at fake DVCS events)
@@ -1033,9 +918,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	kGenDVCS = true;
       }
       else hCount->Fill(0);
-      
-      //cout<<"[DEBUG]: EVENT COUNTER FILLED"<<endl;
-      
+
       // Look at all reco. for eta
       for(int ele_ind{0}; ele_ind<scate4_rec.size(); ele_ind++) h_eta_RPe->Fill(scate4_rec[ele_ind].Eta());  // Electrons
       for(int pho_ind{0}; pho_ind<scatg4_rec.size(); pho_ind++)	h_eta_RPg->Fill(scatg4_rec[pho_ind].Eta());  // Photons
@@ -1044,8 +927,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
       if(applyCuts_Electron(beame4, scate4_gen)) h_Q2_MC->Fill(calcQ2_Elec(beame4, scate4_gen[0]));
       if(applyCuts_Electron(beame4, scate4_rec)) h_Q2_Reco->Fill(calcQ2_Elec(beame4, scate4_rec[0]));
-	  
-      //cout<<"[DEBUG]: ALL RECO FILLED"<<endl;
 
       // Count no. of events which pass cuts - MC only
       // ---------------------Single particle---------------------
@@ -1275,9 +1156,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	  }     //fi (ZDC/OMD veto)
 	}       //fi (non-elec -ve veto)
       }         //fi (e'gamma)
-      //cout<<"[DEBUG]: RECO PASSCUTS - SEMI-INCLUSIVE GOOD"<<endl;
-
-      //cout<<"[DEBUG]: RECO PASSCUTS FILLED"<<endl;
 
       // Mandelstam t distributions
       // MC truth
@@ -1285,6 +1163,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_t_Truth->Fill(calcT_BABE(beamp4,scatp4_gen[0]));
 	h_tq2Vx_MC->Fill(calcX_Elec(beame4, beamp4, scate4_gen[0]),calcT_BABE(beamp4,scatp4_gen[0])/calcQ2_Elec(beame4, scate4_gen[0]));
       }
+
       // Reconstructed and MC accepted - B0 only
       if(!kGenDVCS                                                                  // Not generated DVCS
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rec, scatg4_rec, "B0") // Single e', single photon, single p', proton w/in B0
@@ -1299,147 +1178,32 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	// Distributions
        	h_t_B0Acc->Fill(t_acc);
 	h_t_B0Reco->Fill(t_rec);
-
+	
 	// 3D binned results
 	// Need Q2 and xB for events
 	Float_t q2_acc = calcQ2_Elec(beame4, scate4_aso[0]);
 	Float_t xB_acc = calcX_Elec(beame4, beamp4, scate4_aso[0]);
-
+	
 	// Find bin numbers (B0 region binning)
 	int binq2 = binning.findQ2(q2_acc);
 	int binxB = binning.findXB(DVCSBinning::kB0, binq2, xB_acc);
-	int bint  = binning.findT (DVCSBinning::kB0, binq2, binxB, t_acc);
+	int bint  = binning.findT(DVCSBinning::kB0, binq2, binxB, t_acc);
 	
 	Float_t tphi_rec = calcTrentoPhi_qg(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
-	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
-	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
+	//Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
+	//Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
 	
-	if(binq2>=0 && binxB>=0 && bint>=0){
-	  h_TPhiDiff_B0Reco[binq2][binxB][bint]->Fill(tphi_rec*TMath::RadToDeg());
+	// if(binq2>=0 && binxB>=0 && bint>=0){
+	//   h_TPhiDiff_B0Reco[binq2][binxB][bint]->Fill(tphi_rec*TMath::RadToDeg());
 	  
-	  h_Q2Rec_B0[binq2][binxB][bint]->Fill(q2_rec);
-	  h_xBRec_B0[binq2][binxB][bint]->Fill(xB_rec);
-	  h_tRec_B0[binq2][binxB][bint]->Fill(t_rec);
-	}
+	//   h_Q2Rec_B0[binq2][binxB][bint]->Fill(q2_rec);
+	//   h_xBRec_B0[binq2][binxB][bint]->Fill(xB_rec);
+	//   h_tRec_B0[binq2][binxB][bint]->Fill(t_rec);
+	// }
 	
-	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
-
-	//cout<<"[DEBUG]: RECO T (B0) FILLED"<<endl;
+	//h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
       }
-      // Reconstructed and accepted - RP only
-      if(!kGenDVCS                                                                  // Not generated DVCS
-	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rom, scatg4_rec, "RP") // Single e', single photon, single p', proton w/in RP (assume RP = p')
-	 && scatp4_rec.size() == 0                                                  // No B0 tracks
-	 && !kNonElecNeg_Rec                                                        // Non-electron -ve track veto
-	 && !kBarrelPos_Rec                                                         // Barrel +ve track veto
-	 && !kOtherFFTrack_Rec){                                                    // OMD/ZDC veto
-	
-	//cout<<"[DEBUG]: TRYING FULL EPG (RP)"<<endl;
-	//cout<<"[DEBUG]: N_REC = "<<scatp4_rom.size()<<"\tN_GEN = "<<scatp4_gen.size()<<endl;
-
-	// Need Q2 and xB for events
-	Float_t q2_acc = calcQ2_Elec(beame4, scate4_aso[0]);
-	Float_t xB_acc = calcX_Elec(beame4, beamp4, scate4_aso[0]);
-	
-	// Find bin numbers (RP region binning)
-	int bint{0};
-	int binq2 = binning.findQ2(q2_acc);
-	int binxB = binning.findXB(DVCSBinning::kRP, binq2, xB_acc);
-
-	if(scatp4_gen.size() > 0){
-	  Float_t t_acc = calcT_BABE(beamp4,scatp4_gen[0]);
-	  h_t_RPAcc->Fill(t_acc);
-
-	  bint = binning.findT (DVCSBinning::kRP, binq2, binxB, t_acc);
-	}
-	Float_t t_rec = calcT_BABE(beamp4,scatp4_rom[0]);
-	h_t_RPReco->Fill(t_rec);
-
-	// 3D binned results
-	Float_t tphi_rec = calcTrentoPhi_qg(beame4, beamp4, scate4_rec[0], scatg4_rec[0]);
-	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
-	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
-	
-	if(binq2>=0 && binxB>=0 && bint>=0){
-	  h_TPhiDiff_RPReco[binq2][binxB][bint]->Fill(tphi_rec*TMath::RadToDeg());
-	  
-	  h_Q2Rec_RP[binq2][binxB][bint]->Fill(q2_rec);
-	  h_xBRec_RP[binq2][binxB][bint]->Fill(xB_rec);
-	  h_tRec_RP[binq2][binxB][bint]->Fill(t_rec);
-	}
-	
-	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
-	
-	//cout<<"[DEBUG]: RECO T (RP) FILLED"<<endl;
-      }
-      // Semi-inclusive calculation - ignore if proton is detected or not
-      // Also plot missing kinematics
-      if(!kGenDVCS                                                                // Not generated DVCS
-	 && applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) // Single e', single photon, Q2 > 1 GeV
-	 && !kBarrelPos_Rec                                                       // Barrel +ve track veto
-	 && !kNonElecNeg_Rec                                                      // Non-electron -ve track veto
-	 && !kOtherFFTrack_Rec){                                                  // OMD/ZDC veto
-	
-	//cout<<"[DEBUG]: TRYING SEMI-INCLUSIVE"<<endl;
-	// Calculations
-	Float_t t_acc = calcT_MethodL(beame4,beamp4,scate4_aso[0],fMass_proton,scatg4_aso[0]);
-	Float_t t_rec = calcT_MethodL(beame4,beamp4,scate4_rec[0],fMass_proton,scatg4_rec[0]);
-	// Distributions
-	h_t_LCAcc->Fill(t_acc);
-	h_t_LCReco->Fill(t_rec);
-
-	h_MM2eg_Rec->Fill(calcM2Miss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-	h_PMeg_Rec->Fill(calcPMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-	h_PTMeg_Rec->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-	h_EMeg_Rec->Fill(calcEMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-
-	h_Pmiss2Vt->Fill(t_rec,calcPMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-	h_Ptmiss2Vt->Fill(t_rec,calcPtMiss_2Body(beame4, beamp4, scate4_rec[0], scatg4_rec[0]));
-
-	//cout<<"[DEBUG]: RECO T (SEMI-INC) FILLED"<<endl;
-      }
-
-      // Plotting full e'p'gamma missing pT (w/out pT cut applied)
-      if(!kGenDVCS
-	 && applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rec, "B0") && scatp4_rom.size() == 0
-	 && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() >= fMin_EmPz && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() <= fMax_EmPz
-	 && !kBarrelPos_Rec                                                    
-	 && !kNonElecNeg_Rec                                                  
-	 && !kOtherFFTrack_Rec){
-
-	h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-	h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rec[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-	h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-
-	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
-	h_dPhi_prot->Fill(scatp4_rec[0].Phi()-p_calc.Phi());
-
-	h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
-	h_dPhigp_RP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0])));
-      }
-      //cout<<"[DEBUG]: MISSING KIN (B0) FILLED"<<endl;
       
-      if(!kGenDVCS
-	 && applyCuts_Electron(beame4,scate4_rec) && applyCuts_Photon(scatg4_rec) && applyCuts_Proton(scatp4_rom, "RP") && scatp4_rec.size() == 0
-	 && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() >= fMin_EmPz && (scate4_rec[0]+scatg4_rec[0]).E() - (scate4_rec[0]+scatg4_rec[0]).Pz() <= fMax_EmPz
-	 && !kBarrelPos_Rec                                                    
-	 && !kNonElecNeg_Rec                                                  
-	 && !kOtherFFTrack_Rec){
-
-	h_Pmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-	h_Ptmiss3Vt->Fill(calcT_BABE(beamp4,scatp4_rom[0]),calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-	h_PTMepg_Rec->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-
-	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
-	h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
-
-	h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-	h_dPhigp_RP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0])));
-      }
-      //cout<<"[DEBUG]: MISSING KIN (RP) FILLED"<<endl;
-      
-      //cout<<"[DEBUG]: MANDELSTAM T FILLED"<<endl;
-
     } // END OF EVENT LOOP - MAIN LOOP
 
     fileCounter++;
@@ -1448,79 +1212,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
   //------------------------------------------------------------
   // Write to output file
   //------------------------------------------------------------
-  TString sOutName = sOutFileName+".root";
-  TFile* fOutFile = new TFile(sOutName,"RECREATE");
-  fOutFile->cd();
-  
-  // Eta - MC
-  h_eta_MCp->Write();
-  h_eta_MCe->Write();
-  h_eta_MCg->Write();
-  // Eta - reco.
-  h_eta_RPp->Write();
-  h_eta_RPPp->Write();
-  h_eta_RPe->Write();
-  h_eta_RPg->Write();
-  // Other single-particle plots
-  h_EoverP_elec->Write();
-  h_2D_EvEta_e->Write();
-  h_2D_EvEta_g->Write();
-  h_2D_EvEta_p->Write();
-  // t distributions
-  h_t_Truth->Write();
-  h_t_B0Acc->Write();
-  h_t_RPAcc->Write();
-  h_t_B0Reco->Write();
-  h_t_RPReco->Write();
-  h_t_LCAcc->Write();
-  h_t_LCReco->Write();
-  hCount->Write();
-  hPassCuts_MC->Write();
-  hPassCuts_Rec->Write();
-  // 2-body exclusivity variables
-  h_MM2eg_Rec->Write();
-  h_PMeg_Rec->Write();
-  h_PTMeg_Rec->Write();
-  h_EMeg_Rec->Write();
-  h_PTMepg_Rec->Write();
-  // Q2
-  h_Q2_MC->Write();
-  h_Q2_Reco->Write();
-  // Extra cuts?
-  h_tq2Vx_MC->Write();
-  h_tq2Vx_RP->Write();
-  h_Pmiss2Vt->Write();
-  h_Ptmiss2Vt->Write();
-  h_Pmiss3Vt->Write();
-  h_Ptmiss3Vt->Write();
-  h_dPhi_prot->Write();
-  h_Cone_MC->Write();
-  h_Cone_RP->Write();
-  h_dPhigp_MC->Write();
-  h_dPhigp_RP->Write();
-
-  for(int q{0}; q<nQ2bins; q++){
-    // B0 region grids
-    for(int x{0}; x<binning.nXB(DVCSBinning::kB0,q); x++){
-      for(int t{0}; t<binning.nT(DVCSBinning::kB0,q,x); t++){
-	h_Q2Rec_B0[q][x][t]->Write();
-	h_xBRec_B0[q][x][t]->Write();
-	h_tRec_B0[q][x][t]->Write();
-	h_TPhiDiff_B0Reco[q][x][t]->Write();
-      }
-    }
-    // RP region grids (and MC truth, which uses the RP scheme)
-    for(int x{0}; x<binning.nXB(DVCSBinning::kRP,q); x++){
-      for(int t{0}; t<binning.nT(DVCSBinning::kRP,q,x); t++){
-	h_Q2Rec_RP[q][x][t]->Write();
-	h_xBRec_RP[q][x][t]->Write();
-	h_tRec_RP[q][x][t]->Write();
-	h_TPhiDiff_RPReco[q][x][t]->Write();
-      }
-    }
-  }
-
-  fOutFile->Close();
   
   return;
 }
