@@ -492,8 +492,11 @@ void ePIC_DVCS_TASK::doAnalysis(){
   // Setup: Declare histograms
   //---------------------------------------------------------
   //|t|/Q2 vs x
-  TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",1e5,0.,1.,1e5,0.,2.);
-  TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",1e5,0.,1.,1e5,0.,2.);
+  //TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",1e5,0.,1.,1e5,0.,2.);
+  //TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",1e5,0.,1.,1e5,0.,2.);
+
+  TH2D* h_tq2Vx_MC = new TH2D("tq2vx_mc",";x_{B} (MC);|t|/Q^{2} (MC)",10,0.,1.,10,0.,2.);
+  TH2D* h_tq2Vx_RP = new TH2D("tq2vx_rp",";x_{B} (Rec);|t|/Q^{2} (Rec)",10,0.,1.,10,0.,2.);
   
   //---------------------------------------------------------
   // Loop over files in list
@@ -693,8 +696,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	      for(auto& clust : mcreco.getRec().getClusters()) clus_e += clust.getEnergy();
 	      float eoverp = clus_e/edm4hep::utils::magnitude(mcreco.getRec().getMomentum());
 	      
-	      h_EoverP_elec->Fill(eoverp);
-
 	      // Electron finder cuts
 	      if(eoverp < 0.8 || eoverp > 1.2){
 		// VETO - any negative tracks that aren't electrons
@@ -859,7 +860,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
       // MC truth
       if(kGenDVCS){
-	h_t_Truth->Fill(calcT_BABE(beamp4,scatp4_gen[0]));
 	h_tq2Vx_MC->Fill(calcX_Elec(beame4, beamp4, scate4_gen[0]),calcT_BABE(beamp4,scatp4_gen[0])/calcQ2_Elec(beame4, scate4_gen[0]));
       }
       // Reconstructed and MC accepted - B0 only
