@@ -136,9 +136,21 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   TH1D* h_tDISHQ2_RPRec = (TH1D*)fDISHQ2->Get("t_rpreco");
   TH1D* h_tDISHQ2_LCRec = (TH1D*)fDISHQ2->Get("t_lcreco");
 
+  //--------------------------------------------------------------------
+  // Load histograms from files - DIS discriminating cuts
+  // Fully-exclusive missing pT
+  // gamma-p coplanarity cut
+  //--------------------------------------------------------------------
+  TH1D* h_pTmExc_DVCS = (TH1D*)fDVCS->Get("ptmiss3_rp");
+  TH1D* h_pTmExc_DISLQ2 = (TH1D*)fDISLQ2->Get("ptmepg_rec");
+  TH1D* h_pTmExc_DISHQ2 = (TH1D*)fDISHQ2->Get("ptmepg_rec");
+  TH1D* h_Coplan_DVCS = (TH1D*)fDVCS->Get("dphigp_rec");
+  TH1D* h_Coplan_DISLQ2 = (TH1D*)fDISLQ2->Get("dphigp_rec");
+  TH1D* h_Coplan_DISHQ2 = (TH1D*)fDISHQ2->Get("dphigp_rec");
+  
   //---------------------------------------------------------------------
   // Calculations on histograms
-  // Scaling to 5fb-1
+  // Scaling to EIC early science lumi
   //---------------------------------------------------------------------
   // 1. Scaling factor to EIC lumi
   // -> SET LUMINOSITY TO SCALE TO
@@ -305,7 +317,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_t_RPRec->Draw("same");
   h_t_LCRec->Draw("same");  
   // Add text
-  TLatex* tePICLabel_tDIS = new TLatex(0.1, 0.18*h_t_Truth->GetMaximum(), "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep, 10x130 GeV , L_{proj} = "+EIClumi/1e15+" fb^{-1}}");
+  TLatex* tePICLabel_tDIS = new TLatex(0.1, 0.18*h_t_Truth->GetMaximum(), "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep #rightarrow e'p'#gamma, L_{proj} = "+EIClumi/1e15+" fb^{-1}}");
   tePICLabel_tDIS->SetTextSize(0.037);
   tePICLabel_tDIS->Draw("same");
   // Add legend
@@ -367,7 +379,7 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // Add text
   tePICLabel_tDIS->Draw("same");
   // Add legend
-  TLegend* lt_DISall = new TLegend(0.41,0.62,0.80,0.80);
+  TLegend* lt_DISall = new TLegend(0.27,0.62,0.67,0.80);
   lt_DISall->SetLineWidth(0);
   lt_DISall->SetFillStyle(0);
   lt_DISall->SetTextSize(0.037);
@@ -572,7 +584,6 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
     cout<<"["<<h_t_Truth->GetBinLowEdge(bin)<<" - "<<h_t_Truth->GetBinLowEdge(bin+1)<<"]\t"<<hRatio_B0->GetBinContent(bin)<<"\t"<<hRatio_RP->GetBinContent(bin)<<"\t"<<hRatio_Corr->GetBinContent(bin)<<endl;
   }
 
-
   cout<<"\n\nEFFECT OF CUTS:"<<endl;
   TH1D* PassCuts_LQ2 = (TH1D*)fDISLQ2->Get("passcuts_rec")->Clone("pc_lq2");
   TH1D* PassCuts_HQ2 = (TH1D*)fDISHQ2->Get("passcuts_rec")->Clone("pc_hq2");
@@ -588,13 +599,145 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
     cout<<"["<<label<<"]\t Low Q2 = "<<n_lq2<<"/"<<tot_lq2<<" = "<<100*(float)n_lq2/tot_lq2<<" \%\t"
 	<<"\t High Q2 = "<<n_hq2<<"/"<<tot_hq2<<" = "<<100*(float)n_hq2/tot_hq2<<" \%"<<endl;
   }
-    
+
+  
+  // CANVAS - Missing pT
+  // Fully exclusive events only
+  TCanvas* cpTmiss = new TCanvas("cpTmiss","",1000,1000);
+  // Scale histograms
+  h_pTmExc_DVCS->Scale(scale_DVCS);
+  h_pTmExc_DISLQ2->Scale(scale_DISLo);
+  h_pTmExc_DISHQ2->Scale(scale_DISHi);
+
+  // TEMPORARY - need to rebin DVCS; 5 to 1
+  h_pTmExc_DVCS->Rebin(5);
+  //---------------------------------------
+  
+  // Draw options
+  h_pTmExc_DVCS->SetLineColor(kP6Blue);
+  h_pTmExc_DVCS->SetLineWidth(2);
+  h_pTmExc_DVCS->SetFillColor(kP6Blue);
+  h_pTmExc_DVCS->SetFillStyle(3001);
+  h_pTmExc_DISLQ2->SetLineColor(kP6Yellow);
+  h_pTmExc_DISLQ2->SetLineWidth(2);
+  h_pTmExc_DISLQ2->SetFillColor(kP6Yellow);
+  h_pTmExc_DISLQ2->SetFillStyle(3001);
+  h_pTmExc_DISHQ2->SetLineColor(kP6Red);
+  h_pTmExc_DISHQ2->SetLineWidth(2);
+  h_pTmExc_DISHQ2->SetFillColor(kP6Red);
+  h_pTmExc_DISHQ2->SetFillStyle(3001);
+  // Axes options
+  h_pTmExc_DVCS->SetTitle("");
+  h_pTmExc_DVCS->GetXaxis()->SetTitle("p_{T,miss}(e'p'#gamma) (Reco) [GeV]");
+  h_pTmExc_DVCS->GetYaxis()->SetTitle(Form("Counts / %.2f GeV",h_pTmExc_DVCS->GetBinWidth(1)));
+  // Draw
+  h_pTmExc_DVCS->Draw("hist");
+  h_pTmExc_DISLQ2->Draw("hist same");
+  h_pTmExc_DISHQ2->Draw("hist same");
+  // Add text
+  TLatex* tePICLabel_right = new TLatex(0.37, 0.89, "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep #rightarrow e'p'#gamma, L_{proj} = "+EIClumi/1e15+" fb^{-1}}");
+  tePICLabel_right->SetNDC();
+  tePICLabel_right->SetTextSize(0.037);
+  tePICLabel_right->Draw("same");
+  // Add cut line
+  float ptm_hi = 0.9*h_pTmExc_DVCS->GetMaximum();
+  TLine* lpTm_cut = new TLine(0.25,0.,0.25,ptm_hi);
+  lpTm_cut->SetLineColor(kRed);
+  lpTm_cut->SetLineWidth(2);
+  lpTm_cut->Draw();
+  // Add legend
+  TLegend* lptm = new TLegend(0.37,0.68, 0.72, 0.83);
+  lptm->SetLineWidth(0);
+  lptm->SetFillStyle(0);
+  lptm->AddEntry(h_pTmExc_DVCS,"DVCS","lf");
+  lptm->AddEntry(h_pTmExc_DISLQ2,"DIS - 1 < Q^{2} < 10 GeV^{2}","lf");
+  lptm->AddEntry(h_pTmExc_DISHQ2,"DIS - 10 < Q^{2} < 100 GeV^{2}","lf");
+  lptm->SetTextSize(0.035);
+  lptm->Draw();
+  if(kSAVE) cpTmiss->SaveAs("../figs/DISComp_" + energy +"_pTmiss.png");
+
+
+  // CANVAS - coplanarity
+  // Fully exclusive events only
+  TCanvas* cCoplan = new TCanvas("ccoplan","",1000,1000);
+  // Scale histograms
+  h_Coplan_DVCS->Scale(scale_DVCS);
+  h_Coplan_DISLQ2->Scale(scale_DISLo);
+  h_Coplan_DISHQ2->Scale(scale_DISHi);
+  
+  // Draw options
+  h_Coplan_DVCS->SetLineColor(kP6Blue);
+  h_Coplan_DVCS->SetLineWidth(2);
+  h_Coplan_DVCS->SetFillColor(kP6Blue);
+  h_Coplan_DVCS->SetFillStyle(3001);
+  h_Coplan_DISLQ2->SetLineColor(kP6Yellow);
+  h_Coplan_DISLQ2->SetLineWidth(2);
+  h_Coplan_DISLQ2->SetFillColor(kP6Yellow);
+  h_Coplan_DISLQ2->SetFillStyle(3001);
+  h_Coplan_DISHQ2->SetLineColor(kP6Red);
+  h_Coplan_DISHQ2->SetLineWidth(2);
+  h_Coplan_DISHQ2->SetFillColor(kP6Red);
+  h_Coplan_DISHQ2->SetFillStyle(3001);
+  // Axes options
+  h_Coplan_DVCS->SetTitle("");
+  h_Coplan_DVCS->GetXaxis()->SetRangeUser(2.,4.);
+  h_Coplan_DVCS->GetXaxis()->SetTitle("#Delta#phi_{#gammap'} (Reco) [rad]");
+  float coplan_up = h_Coplan_DVCS->GetMaximum();
+  h_Coplan_DVCS->GetYaxis()->SetRangeUser(0.,1.5*coplan_up);
+  h_Coplan_DVCS->GetYaxis()->SetTitle(Form("Counts / %.2f rad",h_Coplan_DVCS->GetBinWidth(1)));
+  // Draw
+  h_Coplan_DVCS->Draw("hist");
+  h_Coplan_DISLQ2->Draw("hist same");
+  h_Coplan_DISHQ2->Draw("hist same");
+  // Add text
+  TLatex* tePICLabel_left = new TLatex(0.15, 0.89, "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep #rightarrow e'p'#gamma, L_{proj} = "+EIClumi/1e15+" fb^{-1}}");
+  tePICLabel_left->SetNDC();
+  tePICLabel_left->SetTextSize(0.037);
+  tePICLabel_left->Draw("same");
+  // Add legend
+  TLegend* lcoplan = new TLegend(0.14,0.69, 0.49, 0.84);
+  lcoplan->SetLineWidth(0);
+  lcoplan->SetFillStyle(0);
+  lcoplan->AddEntry(h_Coplan_DVCS,"DVCS","lf");
+  lcoplan->AddEntry(h_Coplan_DISLQ2,"DIS - 1 < Q^{2} < 10 GeV^{2}","lf");
+  lcoplan->AddEntry(h_Coplan_DISHQ2,"DIS - 10 < Q^{2} < 100 GeV^{2}","lf");
+  lcoplan->SetTextSize(0.035);
+  lcoplan->Draw();
+  // Fit and draw 
+  TFitResultPtr coplan_gausfit = h_Coplan_DVCS->Fit("gaus","S0","",2.,4.);
+  TLatex* tcoplan_param = new TLatex(0.17,0.60,
+				     Form("#splitline{#mu = %.2f #pm %.2f rad}{#sigma = %.2f #pm %.2f rad}",
+					  coplan_gausfit->Parameter(1),
+					  coplan_gausfit->ParError(1),
+					  coplan_gausfit->Parameter(2),
+					  coplan_gausfit->ParError(2)));
+  tcoplan_param->SetNDC();
+  tcoplan_param->SetTextSize(0.037);
+  tcoplan_param->Draw("same");
+  auto coplan_fitfn = h_Coplan_DVCS->GetFunction("gaus");
+  coplan_fitfn->SetLineColor(kBlack);
+  coplan_fitfn->SetLineWidth(2);
+  coplan_fitfn->Draw("same");
+  // Draw cut lines
+  float sigma = coplan_gausfit->Parameter(2);
+  TLine* lCoplan_cutLeft = new TLine(TMath::Pi()-3*sigma,0.,TMath::Pi()-3*sigma,0.9*coplan_up);
+  lCoplan_cutLeft->SetLineColor(kRed);
+  lCoplan_cutLeft->SetLineWidth(2);
+  lCoplan_cutLeft->Draw();
+  TLine* lCoplan_cutRight = new TLine(TMath::Pi()+3*sigma,0.,TMath::Pi()+3*sigma,0.9*coplan_up);
+  lCoplan_cutRight->SetLineColor(kRed);
+  lCoplan_cutRight->SetLineWidth(2);
+  lCoplan_cutRight->Draw();
+  if(kSAVE) cCoplan->SaveAs("../figs/DISComp_" + energy +"_coplanarity.png");
+  
   // Close canvases
-  /*ct_DISlo->Close();
+  ct_DISlo->Close();
   ct_DIShi->Close();
   ct_DISall->Close();
   ct_DISeg->Close();
-  ct_Ratio->Close();*/
-
+  ct_Ratio->Close();
+  cpTmiss->Close();
+  cCoplan->Close();
+    
   return;
 }
