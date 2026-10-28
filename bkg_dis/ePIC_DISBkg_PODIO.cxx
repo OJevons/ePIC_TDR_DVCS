@@ -463,7 +463,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_PTMeg_Rec  = new TH1D("ptmeg_rec",";P_{T, miss, e'#gamma}(Reco.) [GeV]",300,-5.,10.);
   TH1D* h_EMeg_Rec  = new TH1D("emeg_rec",";E_{miss, e'#gamma}(Reco.) [GeV]",800,-50,350);
   
-  TH1D* h_PTMepg_Rec  = new TH1D("ptmepg_rec",";P_{T, miss, e'p'#gamma}(Reco.) [GeV]",300,-5.,10.);
+  TH1D* h_PTMepg_Rec  = new TH1D("ptmepg_rec",";P_{T, miss, e'p'#gamma}(Reco.) [GeV]",400,-1.,3.);
   
   // 5) Q2 distribution
   TH1D* h_Q2_MC   = new TH1D("q2_mc"  , "Counts/0.2 GeV^{2};Q^{2}(MC) [GeV^{2}]"     , 550, 0., 110.);

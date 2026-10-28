@@ -538,9 +538,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_Pmiss3_MC  = new TH1D("pmiss3_mc",";p_{miss}(MC) [GeV/#it{c}]",(Int_t)240*fPBeam_e,0.,(Int_t)1.2*fPBeam_e);
   TH1D* h_Pmiss3_MCA = new TH1D("pmiss3_mca",";p_{miss}(MCA) [GeV/#it{c}]",(Int_t)240*fPBeam_e,0.,(Int_t)1.2*fPBeam_e);
   TH1D* h_Pmiss3_RP  = new TH1D("pmiss3_rp",";p_{miss}(RP) [GeV/#it{c}]",(Int_t)240*fPBeam_e,0.,(Int_t)1.2*fPBeam_e);
-  TH1D* h_Ptmiss3_MC  = new TH1D("ptmiss3_mc",";p_{T,miss}(MC) [GeV/#it{c}]",300,0.,3.);
-  TH1D* h_Ptmiss3_MCA = new TH1D("ptmiss3_mca",";p_{T,miss}(MCA) [GeV/#it{c}]",300,0.,3.);
-  TH1D* h_Ptmiss3_RP  = new TH1D("ptmiss3_rp",";p_{T,miss}(RP) [GeV/#it{c}]",300,0.,3.);
+  TH1D* h_Ptmiss3_MC  = new TH1D("ptmiss3_mc",";p_{T,miss}(MC) [GeV/#it{c}]",400,-1.,3.);
+  TH1D* h_Ptmiss3_MCA = new TH1D("ptmiss3_mca",";p_{T,miss}(MCA) [GeV/#it{c}]",400,-1.,3.);
+  TH1D* h_Ptmiss3_RP  = new TH1D("ptmiss3_rp",";p_{T,miss}(RP) [GeV/#it{c}]",400,-1.,3.);
   // 6e) Missing momentum (semi-inclusive final state)
   Float_t protlower = (Float_t)0.8*fPBeam_p;
   Float_t protupper = (Float_t)1.2*fPBeam_p;
