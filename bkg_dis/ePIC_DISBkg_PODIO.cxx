@@ -1204,7 +1204,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_tq2Vx_RP->Fill(calcX_Elec(beame4, beamp4, scate4_rec[0]),t_rec/calcQ2_Elec(beame4, scate4_rec[0]));
       }
 
-      / Reconstructed and accepted - RP only
+      // Reconstructed and accepted - RP only
       if(!kGenDVCS                                                                  // Not generated DVCS
 	 && applyCuts_All(beame4, beamp4, scate4_rec, scatp4_rom, scatg4_rec, "RP") // Single e', single photon, single p', proton w/in RP (assume RP = p')
 	 && scatp4_rec.size() == 0                                                  // No B0 tracks
