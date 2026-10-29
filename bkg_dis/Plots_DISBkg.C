@@ -733,11 +733,11 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // Close canvases
   ct_DISlo->Close();
   ct_DIShi->Close();
-  ct_DISall->Close();
-  ct_DISeg->Close();
+  //ct_DISall->Close();
+  //ct_DISeg->Close();
   ct_Ratio->Close();
-  cpTmiss->Close();
-  cCoplan->Close();
+  //cpTmiss->Close();
+  //cCoplan->Close();
     
   return;
 }
