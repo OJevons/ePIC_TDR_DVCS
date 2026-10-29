@@ -480,6 +480,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_Cone_RP = new TH1D("cone_rec",";#theta_{#gamma^{*}#gamma} [rad];",260,-6.5,6.5);
   TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
+  TH1D* h_dPhigp_RPP = new TH1D("dphigp_rom",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   
   // 6) 3D differential distributions: Trento phi  ->  [Q2][xB][|t|]
   // -------------------------------------------------------------------
@@ -1293,7 +1294,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	P3EVector p_calc = (beame4+beamp4)-(scate4_rec[0]+scatg4_rec[0]);
 	h_dPhi_prot->Fill(scatp4_rom[0].Phi()-p_calc.Phi());
 	h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
-	h_dPhigp_RP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0])));
+	h_dPhigp_RPP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0])));
       }
       
     } // END OF EVENT LOOP - MAIN LOOP
@@ -1354,6 +1355,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_Cone_RP->Write();
   h_dPhigp_MC->Write();
   h_dPhigp_RP->Write();
+  h_dPhigp_RPP->Write();
   for(int q{0}; q<nQ2bins; q++){
     // B0 region grids
     for(int x{0}; x<binning.nXB(DVCSBinning::kB0,q); x++){
