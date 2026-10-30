@@ -684,7 +684,11 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH1D* h_dPhigp_MC = new TH1D("dphigp_mc",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   TH1D* h_dPhigp_RP = new TH1D("dphigp_rec",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
   TH1D* h_dPhigp_RPP = new TH1D("dphigp_rom",";d#Phi_{#gamma p} [rad];",130,0.,6.5);
-  
+
+  TH2D* h_dPhigpVt_MC = new TH2D("dphigp_2d_mc",";|t| [GeV^{2}];d#Phi_{#gamma p} [rad]",20,0.,2.,130,0.,6.5);
+  TH2D* h_dPhigpVt_RP = new TH2D("dphigp_2d_rec",";|t| [GeV^{2}];d#Phi_{#gamma p} [rad]",20,0.,2.,130,0.,6.5);
+  TH2D* h_dPhigpVt_RPP = new TH2D("dphigp_2d_rom",";|t| [GeV^{2}];d#Phi_{#gamma p} [rad]",20,0.,2.,130,0.,6.5);
+    
   //---------------------------------------------------------
   // Loop over files in list
   //---------------------------------------------------------
@@ -1327,10 +1331,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
 	//cout<<"[DEBUG] 2D x:t distribution filled"<<endl;
-
-	// h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
-	// h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]));
-	//cout<<"[DEBUG] Missing kinematics filled"<<endl;
       }
       
       //cout<<"[DEBUG] TPhi and differential histos. (RP proton) filled"<<endl;
@@ -1357,9 +1357,6 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	// Q2/xB diff. - reconstructed
 	Float_t q2_rec = calcQ2_Elec(beame4, scate4_rec[0]);
 	Float_t xB_rec = calcX_Elec(beame4, beamp4, scate4_rec[0]);
-	
-	// h_Pmiss2eg_MCA->Fill(calcPMiss_2Body(beame4, beamp4, scate4_aso[0], scatg4_aso[0]));
-	// h_Ptmiss2eg_MCA->Fill(calcPtMiss_2Body(beame4, beamp4, scate4_aso[0], scatg4_aso[0]));
       }
       
       //cout<<"[DEBUG] Semi-inclusive kinematics filled"<<endl;
@@ -1458,6 +1455,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 		h_Ptmiss3_MC->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
 		h_Cone_MC->Fill(calcConeAngle(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0]));
 		h_dPhigp_MC->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0])));
+		h_dPhigpVt_MC->Fill(calcT_BABE(beamp4, scatp4_gen[0]), TMath::Abs(calcAzimGP(beame4, beamp4, scate4_gen[0], scatp4_gen[0], scatg4_gen[0])));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1577,6 +1575,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 		h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]));
 		h_dPhigp_RP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0])));
+		h_dPhigpVt_RP->Fill(calcT_BABE(beamp4, scatp4_rec[0]), TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0])));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1625,6 +1624,7 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 		h_Cone_RP->Fill(calcConeAngle(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]));
 		h_dPhigp_RPP->Fill(TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0])));
+		h_dPhigpVt_RPP->Fill(calcT_BABE(beamp4, scatp4_rom[0]), TMath::Abs(calcAzimGP(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0])));
 		//------------------------------------------------------------------------------------------------------------------------------------
 		
 		// ...and missing pT cut
@@ -1803,6 +1803,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_dPhigp_MC->Write();
   h_dPhigp_RP->Write();
   h_dPhigp_RPP->Write();
+  h_dPhigpVt_MC->Write();
+  h_dPhigpVt_RP->Write();
+  h_dPhigpVt_RPP->Write();
   
   hPassCuts_MC->Write();
   hPassCuts_Rec->Write();
