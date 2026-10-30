@@ -144,9 +144,12 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   TH1D* h_pTmExc_DVCS = (TH1D*)fDVCS->Get("ptmiss3_rp");
   TH1D* h_pTmExc_DISLQ2 = (TH1D*)fDISLQ2->Get("ptmepg_rec");
   TH1D* h_pTmExc_DISHQ2 = (TH1D*)fDISHQ2->Get("ptmepg_rec");
-  TH1D* h_Coplan_DVCS = (TH1D*)fDVCS->Get("dphigp_rec");
-  TH1D* h_Coplan_DISLQ2 = (TH1D*)fDISLQ2->Get("dphigp_rec");
-  TH1D* h_Coplan_DISHQ2 = (TH1D*)fDISHQ2->Get("dphigp_rec");
+  TH1D* h_CoplanB0_DVCS = (TH1D*)fDVCS->Get("dphigp_rec");
+  TH1D* h_CoplanB0_DISLQ2 = (TH1D*)fDISLQ2->Get("dphigp_rec");
+  TH1D* h_CoplanB0_DISHQ2 = (TH1D*)fDISHQ2->Get("dphigp_rec");
+  TH1D* h_CoplanRP_DVCS = (TH1D*)fDVCS->Get("dphigp_rom");
+  TH1D* h_CoplanRP_DISLQ2 = (TH1D*)fDISLQ2->Get("dphigp_rom");
+  TH1D* h_CoplanRP_DISHQ2 = (TH1D*)fDISHQ2->Get("dphigp_rom");
   
   //---------------------------------------------------------------------
   // Calculations on histograms
@@ -658,39 +661,39 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
 
 
   // CANVAS - coplanarity
-  // Fully exclusive events only
-  TCanvas* cCoplan = new TCanvas("ccoplan","",1000,1000);
+  // Fully exclusive events only (proton in B0)
+  TCanvas* cCoplanB0 = new TCanvas("ccoplanb0","",1000,1000);
   // Scale histograms
-  h_Coplan_DVCS->Scale(scale_DVCS);
-  h_Coplan_DISLQ2->Scale(scale_DISLo);
-  h_Coplan_DISHQ2->Scale(scale_DISHi);
+  h_CoplanB0_DVCS->Scale(scale_DVCS);
+  h_CoplanB0_DISLQ2->Scale(scale_DISLo);
+  h_CoplanB0_DISHQ2->Scale(scale_DISHi);
   
   // Draw options
-  h_Coplan_DVCS->SetLineColor(kP6Blue);
-  h_Coplan_DVCS->SetLineWidth(2);
-  h_Coplan_DVCS->SetFillColor(kP6Blue);
-  h_Coplan_DVCS->SetFillStyle(3001);
-  h_Coplan_DISLQ2->SetLineColor(kP6Yellow);
-  h_Coplan_DISLQ2->SetLineWidth(2);
-  h_Coplan_DISLQ2->SetFillColor(kP6Yellow);
-  h_Coplan_DISLQ2->SetFillStyle(3001);
-  h_Coplan_DISHQ2->SetLineColor(kP6Red);
-  h_Coplan_DISHQ2->SetLineWidth(2);
-  h_Coplan_DISHQ2->SetFillColor(kP6Red);
-  h_Coplan_DISHQ2->SetFillStyle(3001);
+  h_CoplanB0_DVCS->SetLineColor(kP6Blue);
+  h_CoplanB0_DVCS->SetLineWidth(2);
+  h_CoplanB0_DVCS->SetFillColor(kP6Blue);
+  h_CoplanB0_DVCS->SetFillStyle(3001);
+  h_CoplanB0_DISLQ2->SetLineColor(kP6Yellow);
+  h_CoplanB0_DISLQ2->SetLineWidth(2);
+  h_CoplanB0_DISLQ2->SetFillColor(kP6Yellow);
+  h_CoplanB0_DISLQ2->SetFillStyle(3001);
+  h_CoplanB0_DISHQ2->SetLineColor(kP6Red);
+  h_CoplanB0_DISHQ2->SetLineWidth(2);
+  h_CoplanB0_DISHQ2->SetFillColor(kP6Red);
+  h_CoplanB0_DISHQ2->SetFillStyle(3001);
   // Axes options
-  h_Coplan_DVCS->SetTitle("");
-  h_Coplan_DVCS->GetXaxis()->SetRangeUser(2.,4.);
-  h_Coplan_DVCS->GetXaxis()->SetTitle("#Delta#phi_{#gammap'} (Reco) [rad]");
-  float coplan_up = h_Coplan_DVCS->GetMaximum();
-  h_Coplan_DVCS->GetYaxis()->SetRangeUser(0.,1.5*coplan_up);
-  h_Coplan_DVCS->GetYaxis()->SetTitle(Form("Counts / %.2f rad",h_Coplan_DVCS->GetBinWidth(1)));
+  h_CoplanB0_DVCS->SetTitle("");
+  h_CoplanB0_DVCS->GetXaxis()->SetRangeUser(2.,4.);
+  h_CoplanB0_DVCS->GetXaxis()->SetTitle("#Delta#phi_{#gammap'} (Reco) [rad]");
+  float coplanb0_up = h_CoplanB0_DVCS->GetMaximum();
+  h_CoplanB0_DVCS->GetYaxis()->SetRangeUser(0.,1.5*coplanb0_up);
+  h_CoplanB0_DVCS->GetYaxis()->SetTitle(Form("Counts / %.2f rad",h_CoplanB0_DVCS->GetBinWidth(1)));
   // Draw
-  h_Coplan_DVCS->Draw("hist");
-  h_Coplan_DISLQ2->Draw("hist same");
-  h_Coplan_DISHQ2->Draw("hist same");
+  h_CoplanB0_DVCS->Draw("hist");
+  h_CoplanB0_DISLQ2->Draw("hist same");
+  h_CoplanB0_DISHQ2->Draw("hist same");
   // Add text
-  TLatex* tePICLabel_left = new TLatex(0.15, 0.89, "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep #rightarrow e'p'#gamma, L_{proj} = "+EIClumi/1e15+" fb^{-1}}");
+  TLatex* tePICLabel_left = new TLatex(0.15, 0.89, "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep #rightarrow e'p'#gamma, L_{proj} = "+EIClumi/1e15+" fb^{-1} - p' in B0}");
   tePICLabel_left->SetNDC();
   tePICLabel_left->SetTextSize(0.037);
   tePICLabel_left->Draw("same");
@@ -698,37 +701,113 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   TLegend* lcoplan = new TLegend(0.14,0.69, 0.49, 0.84);
   lcoplan->SetLineWidth(0);
   lcoplan->SetFillStyle(0);
-  lcoplan->AddEntry(h_Coplan_DVCS,"DVCS","lf");
-  lcoplan->AddEntry(h_Coplan_DISLQ2,"DIS - 1 < Q^{2} < 10 GeV^{2}","lf");
-  lcoplan->AddEntry(h_Coplan_DISHQ2,"DIS - 10 < Q^{2} < 100 GeV^{2}","lf");
+  lcoplan->AddEntry(h_CoplanB0_DVCS,"DVCS","lf");
+  lcoplan->AddEntry(h_CoplanB0_DISLQ2,"DIS - 1 < Q^{2} < 10 GeV^{2}","lf");
+  lcoplan->AddEntry(h_CoplanB0_DISHQ2,"DIS - 10 < Q^{2} < 100 GeV^{2}","lf");
   lcoplan->SetTextSize(0.035);
   lcoplan->Draw();
-  // Fit and draw 
-  TFitResultPtr coplan_gausfit = h_Coplan_DVCS->Fit("gaus","S0","",2.,4.);
-  TLatex* tcoplan_param = new TLatex(0.17,0.60,
-				     Form("#splitline{#mu = %.2f #pm %.2f rad}{#sigma = %.2f #pm %.2f rad}",
-					  coplan_gausfit->Parameter(1),
-					  coplan_gausfit->ParError(1),
-					  coplan_gausfit->Parameter(2),
-					  coplan_gausfit->ParError(2)));
-  tcoplan_param->SetNDC();
-  tcoplan_param->SetTextSize(0.037);
-  tcoplan_param->Draw("same");
-  auto coplan_fitfn = h_Coplan_DVCS->GetFunction("gaus");
-  coplan_fitfn->SetLineColor(kBlack);
-  coplan_fitfn->SetLineWidth(2);
-  coplan_fitfn->Draw("same");
-  // Draw cut lines
-  float sigma = coplan_gausfit->Parameter(2);
-  TLine* lCoplan_cutLeft = new TLine(TMath::Pi()-3*sigma,0.,TMath::Pi()-3*sigma,0.9*coplan_up);
-  lCoplan_cutLeft->SetLineColor(kRed);
-  lCoplan_cutLeft->SetLineWidth(2);
-  lCoplan_cutLeft->Draw();
-  TLine* lCoplan_cutRight = new TLine(TMath::Pi()+3*sigma,0.,TMath::Pi()+3*sigma,0.9*coplan_up);
-  lCoplan_cutRight->SetLineColor(kRed);
-  lCoplan_cutRight->SetLineWidth(2);
-  lCoplan_cutRight->Draw();
-  if(kSAVE) cCoplan->SaveAs("../figs/DISComp_" + energy +"_coplanarity.png");
+  // Fit and draw - only do if histogram isn't empty
+  if(h_CoplanB0_DVCS->GetEntries() > 0){
+    TFitResultPtr coplanb0_gausfit = h_CoplanB0_DVCS->Fit("gaus","S0","",2.,4.);
+    TLatex* tcoplanb0_param = new TLatex(0.17,0.60,
+					 Form("#splitline{#mu = %.2f #pm %.2f rad}{#sigma = %.2f #pm %.2f rad}",
+					      coplanb0_gausfit->Parameter(1),
+					      coplanb0_gausfit->ParError(1),
+					      coplanb0_gausfit->Parameter(2),
+					      coplanb0_gausfit->ParError(2)));
+    tcoplanb0_param->SetNDC();
+    tcoplanb0_param->SetTextSize(0.037);
+    tcoplanb0_param->Draw("same");
+    auto coplanb0_fitfn = h_CoplanB0_DVCS->GetFunction("gaus");
+    coplanb0_fitfn->SetLineColor(kBlack);
+    coplanb0_fitfn->SetLineWidth(2);
+    coplanb0_fitfn->Draw("same");
+    // Draw cut lines
+    float sigmab0 = coplanb0_gausfit->Parameter(2);
+    TLine* lCoplanB0_cutLeft = new TLine(TMath::Pi()-3*sigmab0,0.,TMath::Pi()-3*sigmab0,0.9*coplanb0_up);
+    lCoplanB0_cutLeft->SetLineColor(kRed);
+    lCoplanB0_cutLeft->SetLineWidth(2);
+    lCoplanB0_cutLeft->Draw();
+    TLine* lCoplanB0_cutRight = new TLine(TMath::Pi()+3*sigmab0,0.,TMath::Pi()+3*sigmab0,0.9*coplanb0_up);
+    lCoplanB0_cutRight->SetLineColor(kRed);
+    lCoplanB0_cutRight->SetLineWidth(2);
+    lCoplanB0_cutRight->Draw();
+  }
+  if(kSAVE) cCoplanB0->SaveAs("../figs/DISComp_" + energy +"_B0coplanarity.png");
+
+  // Fully exclusive events only (proton in B0)
+  TCanvas* cCoplanRP = new TCanvas("ccoplanrp","",1000,1000);
+  // Scale histograms
+  h_CoplanRP_DVCS->Scale(scale_DVCS);
+  h_CoplanRP_DISLQ2->Scale(scale_DISLo);
+  h_CoplanRP_DISHQ2->Scale(scale_DISHi);
+  
+  // Draw options
+  h_CoplanRP_DVCS->SetLineColor(kP6Blue);
+  h_CoplanRP_DVCS->SetLineWidth(2);
+  h_CoplanRP_DVCS->SetFillColor(kP6Blue);
+  h_CoplanRP_DVCS->SetFillStyle(3001);
+  h_CoplanRP_DISLQ2->SetLineColor(kP6Yellow);
+  h_CoplanRP_DISLQ2->SetLineWidth(2);
+  h_CoplanRP_DISLQ2->SetFillColor(kP6Yellow);
+  h_CoplanRP_DISLQ2->SetFillStyle(3001);
+  h_CoplanRP_DISHQ2->SetLineColor(kP6Red);
+  h_CoplanRP_DISHQ2->SetLineWidth(2);
+  h_CoplanRP_DISHQ2->SetFillColor(kP6Red);
+  h_CoplanRP_DISHQ2->SetFillStyle(3001);
+  // Axes options
+  h_CoplanRP_DVCS->SetTitle("");
+  h_CoplanRP_DVCS->GetXaxis()->SetRangeUser(2.,4.);
+  h_CoplanRP_DVCS->GetXaxis()->SetTitle("#Delta#phi_{#gammap'} (Reco) [rad]");
+  float coplanrp_up = h_CoplanRP_DVCS->GetMaximum();
+  h_CoplanRP_DVCS->GetYaxis()->SetRangeUser(0.,1.5*coplanrp_up);
+  h_CoplanRP_DVCS->GetYaxis()->SetTitle(Form("Counts / %.2f rad",h_CoplanRP_DVCS->GetBinWidth(1)));
+  // Draw
+  h_CoplanRP_DVCS->Draw("hist");
+  h_CoplanRP_DISLQ2->Draw("hist same");
+  h_CoplanRP_DISHQ2->Draw("hist same");
+  // Add text
+  TLatex* tePICLabel_left2 = new TLatex(0.15, 0.89, "#splitline{#bf{ePIC} Performance " + campaign + ", " + energy + " GeV}{ep #rightarrow e'p'#gamma, L_{proj} = "+EIClumi/1e15+" fb^{-1} - p' in RP}");
+  tePICLabel_left2->SetNDC();
+  tePICLabel_left2->SetTextSize(0.037);
+  tePICLabel_left2->Draw("same");
+  // Add legend
+  // TLegend* lcoplan = new TLegend(0.14,0.69, 0.49, 0.84);
+  // lcoplan->SetLineWidth(0);
+  // lcoplan->SetFillStyle(0);
+  // lcoplan->AddEntry(h_CoplanRP_DVCS,"DVCS","lf");
+  // lcoplan->AddEntry(h_CoplanRP_DISLQ2,"DIS - 1 < Q^{2} < 10 GeV^{2}","lf");
+  // lcoplan->AddEntry(h_CoplanRP_DISHQ2,"DIS - 10 < Q^{2} < 100 GeV^{2}","lf");
+  // lcoplan->SetTextSize(0.035);
+  lcoplan->Draw();
+  // Fit and draw
+  if(h_CoplanRP_DVCS->GetEntries() > 0){
+    TFitResultPtr coplanrp_gausfit = h_CoplanRP_DVCS->Fit("gaus","S0","",2.,4.);
+    TLatex* tcoplanrp_param = new TLatex(0.17,0.60,
+					 Form("#splitline{#mu = %.2f #pm %.2f rad}{#sigma = %.2f #pm %.2f rad}",
+					      coplanrp_gausfit->Parameter(1),
+					      coplanrp_gausfit->ParError(1),
+					      coplanrp_gausfit->Parameter(2),
+					      coplanrp_gausfit->ParError(2)));
+    tcoplanrp_param->SetNDC();
+    tcoplanrp_param->SetTextSize(0.037);
+    tcoplanrp_param->Draw("same");
+    auto coplanrp_fitfn = h_CoplanRP_DVCS->GetFunction("gaus");
+    coplanrp_fitfn->SetLineColor(kBlack);
+    coplanrp_fitfn->SetLineWidth(2);
+    coplanrp_fitfn->Draw("same");
+    // Draw cut lines
+    float sigmarp = coplanrp_gausfit->Parameter(2);
+    TLine* lCoplanRP_cutLeft = new TLine(TMath::Pi()-3*sigmarp,0.,TMath::Pi()-3*sigmarp,0.9*coplanrp_up);
+    lCoplanRP_cutLeft->SetLineColor(kRed);
+    lCoplanRP_cutLeft->SetLineWidth(2);
+    lCoplanRP_cutLeft->Draw();
+    TLine* lCoplanRP_cutRight = new TLine(TMath::Pi()+3*sigmarp,0.,TMath::Pi()+3*sigmarp,0.9*coplanrp_up);
+    lCoplanRP_cutRight->SetLineColor(kRed);
+    lCoplanRP_cutRight->SetLineWidth(2);
+    lCoplanRP_cutRight->Draw();
+  }
+  if(kSAVE) cCoplanRP->SaveAs("../figs/DISComp_" + energy +"_RPcoplanarity.png");
   
   // Close canvases
   ct_DISlo->Close();
@@ -737,7 +816,8 @@ void Plots_DISBkg(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   //ct_DISeg->Close();
   ct_Ratio->Close();
   //cpTmiss->Close();
-  //cCoplan->Close();
+  //cCoplanB0->Close();
+  //cCoplanRP->Close();
     
   return;
 }
