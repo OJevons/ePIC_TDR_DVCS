@@ -519,7 +519,14 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH2D* h_2D_xVtSin2_RP = new TH2D("2d_xvtsin2_rp",";x_{B,MC};|t|_{RP} [GeV^{2}]",5e4,0.,1.,100,0.,2.);
   TH2D* h_2D_xVtCos2_MC = new TH2D("2d_xvtcos2_mc",";x_{B,MC};|t|_{MC} [GeV^{2}]",5e4,0.,1.,100,0.,2.);
   TH2D* h_2D_xVtCos2_RP = new TH2D("2d_xvtcos2_rp",";x_{B,MC};|t|_{RP} [GeV^{2}]",5e4,0.,1.,100,0.,2.);
-
+  // 5e) Inclusive kinematic resolutions from other methods
+  TH2D* h_PctResQ2_JB = new TH2D("q2_pctres_jb",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
+  TH2D* h_PctResxB_JB = new TH2D("xb_pctres_jb",";x_{B};#Deltax_{B}/x_{B}", 1e4, 0., 1., 1000, -5., 5.);
+  TH2D* h_PctResy_JB  = new TH2D("y_pctres_jb" ,";y;#Deltay/y", 100, 0.,  1., 200, -1., 1.);
+  TH2D* h_PctResQ2_ES = new TH2D("q2_pctres_es",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
+  TH2D* h_PctResxB_ES = new TH2D("xb_pctres_es",";x_{B};#Deltax_{B}/x_{B}", 1e4, 0., 1., 1000, -5., 5.);
+  TH2D* h_PctResy_ES  = new TH2D("y_pctres_es" ,";y;#Deltay/y", 100, 0.,  1., 200, -1., 1.);
+  
   // 6) Cut variables
   // 6a) Proton track theta
   TH1D* h_theta_MCp = new TH1D("theta_mcp", ";#theta_{p'}(MC) [mrad]", 200, 0., 50.);
@@ -1257,9 +1264,21 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
-	//h_Pmiss3_MCA->Fill(calcPMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
-	//h_Ptmiss3_MCA->Fill(calcPtMiss_3Body(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]));
+	double q2_mc_jb{0}, xb_mc_jb{0}, y_mc_jb{0};
+	calcKin_JB(beame4, beamp4, scatp4_aso[0], scatg4_aso[0], q2_mc_jb, xb_mc_jb, y_mc_jb);
+	double q2_rec_jb{0}, xb_rec_jb{0}, y_rec_jb{0};
+	calcKin_JB(beame4, beamp4, scatp4_rec[0], scatg4_rec[0], q2_rec_jb, xb_rec_jb, y_rec_jb);
+	double q2_mc_es{0}, xb_mc_es{0}, y_mc_es{0};
+	calcKin_ESigma(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0], q2_mc_es, xb_mc_es, y_mc_es);
+	double q2_rec_es{0}, xb_rec_es{0}, y_rec_es{0};
+	calcKin_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0], q2_rec_es, xb_rec_es, y_rec_es);
 	
+	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
+	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
+	h_PctResy_JB->Fill(y_mc_jb, (y_rec_jb-y_mc_jb)/y_mc_jb);
+	h_PctResQ2_ES->Fill(q2_mc_es, (q2_rec_es-q2_mc_es)/q2_mc_es);
+	h_PctResxB_ES->Fill(xb_mc_es, (xb_rec_es-xb_mc_es)/xb_mc_es);
+	h_PctResy_ES->Fill(y_mc_es, (y_rec_es-y_mc_es)/y_mc_es);
       }
       
       //cout<<"[DEBUG] TPhi and differential histos. (B0 proton) filled"<<endl;
@@ -1331,6 +1350,21 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
 	//cout<<"[DEBUG] 2D x:t distribution filled"<<endl;
+	double q2_mc_jb{0}, xb_mc_jb{0}, y_mc_jb{0};
+	calcKin_JB(beame4, beamp4, scatp4_gen[0], scatg4_aso[0], q2_mc_jb, xb_mc_jb, y_mc_jb);
+	double q2_rec_jb{0}, xb_rec_jb{0}, y_rec_jb{0};
+	calcKin_JB(beame4, beamp4, scatp4_rom[0], scatg4_rec[0], q2_rec_jb, xb_rec_jb, y_rec_jb);
+	double q2_mc_es{0}, xb_mc_es{0}, y_mc_es{0};
+	calcKin_ESigma(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0], q2_mc_es, xb_mc_es, y_mc_es);
+	double q2_rec_es{0}, xb_rec_es{0}, y_rec_es{0};
+	calcKin_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0], q2_rec_es, xb_rec_es, y_rec_es);
+	
+	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
+	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
+	h_PctResy_JB->Fill(y_mc_jb, (y_rec_jb-y_mc_jb)/y_mc_jb);
+	h_PctResQ2_ES->Fill(q2_mc_es, (q2_rec_es-q2_mc_es)/q2_mc_es);
+	h_PctResxB_ES->Fill(xb_mc_es, (xb_rec_es-xb_mc_es)/xb_mc_es);
+	h_PctResy_ES->Fill(y_mc_es, (y_rec_es-y_mc_es)/y_mc_es);
       }
       
       //cout<<"[DEBUG] TPhi and differential histos. (RP proton) filled"<<endl;
@@ -1758,6 +1792,13 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_PctResQ2->Write();
   h_PctResxB->Write();
   h_PctResy->Write();
+  // Inclusive kinematic resolutions - other methods
+  h_PctResQ2_JB->Write();
+  h_PctResxB_JB->Write();
+  h_PctResy_JB->Write();
+  h_PctResQ2_ES->Write();
+  h_PctResxB_ES->Write();
+  h_PctResy_ES->Write();
   // Cross-variable coverages
   h_2D_xVQ2_MC->Write();
   h_2D_xVQ2_RP->Write();
