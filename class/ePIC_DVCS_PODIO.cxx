@@ -1264,14 +1264,19 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
-	double q2_mc_jb{0}, xb_mc_jb{0}, y_mc_jb{0};
-	calcKin_JB(beame4, beamp4, scatp4_aso[0], scatg4_aso[0], q2_mc_jb, xb_mc_jb, y_mc_jb);
-	double q2_rec_jb{0}, xb_rec_jb{0}, y_rec_jb{0};
-	calcKin_JB(beame4, beamp4, scatp4_rec[0], scatg4_rec[0], q2_rec_jb, xb_rec_jb, y_rec_jb);
-	double q2_mc_es{0}, xb_mc_es{0}, y_mc_es{0};
-	calcKin_ESigma(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0], q2_mc_es, xb_mc_es, y_mc_es);
-	double q2_rec_es{0}, xb_rec_es{0}, y_rec_es{0};
-	calcKin_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0], q2_rec_es, xb_rec_es, y_rec_es);
+	Float_t q2_mc_jb = calcQ2_JB(beame4, scatp4_aso[0], scatg4_aso[0]);
+	Float_t xb_mc_jb = calcX_JB(beame4, beamp4, scatp4_aso[0], scatg4_aso[0]);
+	Float_t y_mc_jb = calcY_JB(beame4, scatp4_aso[0], scatg4_aso[0]);
+	Float_t q2_rec_jb = calcQ2_JB(beame4, scatp4_rec[0], scatg4_rec[0]);
+	Float_t xb_rec_jb = calcX_JB(beame4, beamp4, scatp4_rec[0], scatg4_rec[0]);
+	Float_t y_rec_jb = calcY_JB(beame4, scatp4_rec[0], scatg4_rec[0]);
+
+	Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
+	Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]);
+	Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]);
+	Float_t q2_rec_es = calcQ2_ESigma(beame4, scate4_rec[0]);
+	Float_t xb_rec_es = calcX_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
+	Float_t y_rec_es = calcY_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
 	
 	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
 	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
@@ -1350,14 +1355,20 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
 	//cout<<"[DEBUG] 2D x:t distribution filled"<<endl;
-	double q2_mc_jb{0}, xb_mc_jb{0}, y_mc_jb{0};
-	calcKin_JB(beame4, beamp4, scatp4_gen[0], scatg4_aso[0], q2_mc_jb, xb_mc_jb, y_mc_jb);
-	double q2_rec_jb{0}, xb_rec_jb{0}, y_rec_jb{0};
-	calcKin_JB(beame4, beamp4, scatp4_rom[0], scatg4_rec[0], q2_rec_jb, xb_rec_jb, y_rec_jb);
-	double q2_mc_es{0}, xb_mc_es{0}, y_mc_es{0};
-	calcKin_ESigma(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0], q2_mc_es, xb_mc_es, y_mc_es);
-	double q2_rec_es{0}, xb_rec_es{0}, y_rec_es{0};
-	calcKin_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0], q2_rec_es, xb_rec_es, y_rec_es);
+
+	Float_t q2_mc_jb = calcQ2_JB(beame4, scatp4_aso[0], scatg4_aso[0]);
+	Float_t xb_mc_jb = calcX_JB(beame4, beamp4, scatp4_gen[0], scatg4_aso[0]);
+	Float_t y_mc_jb = calcY_JB(beame4, scatp4_gen[0], scatg4_aso[0]);
+	Float_t q2_rec_jb = calcQ2_JB(beame4, scatp4_rom[0], scatg4_rec[0]);
+	Float_t xb_rec_jb = calcX_JB(beame4, beamp4, scatp4_rom[0], scatg4_rec[0]);
+	Float_t y_rec_jb = calcY_JB(beame4, scatp4_rom[0], scatg4_rec[0]);
+
+	Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
+	Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]);
+	Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]);
+	Float_t q2_rec_es = calcQ2_ESigma(beame4, scate4_rec[0]);
+	Float_t xb_rec_es = calcX_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
+	Float_t y_rec_es = calcY_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
 	
 	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
 	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
