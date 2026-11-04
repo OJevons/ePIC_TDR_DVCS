@@ -384,7 +384,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_Q2_MC->GetYaxis()->SetLabelSize(0.05);
   // Drawing
   h_Q2_MC->Draw("hist");
-  h_Q2_Rec->Draw("pe same");
+  //h_Q2_Rec->Draw("pe same");
   h_Q2_Corr->Draw("pe same");
   // Labels
   TLatex* tePICLabel = new TLatex(0.17, 0.86, 
@@ -397,7 +397,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   lQ2->SetLineWidth(0);
   lQ2->SetFillStyle(0);
   lQ2->AddEntry(h_Q2_MC, "MC gen.", "l");
-  lQ2->AddEntry(h_Q2_Rec, "Raw reco.", "lp");
+  //lQ2->AddEntry(h_Q2_Rec, "Raw reco.", "lp");
   lQ2->AddEntry(h_Q2_Corr, "Corr. reco.", "lp");
   lQ2->Draw();
   
@@ -854,7 +854,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   // Labels
   tePICLabel_R->Draw("same");
   // Legend
-  TLegend* lt = new TLegend(0.17, 0.05, 0.71, 0.25);
+  TLegend* lt = new TLegend(0.38, 0.60, 0.92, 0.80);
   lt->SetLineWidth(0);
   lt->SetFillStyle(0);
   lt->SetNColumns(2);
@@ -918,14 +918,16 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   h_tResLC_Proj->SetFillStyle(3001);
   // Set draw options - axes
   // Using Method L plot for baseline
-  gPad->SetLogy();
+  //gPad->SetLogy();
   h_tResLC_Proj->GetXaxis()->SetTitle("#Deltat [GeV^{2}]");
-  h_tResLC_Proj->GetXaxis()->SetRangeUser(-2.,2.);
+  h_tResLC_Proj->GetXaxis()->SetRangeUser(-1.,1.);
   h_tResLC_Proj->GetYaxis()->SetTitle("Normalized counts/0.02 GeV^{2}");
   h_tResLC_Proj->GetYaxis()->SetLabelSize(0.03);
   h_tResLC_Proj->GetYaxis()->SetTitleSize(0.04);
   h_tResLC_Proj->GetYaxis()->SetTitleOffset(1.3);
-  h_tResLC_Proj->GetYaxis()->SetRangeUser(1,1000*h_tResLC_Proj->GetMaximum());
+  double tres_max{0};
+  for( TH1D* h : {h_tResB0_Proj,h_tResRP_Proj,h_tResLC_Proj}){ if(h->GetMaximum() > tres_max) tres_max = h->GetMaximum(); }
+  h_tResLC_Proj->GetYaxis()->SetRangeUser(0.,1.5*tres_max);
   // Draw
   // Method L first, others depending on which has more entries
   h_tResLC_Proj->Draw("hist");
@@ -938,8 +940,9 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
     h_tResB0_Proj->Draw("hist same");
   }
   // Add text
-  TLatex* tePICLabel_tres = new TLatex(-1.85, 0.25*h_tResLC_Proj->GetMaximum(),
+  TLatex* tePICLabel_tres = new TLatex(0.16, 0.89,
 				       Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma}", campaign.Data(), energy.Data()));
+  tePICLabel_tres->SetNDC();
   tePICLabel_tres->SetTextSize(0.037);
   tePICLabel_tres->Draw("same");
   // Add legend
@@ -950,13 +953,13 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   TString sB0Res_leg = "BABE (B0), RMS = " + combineScientific(h_tResB0_Proj->GetRMS(),h_tResB0_Proj->GetRMSError()) + " GeV^{2}";
   TString sRPRes_leg = "BABE (RP), RMS = " + combineScientific(h_tResRP_Proj->GetRMS(),h_tResRP_Proj->GetRMSError()) + " GeV^{2}";
   TString sLCRes_leg = "eXBE, RMS = " + combineScientific(h_tResLC_Proj->GetRMS(),h_tResLC_Proj->GetRMSError()) + " GeV^{2}";
-  ltRes->AddEntry(h_tResB0_Proj,sB0Res_leg,"lp");
-  ltRes->AddEntry(h_tResRP_Proj,sRPRes_leg,"lp");
-  ltRes->AddEntry(h_tResLC_Proj,sLCRes_leg,"lp");
+  ltRes->AddEntry(h_tResB0_Proj,sB0Res_leg,"lf");
+  ltRes->AddEntry(h_tResRP_Proj,sRPRes_leg,"lf");
+  ltRes->AddEntry(h_tResLC_Proj,sLCRes_leg,"lf");
   ltRes->Draw();
   // Save figure
   if(kSAVE) ctRes_All->SaveAs(sFigsPath + "TDR_" + energy +"_tRes_All.png");
-  //ctRes_All->Close();
+  ctRes_All->Close();
 
   // CANVAS - Overlaid t-resolutions (relative)
   TH1D* h_tResB0Pct_Proj = (TH1D*)h_t_B0ResPct->ProjectionY("tresb0pct_py");
@@ -980,9 +983,11 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   // Set draw options - axes
   // Using Method L plot for baseline
   h_tResLCPct_Proj->GetXaxis()->SetTitle("#Deltat/|t_{MC}|");
-  h_tResLCPct_Proj->GetXaxis()->SetRangeUser(-0.05,1.);
   h_tResLCPct_Proj->GetYaxis()->SetTitle("Normalized counts");
-  h_tResLCPct_Proj->GetYaxis()->SetRangeUser(1,1.25*h_tResLCPct_Proj->GetMaximum());
+  h_tResLCPct_Proj->GetYaxis()->SetTitleOffset(1.4);
+  double tres_pct_max{0};
+  for( TH1D* h : {h_tResB0Pct_Proj,h_tResRPPct_Proj,h_tResLCPct_Proj}){ if(h->GetMaximum() > tres_pct_max) tres_pct_max = h->GetMaximum(); }
+  h_tResLCPct_Proj->GetYaxis()->SetRangeUser(0.,1.5*tres_pct_max);
   // Draw
   // Method L first, others depending on which has more entries
   h_tResLCPct_Proj->Draw("hist");
@@ -995,12 +1000,13 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
     h_tResB0Pct_Proj->Draw("hist same");
   }
   // Add text
-  TLatex* tePICLabel_trespct = new TLatex(-0.01, 0.91*h_tResLCPct_Proj->GetMaximum(),
+  TLatex* tePICLabel_trespct = new TLatex(0.16, 0.89,
 					  Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma}", campaign.Data(), energy.Data()));
+  tePICLabel_trespct->SetNDC();
   tePICLabel_trespct->SetTextSize(0.037);
   tePICLabel_trespct->Draw("same");
   // Add legend
-  TLegend* ltResPct = new TLegend(0.30,0.64,0.64,0.78);
+  TLegend* ltResPct = new TLegend(0.15,0.70,0.49,0.83);
   ltResPct->SetLineWidth(0);
   ltResPct->SetFillStyle(0);
   ltResPct->SetTextSize(0.032);
@@ -1013,7 +1019,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   ltResPct->Draw();
   // Save figure
   if(kSAVE) ctResPct_All->SaveAs(sFigsPath + "TDR_" + energy +"_tResPct_All.png");
-  //ctResPct_All->Close();
+  ctResPct_All->Close();
 
 
   // CANVAS: Event (E-pz)
