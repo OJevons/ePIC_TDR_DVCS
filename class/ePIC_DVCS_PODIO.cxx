@@ -1836,6 +1836,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
   h_PctResQ2_JB->Write();
   h_PctResxB_JB->Write();
   h_PctResy_JB->Write();
+  h_PctResQ2_DA->Write();
+  h_PctResxB_DA->Write();
+  h_PctResy_DA->Write();
   h_PctResQ2_ES->Write();
   h_PctResxB_ES->Write();
   h_PctResy_ES->Write();
