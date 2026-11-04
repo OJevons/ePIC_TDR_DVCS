@@ -137,10 +137,11 @@ TH1D* extractRMSSlice(TString outputHistoName, TH2D* twoDHisto){
 // Calculate histogram scaling factors to get to desired luminosity
 // Give luminosity in full scientific (expect 1e15 for 1fb-1)
 //---------------------------------------------------------------------
-double calcScaling(TString energy, TString hel, float lumi){
+double calcScaling(TString energy, TString hel, int ngen, float lumi){
   // Holding variables - No. of events generated, integrated cross-section
   // These vary by beam settings
-  Double_t fXSint{0}, NEv{0};
+  Double_t fXSint{0};
+  Double_t NEv = (double)ngen;
 
   if(energy == "9x130"){
     NEv = 1e6;
@@ -214,6 +215,9 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   //--------------------------------------------------------------------
   // Load histograms from file
   //--------------------------------------------------------------------
+  // 0) Histogram filled every event - e.g no. of neutrals per event
+  TH1I* hCounter = (TH1I*)fIn->Get("mult_rec_neu");
+  
   // 1) Inclusive, Q2 - distribution, efficiency, 2D response, resolution
   TH1D* h_Q2_MC  = (TH1D*)fIn->Get("q2_mc");
   TH1D* h_Q2_Acc = (TH1D*)fIn->Get("q2_acc");
@@ -234,6 +238,17 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   TH1D* h_y_Rec = (TH1D*)fIn->Get("y_reco");
   TH2D* h_y_2D  = (TH2D*)fIn->Get("y_2d");
   TH2D* h_y_Res = (TH2D*)fIn->Get("y_pctres");
+
+  // 3.5) Inclusive kinematic resolutions; Jaquet-Blondel, Double Angle and eSigma methods
+  TH2D* h_Q2_Res_JB = (TH2D*)fIn->Get("q2_pctres_jb");
+  TH2D* h_xB_Res_JB = (TH2D*)fIn->Get("xb_pctres_jb");
+  TH2D* h_y_Res_JB = (TH2D*)fIn->Get("y_pctres_jb");
+  TH2D* h_Q2_Res_DA = (TH2D*)fIn->Get("q2_pctres_da");
+  TH2D* h_xB_Res_DA = (TH2D*)fIn->Get("xb_pctres_da");
+  TH2D* h_y_Res_DA = (TH2D*)fIn->Get("y_pctres_da");
+  TH2D* h_Q2_Res_ES = (TH2D*)fIn->Get("q2_pctres_es");
+  TH2D* h_xB_Res_ES = (TH2D*)fIn->Get("xb_pctres_es");
+  TH2D* h_y_Res_ES = (TH2D*)fIn->Get("y_pctres_es");
   
   // 4) Exclusive, t - distribution, efficiency, resolution
   TH1D* h_t_MC    = (TH1D*)fIn->Get("t_truth");
@@ -268,10 +283,11 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   // CALCULATIONS
   // 1. Scaling factor to EIC lumi
   double EIClumi{1.};
+  int n_gen = hCounter->GetEntries();
   if(energy == "9x130") EIClumi = 1e15;
   else if(energy == "9x275") EIClumi = 2.5e15;
   else EIClumi = 2.5e15;
-  Double_t scaleToEIC = calcScaling(energy, hel, EIClumi);
+  Double_t scaleToEIC = calcScaling(energy, hel, n_gen, EIClumi);
 
   // Scale histograms
   h_Q2_MC->Scale(scaleToEIC);
@@ -428,6 +444,63 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cQ2_Res->SaveAs(sFigsPath + "TDR_" + energy +"_Q2_Res.png");
   cQ2_Res->Close();
 
+  // CANVAS: Comparative Q2 resolution
+  TH1D* hQ2Res1D_EL = h_Q2_Res->ProjectionY();
+  hQ2Res1D_EL->Scale(1./hQ2Res1D_EL->GetEntries());
+  TH1D* hQ2Res1D_JB = h_Q2_Res_JB->ProjectionY();
+  hQ2Res1D_JB->Scale(1./hQ2Res1D_JB->GetEntries());
+  TH1D* hQ2Res1D_DA = h_Q2_Res_DA->ProjectionY();
+  hQ2Res1D_DA->Scale(1./hQ2Res1D_DA->GetEntries());
+  TH1D* hQ2Res1D_ES = h_Q2_Res_ES->ProjectionY();
+  hQ2Res1D_ES->Scale(1./hQ2Res1D_ES->GetEntries());
+  
+  TCanvas* cQ2_CompRes = new TCanvas("cq2_compres","",1000,1000);
+  // Markers and lines
+  hQ2Res1D_EL->SetLineColor(kP6Blue);
+  hQ2Res1D_EL->SetFillColor(kP6Blue);
+  hQ2Res1D_EL->SetFillStyle(3001);
+  hQ2Res1D_JB->SetLineColor(kP6Yellow);
+  hQ2Res1D_JB->SetFillColor(kP6Yellow);
+  hQ2Res1D_JB->SetFillStyle(3001);
+  hQ2Res1D_DA->SetLineColor(kP6Red);
+  hQ2Res1D_DA->SetFillColor(kP6Red);
+  hQ2Res1D_DA->SetFillStyle(3001);
+  hQ2Res1D_ES->SetLineColor(kP6Grape);
+  hQ2Res1D_ES->SetFillColor(kP6Grape);
+  hQ2Res1D_ES->SetFillStyle(3001);
+  // Axes
+  hQ2Res1D_EL->SetTitle("");
+  hQ2Res1D_EL->GetXaxis()->SetTitle("#DeltaQ^{2}/Q^{2}");
+  hQ2Res1D_EL->GetYaxis()->SetTitle("Counts/N_{ev}");
+  hQ2Res1D_EL->GetYaxis()->SetTitleOffset(1.25);
+  hQ2Res1D_EL->GetYaxis()->SetLabelSize(0.04);
+  float q2_compmax{0};
+  for(TH1D* h : {hQ2Res1D_EL,hQ2Res1D_JB,hQ2Res1D_DA,hQ2Res1D_ES}){ if(h->GetMaximum() > q2_compmax) q2_compmax = h->GetMaximum(); }
+  hQ2Res1D_EL->SetMaximum(1.25*q2_compmax);
+  // Draw
+  hQ2Res1D_EL->Draw("hist");
+  hQ2Res1D_JB->Draw("hist same");
+  hQ2Res1D_DA->Draw("hist same");
+  hQ2Res1D_ES->Draw("hist same");
+  // Add text
+  TLatex* tePICLabel_comp = new TLatex(0.16, 0.89, 
+				  Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+  tePICLabel_comp->SetNDC();
+  tePICLabel_comp->SetTextSize(0.037);
+  tePICLabel_comp->Draw("same");
+  // Legend
+  TLegend* lQ2Comp = new TLegend(0.57, 0.68, 0.93, 0.84);
+  lQ2Comp->SetLineWidth(0);
+  lQ2Comp->SetFillStyle(0);
+  lQ2Comp->AddEntry(hQ2Res1D_EL, "Electron", "lf");
+  lQ2Comp->AddEntry(hQ2Res1D_JB, "Jaquet-Blondel", "lf");
+  lQ2Comp->AddEntry(hQ2Res1D_DA, "Double angle", "lf");
+  lQ2Comp->AddEntry(hQ2Res1D_ES, "e#Sigma", "lf");
+  lQ2Comp->Draw();
+  // Save figure
+  if(kSAVE) cQ2_CompRes->SaveAs(sFigsPath + "TDR_" + energy +"_Q2_CompRes.png");
+  cQ2_CompRes->Close();
+  
   // CANVAS: xB distribution
   TCanvas* cxB = new TCanvas("cxb","",1000,1000);
   TPad* upperxb = new TPad("upperxb","",0.05,0.3,0.95,0.95);
@@ -523,6 +596,61 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cxB_Res->SaveAs(sFigsPath + "TDR_" + energy +"_xB_Res.png");
   cxB_Res->Close();
 
+  // CANVAS: Comparative xB resolution
+  TH1D* hxBRes1D_EL = h_xB_Res->ProjectionY();
+  hxBRes1D_EL->Scale(1./hxBRes1D_EL->GetEntries());
+  TH1D* hxBRes1D_JB = h_xB_Res_JB->ProjectionY();
+  hxBRes1D_JB->Scale(1./hxBRes1D_JB->GetEntries());
+  TH1D* hxBRes1D_DA = h_xB_Res_DA->ProjectionY();
+  hxBRes1D_DA->Scale(1./hxBRes1D_DA->GetEntries());
+  TH1D* hxBRes1D_ES = h_xB_Res_ES->ProjectionY();
+  hxBRes1D_ES->Scale(1./hxBRes1D_ES->GetEntries());
+  
+  TCanvas* cxB_CompRes = new TCanvas("cxb_compres","",1000,1000);
+  // Markers and lines
+  hxBRes1D_EL->SetLineColor(kP6Blue);
+  hxBRes1D_EL->SetFillColor(kP6Blue);
+  hxBRes1D_EL->SetFillStyle(3001);
+  hxBRes1D_JB->SetLineColor(kP6Yellow);
+  hxBRes1D_JB->SetFillColor(kP6Yellow);
+  hxBRes1D_JB->SetFillStyle(3001);
+  hxBRes1D_DA->SetLineColor(kP6Red);
+  hxBRes1D_DA->SetFillColor(kP6Red);
+  hxBRes1D_DA->SetFillStyle(3001);
+  hxBRes1D_ES->SetLineColor(kP6Grape);
+  hxBRes1D_ES->SetFillColor(kP6Grape);
+  hxBRes1D_ES->SetFillStyle(3001);
+  // Axes
+  hxBRes1D_EL->SetTitle("");
+  hxBRes1D_EL->GetXaxis()->SetTitle("#Deltax_{B}/x_{B}");
+  hxBRes1D_EL->GetXaxis()->SetRangeUser(-1.,1.);
+  hxBRes1D_EL->GetYaxis()->SetTitle("Counts/N_{ev}");
+  hxBRes1D_EL->GetYaxis()->SetTitleOffset(1.25);
+  hxBRes1D_EL->GetYaxis()->SetLabelSize(0.04);
+  hxBRes1D_EL->GetYaxis()->SetNdivisions(505);
+  float xb_compmax{0};
+  for(TH1D* h : {hxBRes1D_EL,hxBRes1D_JB,hxBRes1D_DA,hxBRes1D_ES}){ if(h->GetMaximum() > xb_compmax) xb_compmax = h->GetMaximum(); }
+  hxBRes1D_EL->SetMaximum(1.25*xb_compmax);
+  // Draw
+  hxBRes1D_EL->Draw("hist");
+  hxBRes1D_JB->Draw("hist same");
+  hxBRes1D_DA->Draw("hist same");
+  hxBRes1D_ES->Draw("hist same");
+  // Add text
+  tePICLabel_comp->Draw("same");
+  // Legend
+  TLegend* lxBComp = new TLegend(0.57, 0.68, 0.93, 0.84);
+  lxBComp->SetLineWidth(0);
+  lxBComp->SetFillStyle(0);
+  lxBComp->AddEntry(hxBRes1D_EL, "Electron", "lf");
+  lxBComp->AddEntry(hxBRes1D_JB, "Jaquet-Blondel", "lf");
+  lxBComp->AddEntry(hxBRes1D_DA, "Double angle", "lf");
+  lxBComp->AddEntry(hxBRes1D_ES, "e#Sigma", "lf");
+  lxBComp->Draw();
+  // Save figure
+  if(kSAVE) cxB_CompRes->SaveAs(sFigsPath + "TDR_" + energy +"_xB_CompRes.png");
+  cxB_CompRes->Close();
+  
   // CANVAS: y distribution
   TCanvas* cy = new TCanvas("cy","",1000,1000);
   TPad* uppery = new TPad("uppery","",0.05,0.3,0.95,0.95);
@@ -610,6 +738,60 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   if(kSAVE) cy_Res->SaveAs(sFigsPath + "TDR_" + energy +"_y_Res.png");
   cy_Res->Close();
 
+  // CANVAS: Comparative y resolution
+  TH1D* hyRes1D_EL = h_y_Res->ProjectionY();
+  hyRes1D_EL->Scale(1./hyRes1D_EL->GetEntries());
+  TH1D* hyRes1D_JB = h_y_Res_JB->ProjectionY();
+  hyRes1D_JB->Scale(1./hyRes1D_JB->GetEntries());
+  TH1D* hyRes1D_DA = h_y_Res_DA->ProjectionY();
+  hyRes1D_DA->Scale(1./hyRes1D_DA->GetEntries());
+  TH1D* hyRes1D_ES = h_y_Res_ES->ProjectionY();
+  hyRes1D_ES->Scale(1./hyRes1D_ES->GetEntries());
+  
+  TCanvas* cy_CompRes = new TCanvas("cy_compres","",1000,1000);
+  // Markers and lines
+  hyRes1D_EL->SetLineColor(kP6Blue);
+  hyRes1D_EL->SetFillColor(kP6Blue);
+  hyRes1D_EL->SetFillStyle(3001);
+  hyRes1D_JB->SetLineColor(kP6Yellow);
+  hyRes1D_JB->SetFillColor(kP6Yellow);
+  hyRes1D_JB->SetFillStyle(3001);
+  hyRes1D_DA->SetLineColor(kP6Red);
+  hyRes1D_DA->SetFillColor(kP6Red);
+  hyRes1D_DA->SetFillStyle(3001);
+  hyRes1D_ES->SetLineColor(kP6Grape);
+  hyRes1D_ES->SetFillColor(kP6Grape);
+  hyRes1D_ES->SetFillStyle(3001);
+  // Axes
+  hyRes1D_EL->SetTitle("");
+  hyRes1D_EL->GetXaxis()->SetTitle("#Deltay/y");
+  hyRes1D_EL->GetXaxis()->SetRangeUser(-1.,1.);
+  hyRes1D_EL->GetYaxis()->SetTitle("Counts/N_{ev}");
+  hyRes1D_EL->GetYaxis()->SetTitleOffset(1.25);
+  hyRes1D_EL->GetYaxis()->SetLabelSize(0.04);
+  hyRes1D_EL->GetYaxis()->SetNdivisions(505);
+  float y_compmax{0};
+  for(TH1D* h : {hyRes1D_EL,hyRes1D_JB,hyRes1D_DA,hyRes1D_ES}){ if(h->GetMaximum() > y_compmax) y_compmax = h->GetMaximum(); }
+  hyRes1D_EL->SetMaximum(1.25*y_compmax);
+  // Draw
+  hyRes1D_EL->Draw("hist");
+  hyRes1D_JB->Draw("hist same");
+  hyRes1D_DA->Draw("hist same");
+  hyRes1D_ES->Draw("hist same");
+  // Add text
+  tePICLabel_comp->Draw("same");
+  // Legend
+  TLegend* lyComp = new TLegend(0.57, 0.68, 0.93, 0.84);
+  lyComp->SetLineWidth(0);
+  lyComp->SetFillStyle(0);
+  lyComp->AddEntry(hyRes1D_EL, "Electron", "lf");
+  lyComp->AddEntry(hyRes1D_JB, "Jaquet-Blondel", "lf");
+  lyComp->AddEntry(hyRes1D_DA, "Double angle", "lf");
+  lyComp->AddEntry(hyRes1D_ES, "e#Sigma", "lf");
+  lyComp->Draw();
+  // Save figure
+  if(kSAVE) cy_CompRes->SaveAs(sFigsPath + "TDR_" + energy +"_y_CompRes.png");
+  cy_CompRes->Close();
   
   // CANVAS: t distribution
   TCanvas* ct = new TCanvas("ct","",1000,1000);
@@ -717,8 +899,11 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
 
   // CANVAS: Overlaid t-resolutions (absolute)
   TH1D* h_tResB0_Proj = (TH1D*)h_t_B0Res->ProjectionY("tresb0_py");
+  h_tResB0_Proj->Scale(1./h_tResB0_Proj->GetEntries());
   TH1D* h_tResRP_Proj = (TH1D*)h_t_RPRes->ProjectionY("tresrp_py");
+  h_tResRP_Proj->Scale(1./h_tResRP_Proj->GetEntries());
   TH1D* h_tResLC_Proj = (TH1D*)h_t_LCRes->ProjectionY("treslc_py");
+  h_tResLC_Proj->Scale(1./h_tResLC_Proj->GetEntries());
 
   TCanvas* ctRes_All = new TCanvas("ctres_all","",1000,1000);
   // Set draw options - markers and lines
@@ -736,7 +921,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   gPad->SetLogy();
   h_tResLC_Proj->GetXaxis()->SetTitle("#Deltat [GeV^{2}]");
   h_tResLC_Proj->GetXaxis()->SetRangeUser(-2.,2.);
-  h_tResLC_Proj->GetYaxis()->SetTitle("Counts/0.02 GeV^{2}");
+  h_tResLC_Proj->GetYaxis()->SetTitle("Normalized counts/0.02 GeV^{2}");
   h_tResLC_Proj->GetYaxis()->SetLabelSize(0.03);
   h_tResLC_Proj->GetYaxis()->SetTitleSize(0.04);
   h_tResLC_Proj->GetYaxis()->SetTitleOffset(1.3);
@@ -771,12 +956,15 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   ltRes->Draw();
   // Save figure
   if(kSAVE) ctRes_All->SaveAs(sFigsPath + "TDR_" + energy +"_tRes_All.png");
-  ctRes_All->Close();
+  //ctRes_All->Close();
 
   // CANVAS - Overlaid t-resolutions (relative)
   TH1D* h_tResB0Pct_Proj = (TH1D*)h_t_B0ResPct->ProjectionY("tresb0pct_py");
+  h_tResB0Pct_Proj->Scale(1./h_tResB0Pct_Proj->GetEntries());
   TH1D* h_tResRPPct_Proj = (TH1D*)h_t_RPResPct->ProjectionY("tresrppct_py");
+  h_tResRPPct_Proj->Scale(1./h_tResRPPct_Proj->GetEntries());
   TH1D* h_tResLCPct_Proj = (TH1D*)h_t_LCResPct->ProjectionY("treslcpct_py");
+  h_tResLCPct_Proj->Scale(1./h_tResLCPct_Proj->GetEntries());
 
   TCanvas* ctResPct_All = new TCanvas("ctrespct_all","",1000,1000);
   // Set draw options - markers and lines
@@ -793,6 +981,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   // Using Method L plot for baseline
   h_tResLCPct_Proj->GetXaxis()->SetTitle("#Deltat/|t_{MC}|");
   h_tResLCPct_Proj->GetXaxis()->SetRangeUser(-0.05,1.);
+  h_tResLCPct_Proj->GetYaxis()->SetTitle("Normalized counts");
   h_tResLCPct_Proj->GetYaxis()->SetRangeUser(1,1.25*h_tResLCPct_Proj->GetMaximum());
   // Draw
   // Method L first, others depending on which has more entries
@@ -824,7 +1013,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   ltResPct->Draw();
   // Save figure
   if(kSAVE) ctResPct_All->SaveAs(sFigsPath + "TDR_" + energy +"_tResPct_All.png");
-  ctResPct_All->Close();
+  //ctResPct_All->Close();
 
 
   // CANVAS: Event (E-pz)
@@ -851,11 +1040,13 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   tePICLabel_empz->SetTextSize(0.04);
   tePICLabel_empz->Draw("same");
   // Lines
-  TLine* lLower = new TLine(15.,0.,15.,empz_high);
+  float empz_cut_lower = (2*fEBeam)-3;
+  TLine* lLower = new TLine(empz_cut_lower,0.,empz_cut_lower,empz_high);
   lLower->SetLineColor(kP6Red);
   lLower->SetLineWidth(2);
   lLower->Draw();
-  TLine* lUpper = new TLine(25.,0.,25.,empz_high);
+  float empz_cut_upper = (2*fEBeam)+3;
+  TLine* lUpper = new TLine(empz_cut_upper,0.,empz_cut_upper,empz_high);
   lUpper->SetLineColor(kP6Red);
   lUpper->SetLineWidth(2);
   lUpper->Draw();
@@ -892,7 +1083,7 @@ void Plots_Event(TString campaign = "26.07.1", TString energy = "9x130", TString
   tePICLabel_ptm3->SetTextSize(0.04);
   tePICLabel_ptm3->Draw("same");
   // Lines
-  TLine* lptm3 = new TLine(0.5,0.,0.5,0.75*h_pTmiss_RP->GetMaximum());
+  TLine* lptm3 = new TLine(0.25,0.,0.25,0.75*h_pTmiss_RP->GetMaximum());
   lptm3->SetLineColor(kP6Red);
   lptm3->SetLineWidth(2);
   lptm3->Draw();
