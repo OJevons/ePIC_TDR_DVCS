@@ -523,6 +523,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
   TH2D* h_PctResQ2_JB = new TH2D("q2_pctres_jb",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
   TH2D* h_PctResxB_JB = new TH2D("xb_pctres_jb",";x_{B};#Deltax_{B}/x_{B}", 1e4, 0., 1., 1000, -5., 5.);
   TH2D* h_PctResy_JB  = new TH2D("y_pctres_jb" ,";y;#Deltay/y", 100, 0.,  1., 200, -1., 1.);
+  TH2D* h_PctResQ2_DA = new TH2D("q2_pctres_da",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
+  TH2D* h_PctResxB_DA = new TH2D("xb_pctres_da",";x_{B};#Deltax_{B}/x_{B}", 1e4, 0., 1., 1000, -5., 5.);
+  TH2D* h_PctResy_DA  = new TH2D("y_pctres_da" ,";y;#Deltay/y", 100, 0.,  1., 200, -1., 1.);
   TH2D* h_PctResQ2_ES = new TH2D("q2_pctres_es",";Q^{2} [GeV^{2}];#DeltaQ^{2}/Q^{2}", 220, 0., 110., 200, -1., 1.);
   TH2D* h_PctResxB_ES = new TH2D("xb_pctres_es",";x_{B};#Deltax_{B}/x_{B}", 1e4, 0., 1., 1000, -5., 5.);
   TH2D* h_PctResy_ES  = new TH2D("y_pctres_es" ,";y;#Deltay/y", 100, 0.,  1., 200, -1., 1.);
@@ -1274,6 +1277,13 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	Float_t xb_rec_jb = calcX_JB(beame4, beamp4, hfs_rec);
 	Float_t y_rec_jb = calcY_JB(beame4, hfs_rec);
 	
+	Float_t q2_mc_da = calcQ2_DA(beame4, scate4_aso[0], hfs_gen);
+	Float_t xb_mc_da = calcX_DA(beame4, beamp4, scate4_aso[0], hfs_gen);
+	Float_t y_mc_da = calcY_DA(scate4_aso[0], hfs_gen);
+	Float_t q2_rec_da = calcQ2_DA(beame4, scate4_rec[0], hfs_rec);
+	Float_t xb_rec_da = calcX_DA(beame4, beamp4, scate4_rec[0], hfs_rec);
+	Float_t y_rec_da = calcY_DA(scate4_rec[0], hfs_rec);
+
 	Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
 	Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
 	Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
@@ -1284,6 +1294,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
 	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
 	h_PctResy_JB->Fill(y_mc_jb, (y_rec_jb-y_mc_jb)/y_mc_jb);
+	h_PctResQ2_DA->Fill(q2_mc_da, (q2_rec_da-q2_mc_da)/q2_mc_da);
+	h_PctResxB_DA->Fill(xb_mc_da, (xb_rec_da-xb_mc_da)/xb_mc_da);
+	h_PctResy_DA->Fill(y_mc_da, (y_rec_da-y_mc_da)/y_mc_da);
 	h_PctResQ2_ES->Fill(q2_mc_es, (q2_rec_es-q2_mc_es)/q2_mc_es);
 	h_PctResxB_ES->Fill(xb_mc_es, (xb_rec_es-xb_mc_es)/xb_mc_es);
 	h_PctResy_ES->Fill(y_mc_es, (y_rec_es-y_mc_es)/y_mc_es);
@@ -1369,6 +1382,13 @@ void ePIC_DVCS_TASK::doAnalysis(){
         Float_t xb_rec_jb = calcX_JB(beame4, beamp4, hfs_rec);
         Float_t y_rec_jb = calcY_JB(beame4, hfs_rec);
 
+	Float_t q2_mc_da = calcQ2_DA(beame4, scate4_aso[0], hfs_gen);
+	Float_t xb_mc_da = calcX_DA(beame4, beamp4, scate4_aso[0], hfs_gen);
+	Float_t y_mc_da = calcY_DA(scate4_aso[0], hfs_gen);
+	Float_t q2_rec_da = calcQ2_DA(beame4, scate4_rec[0], hfs_rec);
+	Float_t xb_rec_da = calcX_DA(beame4, beamp4, scate4_rec[0], hfs_rec);
+	Float_t y_rec_da = calcY_DA(scate4_rec[0], hfs_rec);
+	
         Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
         Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
         Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
@@ -1379,6 +1399,9 @@ void ePIC_DVCS_TASK::doAnalysis(){
 	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
 	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
 	h_PctResy_JB->Fill(y_mc_jb, (y_rec_jb-y_mc_jb)/y_mc_jb);
+	h_PctResQ2_DA->Fill(q2_mc_da, (q2_rec_da-q2_mc_da)/q2_mc_da);
+	h_PctResxB_DA->Fill(xb_mc_da, (xb_rec_da-xb_mc_da)/xb_mc_da);
+	h_PctResy_DA->Fill(y_mc_da, (y_rec_da-y_mc_da)/y_mc_da);
 	h_PctResQ2_ES->Fill(q2_mc_es, (q2_rec_es-q2_mc_es)/q2_mc_es);
 	h_PctResxB_ES->Fill(xb_mc_es, (xb_rec_es-xb_mc_es)/xb_mc_es);
 	h_PctResy_ES->Fill(y_mc_es, (y_rec_es-y_mc_es)/y_mc_es);
