@@ -1264,20 +1264,23 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	h_tq2Vx_RP->Fill(xB_rec,t_rec/q2_rec);
 
-	Float_t q2_mc_jb = calcQ2_JB(beame4, scatp4_aso[0], scatg4_aso[0]);
-	Float_t xb_mc_jb = calcX_JB(beame4, beamp4, scatp4_aso[0], scatg4_aso[0]);
-	Float_t y_mc_jb = calcY_JB(beame4, scatp4_aso[0], scatg4_aso[0]);
-	Float_t q2_rec_jb = calcQ2_JB(beame4, scatp4_rec[0], scatg4_rec[0]);
-	Float_t xb_rec_jb = calcX_JB(beame4, beamp4, scatp4_rec[0], scatg4_rec[0]);
-	Float_t y_rec_jb = calcY_JB(beame4, scatp4_rec[0], scatg4_rec[0]);
-
-	Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
-	Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]);
-	Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], scatp4_aso[0], scatg4_aso[0]);
-	Float_t q2_rec_es = calcQ2_ESigma(beame4, scate4_rec[0]);
-	Float_t xb_rec_es = calcX_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
-	Float_t y_rec_es = calcY_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rec[0], scatg4_rec[0]);
+	P3EVector hfs_gen = scatp4_aso[0]+scatg4_aso[0];
+	P3EVector hfs_rec = scatp4_rec[0]+scatg4_rec[0];
 	
+	Float_t q2_mc_jb = calcQ2_JB(beame4, hfs_gen);
+	Float_t xb_mc_jb = calcX_JB(beame4, beamp4, hfs_gen);
+	Float_t y_mc_jb = calcY_JB(beame4, hfs_gen);
+	Float_t q2_rec_jb = calcQ2_JB(beame4, hfs_rec);
+	Float_t xb_rec_jb = calcX_JB(beame4, beamp4, hfs_rec);
+	Float_t y_rec_jb = calcY_JB(beame4, hfs_rec);
+	
+	Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
+	Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
+	Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
+	Float_t q2_rec_es = calcQ2_ESigma(beame4, scate4_rec[0]);
+	Float_t xb_rec_es = calcX_ESigma(beame4, beamp4, scate4_rec[0], hfs_rec);
+	Float_t y_rec_es = calcY_ESigma(beame4, beamp4, scate4_rec[0], hfs_rec);
+      
 	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
 	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
 	h_PctResy_JB->Fill(y_mc_jb, (y_rec_jb-y_mc_jb)/y_mc_jb);
@@ -1356,19 +1359,22 @@ void ePIC_DVCS_TASK::doAnalysis(){
 
 	//cout<<"[DEBUG] 2D x:t distribution filled"<<endl;
 
-	Float_t q2_mc_jb = calcQ2_JB(beame4, scatp4_aso[0], scatg4_aso[0]);
-	Float_t xb_mc_jb = calcX_JB(beame4, beamp4, scatp4_gen[0], scatg4_aso[0]);
-	Float_t y_mc_jb = calcY_JB(beame4, scatp4_gen[0], scatg4_aso[0]);
-	Float_t q2_rec_jb = calcQ2_JB(beame4, scatp4_rom[0], scatg4_rec[0]);
-	Float_t xb_rec_jb = calcX_JB(beame4, beamp4, scatp4_rom[0], scatg4_rec[0]);
-	Float_t y_rec_jb = calcY_JB(beame4, scatp4_rom[0], scatg4_rec[0]);
+	P3EVector hfs_gen = scatp4_gen[0]+scatg4_aso[0];
+        P3EVector hfs_rec = scatp4_rom[0]+scatg4_rec[0];
 
-	Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
-	Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]);
-	Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], scatp4_gen[0], scatg4_aso[0]);
-	Float_t q2_rec_es = calcQ2_ESigma(beame4, scate4_rec[0]);
-	Float_t xb_rec_es = calcX_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
-	Float_t y_rec_es = calcY_ESigma(beame4, beamp4, scate4_rec[0], scatp4_rom[0], scatg4_rec[0]);
+        Float_t q2_mc_jb = calcQ2_JB(beame4, hfs_gen);
+        Float_t xb_mc_jb = calcX_JB(beame4, beamp4, hfs_gen);
+        Float_t y_mc_jb = calcY_JB(beame4, hfs_gen);
+        Float_t q2_rec_jb = calcQ2_JB(beame4, hfs_rec);
+        Float_t xb_rec_jb = calcX_JB(beame4, beamp4, hfs_rec);
+        Float_t y_rec_jb = calcY_JB(beame4, hfs_rec);
+
+        Float_t q2_mc_es = calcQ2_ESigma(beame4, scate4_aso[0]);
+        Float_t xb_mc_es = calcX_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
+        Float_t y_mc_es = calcY_ESigma(beame4, beamp4, scate4_aso[0], hfs_gen);
+        Float_t q2_rec_es = calcQ2_ESigma(beame4, scate4_rec[0]);
+        Float_t xb_rec_es = calcX_ESigma(beame4, beamp4, scate4_rec[0], hfs_rec);
+        Float_t y_rec_es = calcY_ESigma(beame4, beamp4, scate4_rec[0], hfs_rec);
 	
 	h_PctResQ2_JB->Fill(q2_mc_jb, (q2_rec_jb-q2_mc_jb)/q2_mc_jb);
 	h_PctResxB_JB->Fill(xb_mc_jb, (xb_rec_jb-xb_mc_jb)/xb_mc_jb);
