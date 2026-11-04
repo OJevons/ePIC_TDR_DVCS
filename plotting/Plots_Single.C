@@ -86,10 +86,11 @@ TH1D* extractRMSSlice(TString outputHistoName, TH2D* twoDHisto){
 // Calculate histogram scaling factors to get to desired luminosity
 // Give luminosity in full scientific (expect 1e15 for 1fb-1)
 //---------------------------------------------------------------------
-double calcScaling(TString energy, TString hel, float lumi){
+double calcScaling(TString energy, TString hel, int ngen, float lumi){
   // Holding variables - No. of events generated, integrated cross-section
   // These vary by beam settings
-  Double_t fXSint{0}, NEv{0};
+  Double_t fXSint{0};
+  Double_t NEv = (double)ngen;
 
   if(energy == "9x130"){
     NEv = 1e6;
@@ -163,6 +164,8 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   //--------------------------------------------------------------------
   // Load histograms from file
   //--------------------------------------------------------------------
+  // 0) Histogram filled every event - e.g no. of neutrals per event
+  TH1I* hCounter = (TH1I*)fIn->Get("mult_rec_neu");
   
   // SINGLE PARTICLE KINEMATICS
   // 1) Scattered electron - eta, E/p, 2D E/eta
@@ -190,10 +193,11 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   // CALCULATIONS
   // 1. Scaling factor to EIC lumi
   double EIClumi{1.};
+  int n_gen = hCounter->GetEntries();
   if(energy == "9x130") EIClumi = 1e15;
   else if(energy == "9x275") EIClumi = 2.5e15;
   else EIClumi = 2.5e15;
-  Double_t scaleToEIC = calcScaling(energy, hel, EIClumi);
+  Double_t scaleToEIC = calcScaling(energy, hel, n_gen, EIClumi);
 
 
   //--------------------------------------------------------------------------------------
@@ -235,8 +239,10 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_eta_RPe->SetFillColorAlpha(kP6Gray,0.5);
   // Axes
   h_eta_MCe->GetYaxis()->SetRangeUser(0.9, maxEta);
+  h_eta_MCe->GetXaxis()->SetTitleSize(0.05);
   h_eta_MCe->GetXaxis()->SetTitle("#eta");
   h_eta_MCe->GetYaxis()->SetTitleOffset(1.25);
+  h_eta_MCe->GetYaxis()->SetTitleSize(0.05);
   h_eta_MCe->GetYaxis()->SetTitle("Counts");
   // Draw
   h_eta_MCe->Draw("HIST");
@@ -266,6 +272,7 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_eta_RPg->SetMarkerStyle(20);
   // Axes
   h_eta_MCg->GetYaxis()->SetRangeUser(0.9, maxEta);
+  h_eta_MCg->GetXaxis()->SetTitleSize(0.05);
   h_eta_MCg->GetXaxis()->SetTitle("#eta");
   // Draw
   h_eta_MCg->Draw("HIST");
@@ -294,6 +301,7 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_eta_RPPp->SetMarkerStyle(20);
   // Axes
   h_eta_MCp->GetYaxis()->SetRangeUser(0.9, maxEta);
+  h_eta_MCp->GetXaxis()->SetTitleSize(0.05);
   h_eta_MCp->GetXaxis()->SetTitle("#eta");
   h_eta_MCp->GetYaxis()->SetTitle("Counts");
   // Draw
@@ -364,11 +372,14 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
 
   // CANVAS: ELECTRON E/P
   TCanvas* cEOverP = new TCanvas("cEOverP","",1000,1000);
-  // Scale to 5fb-1
+  // Scale to EIC lumi
   h_EOverP_e->Scale(scaleToEIC);
   // Set draw options - markers and lines
   h_EOverP_e->SetLineColor(kBlack);
   // Set draw options - axes
+  h_EOverP_e->GetYaxis()->SetTitle("Counts");
+  h_EOverP_e->GetYaxis()->SetTitleSize(0.04);
+  h_EOverP_e->GetYaxis()->SetTitleOffset(1.25);
   float origmax = h_EOverP_e->GetMaximum();
   h_EOverP_e->SetLineWidth(2);
   h_EOverP_e->SetMaximum(origmax*1.2);
@@ -416,9 +427,11 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   h_PhotRes_theta->SetMarkerStyle(20);
   // Axes
   h_PhotRes_theta->GetXaxis()->SetTitle("#Delta#theta_{#gamma} [deg]");
+  h_PhotRes_theta->GetXaxis()->SetTitleSize(0.05);
   h_PhotRes_theta->GetXaxis()->SetRangeUser(-10,10);
   h_PhotRes_theta->GetYaxis()->SetTitle("Counts / 0.5 deg");
-  h_PhotRes_theta->GetYaxis()->SetTitleOffset(1.45);
+  h_PhotRes_theta->GetYaxis()->SetTitleSize(0.05);
+  h_PhotRes_theta->GetYaxis()->SetTitleOffset(1.2);
   h_PhotRes_theta->GetYaxis()->SetRangeUser(0.1,1.5*h_PhotRes_theta->GetMaximum());
   // Draw
   h_PhotRes_theta->Draw("ep");
@@ -439,7 +452,10 @@ void Plots_Single(TString campaign = "26.07.1", TString energy = "9x130", TStrin
   gPad->SetLogz();
   gPad->SetRightMargin(0.125);
   h_PhotRes2D_theta->GetYaxis()->SetTitle("#Delta#theta_{#gamma} [deg]");
+  h_PhotRes2D_theta->GetYaxis()->SetTitleSize(0.05);
+  h_PhotRes2D_theta->GetYaxis()->SetTitleOffset(1.);
   h_PhotRes2D_theta->GetYaxis()->SetRangeUser(-60,60);
+  h_PhotRes2D_theta->GetXaxis()->SetTitleSize(0.05);
   h_PhotRes2D_theta->GetZaxis()->SetMaxDigits(2);
   h_PhotRes2D_theta->Draw("colz");
   gPad->Update();
