@@ -60,6 +60,21 @@ double calcScaling(TString energy, TString hel, float lumi){
   return scale;
 }
 
+Double_t ALU_Func(Double_t *x, Double_t *par){
+  Float_t xx = x[0];
+  Float_t A = par[0];
+  Float_t B = par[1];
+
+  Float_t num = A*TMath::Sin(xx*TMath::DegToRad());
+  Float_t den = 1 + B*TMath::Cos(xx*TMath::DegToRad());
+
+  return num/den;
+}
+
+const Color_t ROOTColours[10]{
+  kP10Blue, kP10Yellow, kP10Red, kP10Gray, kP10Violet, kP10Brown, kP10Orange, kP10Green, kP10Ash, kP10Cyan
+    };
+
 //---------------------------------------------------------------------
 // MAIN
 // 
@@ -184,7 +199,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
   // Check if phi bins in degrees or rad (want to print in rad)
   bool kPhiRad{true};
   if(hPhiBins->GetBinLowEdge(hPhiBins->GetNbinsX()+1) == 360) kPhiRad = false;
-  
+    
   cout<<"\n---------------------------------------------------------------------------------------------------"<<endl;
   cout<<"Printing binning:"<<endl;
   
@@ -199,6 +214,32 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 
 
   for(int q=0; q<binning.nQ2(); q++){
+
+    //----------------------------------------------------------
+    // Canvases for A_LU parameters - 1 per Q2 bin
+    TCanvas* cALU = new TCanvas(Form("cALU_q%d",q),"",800,800);
+    // Histogram for axis
+    TH1D* hAx = new TH1D("hAx",";-t [GeV^{2}];A_{LU}^{sin#phi}",1,0.,1.);
+    hAx->SetMinimum(-1.);
+    hAx->SetMaximum(1.);
+    hAx->GetYaxis()->SetTitleOffset(1.2);
+    hAx->Draw("");
+
+    // Add text and create legend before looping
+    TLatex* tePICLabel_ALU = new TLatex(0.14, 0.83, 
+					Form("#splitline{#bf{ePIC} Performance %s, %s GeV}{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+    tePICLabel_ALU->SetNDC();
+    tePICLabel_ALU->SetTextSize(0.03);
+    tePICLabel_ALU->Draw();
+    
+    // Create legend
+    TLegend* leg_ALU = new TLegend(0.15,0.15,0.66,0.33);
+    leg_ALU->SetLineWidth(0);
+    leg_ALU->SetFillStyle(0);
+    leg_ALU->SetHeader(Form("%.2f < Q^{2} < %.2f GeV^{2}",binning.q2Low(q), binning.q2High(q)));
+    leg_ALU->AddEntry((TObject*)0,"","");
+    //----------------------------------------------------------
+    
     for(int region=DVCSBinning::kB0; region<=DVCSBinning::kRP; region++){
 
       const char* preg  = (region==DVCSBinning::kB0) ? "b0" : "rp";
@@ -206,9 +247,21 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 
       for(int x=0; x<binning.nXB(region,q); x++){
         const int nt = binning.nT(region,q,x);
+
+	//----------------------------------------------------------
+	// Arrays for ALU
+	vector<float> ALU;
+	vector<float> ALU_err;
+	vector<float> avt;
+
+	// Mean xB - pull out of loop
+	float xbmean_plot{0};
+	//----------------------------------------------------------
+    
 	for(int t=0; t<nt; t++){
 	  // Set up canvas
 	  TCanvas* c = new TCanvas(Form("cDiff_q%d_%s_x%d_t%d",q,preg,x,t),"",1200,800);
+	  c->cd();
 	  c->Divide(2,2);
 	  
 	  // Extract and scale histograms
@@ -392,7 +445,17 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  tePICLabel->SetNDC();
 	  tePICLabel->SetTextSize(0.05);
 	  tePICLabel->Draw("same");
-  
+
+	  //----------------------------------------------------------------
+	  // Fit A_LU
+	  //----------------------------------------------------------------
+	  // Define ALU fit function and initialise parameters
+	  TF1* fit_ALU = new TF1("fit_ALU",ALU_Func,0.,360.,2);
+	  fit_ALU->SetParNames("A","B");
+	  fit_ALU->SetParameters(0.5,0.1);
+	  // Fit
+	  hbsa->Fit("fit_ALU","","",0,360);
+
 	  // Pad 2 - TSA
 	  c->cd(2);
 	  ymax = 0;
@@ -417,7 +480,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
           htsa->SetMaximum(1.);
 	  htsa->Draw();
 	  htsamc->Draw("same");
-	   TLegend* leg2 = new TLegend(0.14,0.15,0.53,0.35);
+	  TLegend* leg2 = new TLegend(0.14,0.15,0.53,0.35);
 	  leg2->SetLineWidth(0);
 	  leg2->SetFillStyle(1);
 	  leg2->AddEntry(htsamc,"MC gen.","lp");
@@ -550,9 +613,55 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  }
 	  cout<<"]"<<endl;
 
+	  // Pull mean xB and ALU fit parameters out of loop
+	  if(region==DVCSBinning::kRP){
+	    ALU.push_back(fit_ALU->GetParameter(0));
+	    ALU_err.push_back(fit_ALU->GetParError(0));
+	    avt.push_back(tmean);
+	  }
+	  xbmean_plot = xbmean;
+	    
 	} // rof (t bins)
-      } // rof (xB bins)
+
+	if(region==DVCSBinning::kRP){
+	  //----------------------------------------------------------------
+	  // Extract vectors into arrays for plotting ALU
+	  //----------------------------------------------------------------
+	  const int tbins = ALU.size();
+	  float y[tbins], y_err[tbins], t_cent[tbins], t_err[tbins];
+	  for(int i{0}; i<tbins; i++){
+	    y[i]=ALU[i];
+	    y_err[i]=ALU_err[i];
+	    t_cent[i]=avt[i];
+	    t_err[i]=0;
+	  }
+
+	  //----------------------------------------------------------------
+	  // Plot ALU amplitude
+	  //----------------------------------------------------------------
+	  cALU->cd();
+	  auto gr = new TGraphErrors(tbins,t_cent,y,t_err,y_err);
+	  gr->SetLineColor(ROOTColours[x]);
+	  gr->SetLineWidth(2);
+	  gr->SetMarkerColor(ROOTColours[x]);
+	  gr->SetMarkerStyle(20+x);
+	  gr->SetMarkerSize(1.5);
+	  gr->Draw("P same");
+
+	  leg_ALU->AddEntry(gr,Form("<x_{B}> = %.4g",xbmean_plot),"lp");
+	}
+	
+      } // rof (xB bins)          
     } // rof (detector regions)
+
+    //----------------------------------------------------------------
+    // Add legend to ALU plot
+    //----------------------------------------------------------------
+    cALU->cd();
+    leg_ALU->Draw();
+    cALU->Print(Form("DVCS_ALU_temp%i.pdf", q));
+    cALU->Close();
+    
   } // rof (Q2 bins)
 
   //std::cout<<"...Cleaning up files..."<<std::endl;
@@ -560,6 +669,10 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
   //std::cout<<"Moving plots to "<<filePlots<<std::endl;
   gSystem->Exec("pdfunite DVCSasym_temp*.pdf " + filePlots);
   gSystem->Exec("rm DVCSasym_temp*.pdf");
+  
+  TString ALUPlots = "../figs/DVCSALUPlots_" + campaign + "_" + energy + "_" + haddir + ".pdf";
+  gSystem->Exec("pdfunite DVCS_ALU_temp*.pdf " + ALUPlots);
+  gSystem->Exec("rm DVCS_ALU_temp*.pdf");
 
   return;
 }
