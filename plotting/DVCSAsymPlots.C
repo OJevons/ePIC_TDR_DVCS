@@ -214,6 +214,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 
 
   for(int q=0; q<binning.nQ2(); q++){
+  //for(int q=0; q<1; q++){
 
     //----------------------------------------------------------
     // Canvases for A_LU parameters - 1 per Q2 bin
@@ -424,11 +425,13 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hbsamc->SetMarkerStyle(kOpenCircle);
 	  hbsamc->SetMarkerColor(kBlack);
 	  hbsamc->SetMarkerSize(2);
-	  hbsa->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];A_{LU}",
-			      rname,
-			      binning.q2Low(q), binning.q2High(q),
-			      binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
-			      binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t)));
+	  if(rname == "B0"){
+	    hbsa->SetTitle(Form("%s: Q^{2}[%.2f,%.2f]  x_{B}[%.4g,%.4g]  |t|[%.3g,%.3g];#phi_{h} [deg];A_{LU}",
+				rname,
+				binning.q2Low(q), binning.q2High(q),
+				binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
+				binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t)));
+	  }
 	  hbsa->GetYaxis()->SetTitleSize(0.05);
 	  hbsa->GetYaxis()->SetTitleOffset(1.);
           hbsa->GetYaxis()->SetLabelSize(0.05);
@@ -512,12 +515,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  hdsa->Draw();
 	  hdsamc->Draw("same");
 
-	  // Print out plots
-	  // If lowest x/t bin, print out as png for analysis note
-	  if(page == 1) c->Print(Form("../figs/TDRAsym_%s_%i_%i.png",energy.Data(),x,t));
-			  
-	  c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
-	  c->Close();
+	 
 
 	  // Print Asymmetry values
 	  float counts =  hrec_mm->Integral()+hrec_mp->Integral()+hrec_pm->Integral()+hrec_pp->Integral();
@@ -613,6 +611,24 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  }
 	  cout<<"]"<<endl;
 
+	  // Last minute changes to plots
+	  // Print mean kinematics on plot rather than in title
+	  c->cd(1);
+	  TLatex* tLabelQ2 = new TLatex(0.65, 0.81, Form("<Q^{2}> = %.2f GeV^{2}",q2mean));
+	  TLatex* tLabelxB = new TLatex(0.65, 0.73, Form("<x_{B}> = %.4g",xbmean));
+	  TLatex* tLabelt  = new TLatex(0.65, 0.65, Form("<-t> = %.2f GeV^{2}",tmean));
+	  for(TLatex* t : {tLabelQ2,tLabelxB,tLabelt}){
+	    t->SetNDC();
+	    t->SetTextSize(0.05);
+	    t->Draw("same");
+	  }
+	  
+	  // Finally, print
+	  // If lowest x/t bin, print out as png for analysis note
+	  if(page == 1) c->Print(Form("../figs/TDRAsym_%s_%i_%i.png",energy.Data(),x,t));
+	  c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
+	  c->Close();
+	  
 	  // Pull mean xB and ALU fit parameters out of loop
 	  if(region==DVCSBinning::kRP){
 	    ALU.push_back(fit_ALU->GetParameter(0));
