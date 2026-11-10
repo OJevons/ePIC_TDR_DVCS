@@ -214,7 +214,6 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 
 
   for(int q=0; q<binning.nQ2(); q++){
-  //for(int q=0; q<1; q++){
 
     //----------------------------------------------------------
     // Canvases for A_LU parameters - 1 per Q2 bin
@@ -456,7 +455,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  // Define ALU fit function and initialise parameters
 	  TF1* fit_ALU = new TF1("fit_ALU",ALU_Func,0.,360.,2);
 	  fit_ALU->SetParNames("A","B");
-	  fit_ALU->SetParameters(0.5,0.1);
+	  fit_ALU->SetParameters(0.5,0.05);
 	  // Fit
 	  hbsa->Fit("fit_ALU","","",0,360);
 
@@ -628,7 +627,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  // If lowest x/t bin, print out as png for analysis note
 	  if(page == 1) c->Print(Form("../figs/TDRAsym_%s_%i_%i.png",energy.Data(),x,t));
 	  c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
-	  if(page!=1) c->Close();
+	  c->Close();
 	  
 	  // Pull mean xB and ALU fit parameters out of loop
 	  if(region==DVCSBinning::kRP){
@@ -637,7 +636,61 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	    avt.push_back(tmean);
 	  }
 	  xbmean_plot = xbmean;
+
+
+	  //----------------------------------------------------------------
+	  // Plot single ALU  - lowest Q2/xB/t from RP
+	  //----------------------------------------------------------------
+	  if(region==DVCSBinning::kRP && q==0 && x==0 && t==0){
+	    auto csing = new TCanvas("c_single","",800,800);
+	    csing->cd();
 	    
+	    // Plot BSA
+	    // Modify axis labels
+	    hbsa->GetXaxis()->SetTitle("#phi_{h} [deg]");
+	    hbsa->GetXaxis()->SetTitleSize(0.04);
+	    hbsa->GetXaxis()->SetTitleOffset(1.1);
+	    hbsa->GetXaxis()->SetLabelSize(0.04);
+	    hbsa->GetYaxis()->SetTitle("A_{LU}");
+	    hbsa->GetYaxis()->SetTitleSize(0.04);
+	    hbsa->GetYaxis()->SetTitleOffset(1.1);
+	    hbsa->GetYaxis()->SetLabelSize(0.04);
+	    // Draw
+	    hbsa->Draw();
+	    hbsamc->Draw("same");
+	    // Draw fit
+	    
+	    // ePIC text label
+	    TLatex* tePICLabel_mini = new TLatex(0.13, 0.83, 
+						 Form("#splitline{ePIC #bf{Performance %s, %s GeV}}{#bf{ep #rightarrow e'p'#gamma, L_{proj} = %.1f fb^{-1}}}", campaign.Data(), energy.Data(), EIClumi/1e15));
+	    tePICLabel_mini->SetNDC();
+	    tePICLabel_mini->SetTextSize(0.04);
+	    tePICLabel_mini->Draw("same");
+
+	    TLatex* tLabelQ2_mini = new TLatex(0.15, 0.29, Form("<Q^{2}> = %.2f GeV^{2}",q2mean));
+	    TLatex* tLabelxB_mini = new TLatex(0.15, 0.22, Form("<x_{B}> = %.4g",xbmean));
+	    TLatex* tLabelt_mini  = new TLatex(0.15, 0.15, Form("<-t> = %.2f GeV^{2}",tmean));
+	    for(TLatex* t : {tLabelQ2_mini,tLabelxB_mini,tLabelt_mini}){
+	      t->SetNDC();
+	      t->SetTextSize(0.04);
+	      t->Draw("same");
+	    }
+
+	    // Add legend
+	    auto l = new TLegend(0.6,0.62,0.88,0.78);
+	    l->SetLineWidth(0);
+	    l->SetFillStyle(0);
+	    l->AddEntry(hbsamc,"#bf{EpIC} MC","lp");
+	    l->AddEntry(hbsa,"Raw reco.","lp");
+	    l->Draw();
+	    
+	    csing->Print(Form("../figs/DVCS_ALUsingle_%s.png",energy.Data()));
+	    csing->Close();
+	  }
+	  //----------------------------------------------------------------
+	  //----------------------------------------------------------------
+	  //----------------------------------------------------------------
+	  
 	} // rof (t bins)
 
 	if(region==DVCSBinning::kRP){
