@@ -2,6 +2,7 @@
 //#include "class/ePIC_DVCS_TASK.cxx"
 //#include "class/ePIC_DVCS_Res.cxx"
 #include "class/ePIC_DVCS_PODIO.cxx"
+//#include "class/ePIC_DVCS_FEMCPODIO.cxx"
 //#include "class/ePIC_DVCS_BeamGas.cxx"
 
 const float fMass_proton{0.938272};
