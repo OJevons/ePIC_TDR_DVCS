@@ -158,10 +158,10 @@ Bool_t ePIC_DVCS_TASK::applyCuts_Photon(std::vector<P3EVector> scatg){
      // Reject based on photon x/y momentum - should correspond to semicircle of FEMC hit
 
      // X-DIRECTION - LEFT/RIGHT REJECTION
-     if(scatg[0].Px() < 0) passCuts = kFALSE;
+     //if(scatg[0].Px() < 0) passCuts = kFALSE;
      
      // Y-DIRECTION - TOP/BOTTOM REJECTION
-     //if(scatg[0].Py() < 0) passCuts = kFALSE;
+     if(scatg[0].Py() > 0) passCuts = kFALSE;
    }
    
    return passCuts;
