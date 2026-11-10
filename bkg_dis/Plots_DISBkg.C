@@ -7,7 +7,7 @@ using namespace std;
 
 #include "../plotting/ePIC_style.C"
 
-bool kSAVE = false;
+bool kSAVE = true;
 
 double calcScalingDVCS(TString energy, TString hel, float lumi){
   // Holding variables - No. of events generated, integrated cross-section
