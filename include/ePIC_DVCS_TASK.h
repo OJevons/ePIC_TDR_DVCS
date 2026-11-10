@@ -13,6 +13,9 @@
 #include "./ePIC_BinUtils.h"
 #include "./ePIC_MiscUtils.h"
 
+// Include PODIO preload
+#include "./preLoadLib.hh"
+
 // ROOT::Math aliases
 using ROOT::Math::VectorUtil::boost;
 using ROOT::Math::VectorUtil::Angle;
