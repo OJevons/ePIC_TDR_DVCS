@@ -432,6 +432,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 				binning.xBLow(region,q,x), binning.xBHigh(region,q,x),
 				binning.tLow(region,q,x,t), binning.tHigh(region,q,x,t)));
 	  }
+	  else hbsa->SetTitle("");
 	  hbsa->GetYaxis()->SetTitleSize(0.05);
 	  hbsa->GetYaxis()->SetTitleOffset(1.);
           hbsa->GetYaxis()->SetLabelSize(0.05);
@@ -614,9 +615,9 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  // Last minute changes to plots
 	  // Print mean kinematics on plot rather than in title
 	  c->cd(1);
-	  TLatex* tLabelQ2 = new TLatex(0.65, 0.81, Form("<Q^{2}> = %.2f GeV^{2}",q2mean));
-	  TLatex* tLabelxB = new TLatex(0.65, 0.73, Form("<x_{B}> = %.4g",xbmean));
-	  TLatex* tLabelt  = new TLatex(0.65, 0.65, Form("<-t> = %.2f GeV^{2}",tmean));
+	  TLatex* tLabelQ2 = new TLatex(0.64, 0.82, Form("<Q^{2}> = %.2f GeV^{2}",q2mean));
+	  TLatex* tLabelxB = new TLatex(0.64, 0.75, Form("<x_{B}> = %.4g",xbmean));
+	  TLatex* tLabelt  = new TLatex(0.64, 0.68, Form("<-t> = %.2f GeV^{2}",tmean));
 	  for(TLatex* t : {tLabelQ2,tLabelxB,tLabelt}){
 	    t->SetNDC();
 	    t->SetTextSize(0.05);
@@ -627,7 +628,7 @@ void DVCSAsymPlots(TString campaign = "26.07.1", TString energy = "9x130", TStri
 	  // If lowest x/t bin, print out as png for analysis note
 	  if(page == 1) c->Print(Form("../figs/TDRAsym_%s_%i_%i.png",energy.Data(),x,t));
 	  c->Print(Form("DVCSasym_temp%03d.pdf", ++page));
-	  c->Close();
+	  if(page!=1) c->Close();
 	  
 	  // Pull mean xB and ALU fit parameters out of loop
 	  if(region==DVCSBinning::kRP){
